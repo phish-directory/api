@@ -5,7 +5,7 @@ import NIOPosix
 import JWT
 import PostgresNIO
 
-let config = PostgresClient.Configuration(
+let config: PostgresClient.Configuration = PostgresClient.Configuration(
   host: "localhost",
   port: 5432,
   username: "my_username",
@@ -14,7 +14,7 @@ let config = PostgresClient.Configuration(
   tls: .disable
 )
 
-let postgresClient = PostgresClient(configuration: config)
+let postgresClient: PostgresClient = PostgresClient(configuration: config)
 
 @main
 enum Entrypoint {
@@ -29,8 +29,9 @@ enum Entrypoint {
         let executorTakeoverSuccess = NIOSingletons.unsafeTryInstallSingletonPosixEventLoopGroupAsConcurrencyGlobalExecutor()
         app.logger.debug("Running with \(executorTakeoverSuccess ? "SwiftNIO" : "standard") Swift Concurrency default executor")
 
+        // await postgresClient.run()
+
         do {
-            await postgresClient.run()
             try await configure(app)
         } catch {
             app.logger.report(error: error)
