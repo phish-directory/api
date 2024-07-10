@@ -11,7 +11,6 @@ struct Link: Codable {
   var id: UUID?
   var link: String
   var type: LinkType
-  // var reportedBy: String
-  var reportedById: UUID
+  var reportedBy: UUID?
   var dateReported: Date
 }
