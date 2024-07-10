@@ -6,29 +6,52 @@ func routes(_ app: Application) throws {
     }
 
     app.get("health") { req async throws in
-        "OK"
+       // return stats about the server in json format
+        return [
+            "status": "ok",
+            "uptime": "1234",
+            ]
     }
 
     app.get("check") { req async throws in
+
+       guard let url = req.query[String.self, at: "url"] else {
+        throw Abort(.badRequest, reason: "Missing URL")
+    }
+
 
     let urls = [
         "google.com",
         "apple.com",
     ]
 
-    // check if the req.body contains the key "url"
-    guard let url = req.query[String.self, at: "url"] else {
-        throw Abort(.badRequest)
-    }
-
-    // check if the url is in the urls array, and return if it is
     if urls.contains(url) {
-        return "URL is in the list"
-
+        return [
+            "url": url,
+            "isPhish": "true"
+        ]
     } else {
-        return "URL is not in the list"
+        return [
+            "url": url,
+            "isPhish": "false"
+        ]
     }
 
+    }
+
+    // // check if the req.body contains the key "url"
+    // guard let url = req.query[String.self, at: "url"] else {
+    //     throw Abort(.badRequest)
+    // }
+
+    // // check if the url is in the urls array, and return if it is
+    // if urls.contains(url) {
+    //     return "URL is in the list"
+
+    // } else {
+    //     return "URL is not in the list"
+    // }
+
+
 
     }
-}
