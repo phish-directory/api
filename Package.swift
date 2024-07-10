@@ -16,7 +16,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-openapi-generator", from: "1.2.1"),
         // vapor openapi
         .package(url: "https://github.com/swift-server/swift-openapi-vapor", from: "1.0.1")
-
     ],
     targets: [
         .executableTarget(
@@ -25,8 +24,13 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
+                .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+                .product(name: "OpenAPIVapor", package: "swift-openapi-vapor"),
             ],
-            swiftSettings: swiftSettings
+            swiftSettings: swiftSettings,
+            plugins: [
+                .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator"),
+            ]
         ),
         .testTarget(
             name: "AppTests",
