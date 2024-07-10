@@ -2,6 +2,7 @@ import Vapor
 import Logging
 import NIOCore
 import NIOPosix
+import JWT
 
 @main
 enum Entrypoint {
@@ -17,6 +18,8 @@ enum Entrypoint {
         app.logger.debug("Running with \(executorTakeoverSuccess ? "SwiftNIO" : "standard") Swift Concurrency default executor")
 
         do {
+            // Add HMAC with SHA-256 signer.
+            // try await app.jwt.keys.addHMAC(key: "secret", digestAlgorithm: .sha256)
             try await configure(app)
         } catch {
             app.logger.report(error: error)
