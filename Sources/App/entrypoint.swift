@@ -3,6 +3,18 @@ import Logging
 import NIOCore
 import NIOPosix
 import JWT
+import PostgresNIO
+
+let config = PostgresClient.Configuration(
+  host: "localhost",
+  port: 5432,
+  username: "my_username",
+  password: "my_password",
+  database: "my_database",
+  tls: .disable
+)
+
+let postgresClient = PostgresClient(configuration: config)
 
 @main
 enum Entrypoint {
@@ -18,8 +30,7 @@ enum Entrypoint {
         app.logger.debug("Running with \(executorTakeoverSuccess ? "SwiftNIO" : "standard") Swift Concurrency default executor")
 
         do {
-            // Add HMAC with SHA-256 signer.
-            // try await app.jwt.keys.addHMAC(key: "secret", digestAlgorithm: .sha256)
+            await postgresClient.run()
             try await configure(app)
         } catch {
             app.logger.report(error: error)

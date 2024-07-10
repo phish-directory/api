@@ -11,6 +11,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
 		.package(url: "https://github.com/vapor/jwt.git", from: "4.2.2"),
         .package(url: "https://github.com/tetraoxygen/jwt-kit.git", branch: "add-zip-support"),
+        .package(url: "https://github.com/vapor/postgres-nio.git", from: "1.21.0"),
     ],
     targets: [
         .executableTarget(
@@ -21,6 +22,7 @@ let package = Package(
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "JWT", package: "jwt"),
                 .product(name: "JWTKit", package: "jwt-kit"),
+                .product(name: "PostgresNIO", package: "postgres-nio"),
             ],
             swiftSettings: swiftSettings,
             plugins: [
