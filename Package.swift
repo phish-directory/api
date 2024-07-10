@@ -14,11 +14,20 @@ let package = Package(
      dependencies: [
         .package(url: "https://github.com/vapor/vapor", from: "4.102.0"),
         .package(url: "https://github.com/swift-server/swift-openapi-vapor", from: "1.0.1"),
+        // add openapi-runtime
+        .package(url: "https://github.com/apple/openapi-runtime", from: "1.0.0"),
         .package(url: "https://github.com/vapor/postgres-nio", from: "1.21.5")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .executableTarget(name: "phish.directory"),
+        .executableTarget(name: "phish.directory", dependencies:
+            [
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "OpenAPIVapor", package: "swift-openapi-vapor"),
+                .product(name: "OpenAPIRuntime", package: "openapi-runtime"),
+                .product(name: "PostgresNIO", package: "postgres-nio")
+            ]
+        )
     ]
 )
