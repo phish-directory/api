@@ -1,14 +1,11 @@
-
-
 // create a GoogleSafeBrowsing service with 2 methods, check and report
 // check will take a url and return if it is a phish or not
 // report will take a url and report it as a phish
 // the service will use the Google Safe Browsing API
 // https://developers.google.com/safe-browsing/v4
 
-import Vapor
 import Foundation
-
+import Vapor
 
 struct GoogleSafeBrowsing {
 
@@ -16,12 +13,15 @@ struct GoogleSafeBrowsing {
     // Define the structure of the response type here
   }
 
-  func check(domain: String) async throws -> Bool {
+  func check(domain: String) async {
+
+    guardDomain(domain)
 
     let domain = domain.canonicalizeURL()
 
     let apiKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"] ?? ""
-    let url = URL(string: "https://www.google.com/safebrowsing/v4/threatMatches:find?key=\(apiKey)")!
+    let url = URL(
+      string: "https://www.google.com/safebrowsing/v4/threatMatches:find?key=\(apiKey)")!
 
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
@@ -33,16 +33,18 @@ struct GoogleSafeBrowsing {
     let reqBody = [
       "client": [
         "clientId": "phish.directory",
-        "clientVersion": "1.0.0"
+        "clientVersion": "1.0.0",
       ],
       "threatInfo": [
-        "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION"],
+        "threatTypes": [
+          "MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE", "POTENTIALLY_HARMFUL_APPLICATION",
+        ],
         "platformTypes": ["ANY_PLATFORM"],
         "threatEntryTypes": ["URL"],
         "threatEntries": [
-          ["url": domain ]
-        ]
-      ]
+          ["url": domain]
+        ],
+      ],
     ]
 
     request.httpBody = try JSONSerialization.data(withJSONObject: reqBody)
@@ -53,8 +55,8 @@ struct GoogleSafeBrowsing {
     return response
   }
 
-  func report(url: String) async throws {
-    return
-  }
+  // func report(url: String) async throws {
+  //   return
+  // }
 
 }
