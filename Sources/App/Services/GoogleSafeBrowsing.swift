@@ -26,6 +26,7 @@ struct GoogleSafeBrowsing {
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("internal-server@phish.directory", forHTTPHeaderField: "User-Agent")
+    request.setValue("internal-server@phish.directory", forHTTPHeaderField: "X-Identity")
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue("https://phish.directory", forHTTPHeaderField: "Referer")
 
