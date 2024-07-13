@@ -20,22 +20,40 @@ func routes(_ app: Application) throws {
     }
 
 
-    let urls = [
-        "google.com",
-        "apple.com",
-    ]
+// set gsb to the GoogleSafeBrowsing service
+    let gsb = GoogleSafeBrowsing()
+    let gsbResponse = try await gsb.check(domain: url)
 
-    if urls.contains(url) {
-        return [
-            "url": url,
-            "isPhish": "true"
-        ]
-    } else {
+    // check if gsb response is an empty object
+    if gsbResponse.isEmpty {
         return [
             "url": url,
             "isPhish": "false"
         ]
+    } else {
+        return [
+            "url": url,
+            "isPhish": "true"
+        ]
     }
+
+
+    // let urls = [
+    //     "google.com",
+    //     "apple.com",
+    // ]
+
+    // if urls.contains(url) {
+    //     return [
+    //         "url": url,
+    //         "isPhish": "true"
+    //     ]
+    // } else {
+    //     return [
+    //         "url": url,
+    //         "isPhish": "false"
+    //     ]
+    // }
 
     }
 
