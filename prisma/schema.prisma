@@ -84,14 +84,14 @@ model IpQualityScoreAPIResponse {
 }
 
 model PhishermanAPIResponse {
-  id          Int      @id @default(autoincrement())
-  domainId    Int
-  domain      Domain   @relation(fields: [domainId], references: [id])
-  phishing    Boolean
-  threatLevel String // Potential values like "high", "medium", "low"
-  data        Json // Store the raw JSON response from Phisherman
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  domainId       Int
+  domain         Domain   @relation(fields: [domainId], references: [id])
+  classification String
+  verifiedPhish  Boolean
+  data           Json // Store the raw JSON response from Phisherman
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model SinkingYachtsAPIResponse {

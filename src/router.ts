@@ -174,6 +174,21 @@ router.get("/check", async (req, res) => {
     },
   });
 
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbPhishermanResponse = await prisma.PhishermanAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      classification: phishermanData.classification,
+      verifiedPhish: phishermanData.verifiedPhish,
+      data: phishermanData,
+    },
+  });
+
   res.status(200).json({
     walshy: walshyData,
     ipQualityScore: ipQualityScoreData,
