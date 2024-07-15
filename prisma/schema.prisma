@@ -77,10 +77,7 @@ model IpQualityScoreAPIResponse {
   domainId    Int
   domain      Domain   @relation(fields: [domainId], references: [id])
   proxy       Boolean
-  riskLevel   String
-  country     String
   countryCode String
-  city        String
   region      String
   lat         Float
   lon         Float

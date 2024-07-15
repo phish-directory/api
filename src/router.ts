@@ -159,6 +159,28 @@ router.get("/check", async (req, res) => {
     },
   });
 
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbIpQualityScoreResponse = await prisma.IpQualityScoreAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      proxy: ipQualityScoreData.proxy ? true : false,
+      countryCode: ipQualityScoreData.country_code,
+      region: ipQualityScoreData.region,
+      lat: ipQualityScoreData.lat,
+      lon: ipQualityScoreData.lon,
+      asn: ipQualityScoreData.asn,
+      isp: ipQualityScoreData.isp,
+      org: ipQualityScoreData.org,
+      threatLevel: ipQualityScoreData.threatLevel,
+      data: ipQualityScoreData,
+    },
+  });
+
   res.status(200).json({
     walshy: walshyData,
     ipQualityScore: ipQualityScoreData,
