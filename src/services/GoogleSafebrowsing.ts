@@ -14,13 +14,6 @@ export class GoogleSafebrowsingService {
     const response = await axios.post(
       `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.GOOGLE_API_KEY!}`,
       {
-        // todo: extract headers to a seperate place to avoid duplication
-        headers: {
-          Referer: "https://phish.directory",
-          "User-Agent": "internal-server@phish.directory",
-          "X-Identity": "internal-server@phish.directory",
-        },
-
         client: {
           clientId: `phish.directory`,
           clientVersion: `${process.env.npm_package_version!}`,
