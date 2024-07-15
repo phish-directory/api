@@ -1,4 +1,5 @@
 import * as express from "express";
+import moment from "moment";
 
 const router = express.Router();
 
@@ -19,8 +20,45 @@ router.use((req, res, next) => {
   next();
 });
 
+/**
+ * GET /
+ * @summary Redirect to docs
+ * @tags Main API Endpoints
+ * @return {string} 301 - Redirect to /docs
+ * @example response - 301 - Redirect to /docs
+ *  "Redirecting to /docs"
+ */
 router.get("/", (req, res) => {
-  res.status(200).json("Hello World!");
+  res.status(301).redirect("/docs");
+});
+
+/**
+ * GET /metrics
+ * @summary Get the uptime and date started of the API
+ * @tags Main API Endpoints
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
+ * {
+ *  "status": "up",
+ * "uptime": "00:00:00",
+ * "dateStarted": "01-01-21 0:0:0 AM +00:00"
+ * }
+ *
+ */
+router.get("/metrics", (req, res) => {
+  let uptime = process.uptime();
+  // format the uptime
+  let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
+
+  let dateStarted = new Date(Date.now() - uptime * 1000);
+  // format the date started with moment
+  let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
+
+  res.status(200).json({
+    status: "up",
+    uptime: uptimeString,
+    dateStarted: dateStartedFormatted,
+  });
 });
 
 /**
@@ -66,6 +104,15 @@ router.get("/check", (req, res) => {
   res.status(200).json("Check!");
 });
 
+/**
+ * POST /report
+ * @summary Report a domain as malicious
+ * @tags Main API Endpoints
+ * @return {string} 200 - Success message
+ * @return {string} 400 - Error message
+ * @example response - 200 - Success message
+ * "Report!"
+ */
 router.post("/report", (req, res) => {
   res.status(200).json("Report!");
 });

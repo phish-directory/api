@@ -30,7 +30,7 @@ export const swaggerOptions = {
     },
   }, */
   // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
-  filesPattern: ["../routes/*.ts", "./router.ts"], // Glob pattern to find your jsdoc files
+  filesPattern: ["./router.ts"], // Glob pattern to find your jsdoc files
   swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
   baseDir: __dirname,
   // disable the default tag
