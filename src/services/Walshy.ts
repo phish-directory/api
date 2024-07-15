@@ -17,6 +17,12 @@ export class WalshyService {
       badDomain: boolean;
       detection: "discord" | "community";
     }>("https://bad-domains.walshy.dev/check", {
+      // todo: extract headers to a seperate place to avoid duplication
+      headers: {
+        Referer: "https://phish.directory",
+        "User-Agent": "internal-server@phish.directory",
+        "X-Identity": "internal-server@phish.directory",
+      },
       domain: domain,
     });
 
