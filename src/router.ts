@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import * as express from "express";
 import moment from "moment";
 
@@ -9,6 +10,7 @@ import { VirusTotalService } from "./services/VirusTotal";
 import { WalshyService } from "./services/Walshy";
 
 const router = express.Router();
+const prisma = new PrismaClient();
 
 router.use((req, res, next) => {
   res.setHeader("X-Api-Version", `${process.env.npm_package_version!}`);
@@ -115,12 +117,47 @@ router.get("/check", async (req, res) => {
   const virusTotal = new VirusTotalService();
   const phisherman = new PhishermanService();
 
-  let walshyData = await walshy.check(domain);
-  let ipQualityScoreData = await ipQualityScore.check(domain);
-  let googleSafebrowsingData = await googleSafebrowsing.check(domain);
-  let sinkingYahtsData = await sinkingYahts.check(domain);
-  let virusTotalData = await virusTotal.check(domain);
-  let phishermanData = await phisherman.check(domain);
+  let walshyData = await walshy.check(domain, prisma);
+  let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
+  let googleSafebrowsingData = await googleSafebrowsing.check(domain, prisma);
+  let sinkingYahtsData = await sinkingYahts.check(domain, prisma);
+  let virusTotalData = await virusTotal.check(domain, prisma);
+  let phishermanData = await phisherman.check(domain, prisma);
+
+  // let dbDomain = await prisma.domain.findUnique({
+  //   // @ts-expect-error
+  //   where: {
+  //     domain: domain,
+  //   },
+  // });
+
+  let dbDomain = await prisma.domain.findFirst({
+    where: {
+      domain: domain,
+    },
+  });
+
+  if (!dbDomain) {
+    dbDomain = await prisma.domain.create({
+      data: {
+        domain: domain,
+      },
+    });
+  }
+
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbWalshyResponse = await prisma.WalshyAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      badDomain: walshyData.badDomain,
+      data: walshyData,
+    },
+  });
 
   res.status(200).json({
     walshy: walshyData,

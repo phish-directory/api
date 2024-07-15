@@ -31,25 +31,107 @@ enum DomainType {
 }
 
 model User {
-  id              Int         @id @unique @default(autoincrement())
-  uuid            String      @unique @default(uuid())
-  name            String
-  email           String      @unique
-  accountType     AccountType @default(user)
-  dateCreated     DateTime    @default(now())
-  dateUpdated     DateTime    @updatedAt
-  deleted         Boolean     @default(false)
-  dateDeleted     DateTime?
-  domainsReported Domain[]
+  id          Int         @id @unique @default(autoincrement())
+  uuid        String      @unique @default(uuid())
+  name        String
+  email       String      @unique
+  accountType AccountType @default(user)
+  dateCreated DateTime    @default(now())
+  dateUpdated DateTime    @updatedAt
+  deleted     Boolean     @default(false)
+  dateDeleted DateTime?
+  // domainsReported Domain[]
 }
 
 model Domain {
-  id           Int        @id @unique @default(autoincrement())
-  uuid         String     @unique @default(uuid())
-  type         DomainType @default(unknown)
-  domain       String
-  reportedBy   User[]
-  dateReported DateTime[]
-  dateCreated  DateTime   @default(now())
-  dateUpdated  DateTime   @updatedAt
+  id                            Int                             @id @unique @default(autoincrement())
+  uuid                          String                          @unique @default(uuid())
+  type                          DomainType                      @default(unknown)
+  domain                        String
+  // reportedBy                    User[]
+  dateCreated                   DateTime                        @default(now())
+  dateUpdated                   DateTime                        @updatedAt
+  WalshyAPIResponse             WalshyAPIResponse[]
+  IpQualityScoreAPIResponse     IpQualityScoreAPIResponse[]
+  GoogleSafeBrowsingAPIResponse GoogleSafeBrowsingAPIResponse[]
+  PhishermanAPIResponse         PhishermanAPIResponse[]
+  SinkingYachtsAPIResponse      SinkingYachtsAPIResponse[]
+  VirusTotalAPIResponse         VirusTotalAPIResponse[]
+  // User                          User?                           @relation(fields: [userId], references: [id])
+  // userId                        Int?
+}
+
+model GoogleSafeBrowsingAPIResponse {
+  id         Int      @id @default(autoincrement())
+  domainId   Int
+  domain     Domain   @relation(fields: [domainId], references: [id])
+  threatType String // Potential values like "MALWARE", "SOCIAL_ENGINEERING", etc.
+  matched    Boolean
+  data       Json // Store the raw JSON response from GoogleSafeBrowsing
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model IpQualityScoreAPIResponse {
+  id          Int      @id @default(autoincrement())
+  domainId    Int
+  domain      Domain   @relation(fields: [domainId], references: [id])
+  proxy       Boolean
+  riskLevel   String
+  country     String
+  countryCode String
+  city        String
+  region      String
+  lat         Float
+  lon         Float
+  asn         String
+  isp         String
+  org         String
+  threatLevel String
+  data        Json // Store the raw JSON response from IpQualityScore
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PhishermanAPIResponse {
+  id          Int      @id @default(autoincrement())
+  domainId    Int
+  domain      Domain   @relation(fields: [domainId], references: [id])
+  phishing    Boolean
+  threatLevel String // Potential values like "high", "medium", "low"
+  data        Json // Store the raw JSON response from Phisherman
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SinkingYachtsAPIResponse {
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  status    String // Potential values like "clean", "threat", etc.
+  category  String
+  data      Json // Store the raw JSON response from SinkingYachts
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VirusTotalAPIResponse {
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  positives Int
+  scans     Int
+  data      Json // Store the raw JSON response from VirusTotal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WalshyAPIResponse {
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  badDomain Boolean
+  data      Json // Store the raw JSON response from Walshy
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
