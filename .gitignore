@@ -1,11 +1,11 @@
-Packages
-.build
-xcuserdata
-*.xcodeproj
-DerivedData/
-.DS_Store
-db.sqlite
-.swiftpm
+.env
+prod.env
+node_modules/*
+.vscode/*
+yarn.lock
+dist/
+ignore/
+prisma/data
 .env
 .env.*
 ! .env.example
