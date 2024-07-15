@@ -170,13 +170,6 @@ router.get("/check", async (req, res) => {
       },
       proxy: ipQualityScoreData.proxy ? true : false,
       countryCode: ipQualityScoreData.country_code,
-      region: ipQualityScoreData.region,
-      lat: ipQualityScoreData.lat,
-      lon: ipQualityScoreData.lon,
-      asn: ipQualityScoreData.asn,
-      isp: ipQualityScoreData.isp,
-      org: ipQualityScoreData.org,
-      threatLevel: ipQualityScoreData.threatLevel,
       data: ipQualityScoreData,
     },
   });

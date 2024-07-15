@@ -78,13 +78,6 @@ model IpQualityScoreAPIResponse {
   domain      Domain   @relation(fields: [domainId], references: [id])
   proxy       Boolean
   countryCode String
-  region      String
-  lat         Float
-  lon         Float
-  asn         String
-  isp         String
-  org         String
-  threatLevel String
   data        Json // Store the raw JSON response from IpQualityScore
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
