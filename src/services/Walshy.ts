@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 
 /**
@@ -8,10 +9,12 @@ export class WalshyService {
    * Asynchronously checks a given domain against the walshy service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
+   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
    * @returns {Promise<{ badDomain: boolean, detection: "discord" | "community" }>} A promise that resolves with the check results.
    */
   async check(
     domain: string,
+    prisma: PrismaClient,
   ): Promise<{ badDomain: boolean; detection: "discord" | "community" }> {
     const responnse = await axios.post<{
       badDomain: boolean;
@@ -33,9 +36,10 @@ export class WalshyService {
    * Asynchronously reports a given domain to the walshy service for further processing or analysis.
    *
    * @param {string} domain - The domain name to be reported.
+   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
    * @returns {Promise<void>} A promise that resolves when the report operation is complete.
    */
-  async report(domain: string): Promise<void> {
+  async report(domain: string, prisma: PrismaClient): Promise<void> {
     // todo: implement this
   }
 }
