@@ -105,14 +105,14 @@ model SinkingYachtsAPIResponse {
 }
 
 model VirusTotalAPIResponse {
-  id        Int      @id @default(autoincrement())
-  domainId  Int
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  positives Int
-  scans     Int
-  data      Json // Store the raw JSON response from VirusTotal
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  domainId   Int
+  domain     Domain   @relation(fields: [domainId], references: [id])
+  malicious  Boolean
+  suspicious Boolean
+  data       Json // Store the raw JSON response from VirusTotal
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model WalshyAPIResponse {

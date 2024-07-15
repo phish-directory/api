@@ -203,6 +203,26 @@ router.get("/check", async (req, res) => {
     },
   });
 
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbVirusTotalResponse = await prisma.VirusTotalAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: virusTotalData,
+      // virusTotalData.data.attributes.last_analysis_stats.malicious is 0 if false and 1 if true, convert to boolean
+      malicious: virusTotalData.data.attributes.last_analysis_stats.malicious
+        ? true
+        : false,
+      suspicious: virusTotalData.data.attributes.last_analysis_stats.suspicious
+        ? true
+        : false,
+    },
+  });
+
   res.status(200).json({
     walshy: walshyData,
     ipQualityScore: ipQualityScoreData,
