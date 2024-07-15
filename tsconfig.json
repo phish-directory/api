@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "strict": true /* Enable all strict type-checking options. */,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "resources",
+    ".vscode",
+    ".husky",
+    ".git",
+    "Sources",
+  ] /* Exclude files from compilation. */
+}
