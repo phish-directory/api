@@ -98,8 +98,7 @@ model SinkingYachtsAPIResponse {
   id        Int      @id @default(autoincrement())
   domainId  Int
   domain    Domain   @relation(fields: [domainId], references: [id])
-  status    String // Potential values like "clean", "threat", etc.
-  category  String
+  status    Boolean
   data      Json // Store the raw JSON response from SinkingYachts
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

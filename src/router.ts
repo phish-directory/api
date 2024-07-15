@@ -189,6 +189,20 @@ router.get("/check", async (req, res) => {
     },
   });
 
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbSinkingYahtsResponse = await prisma.SinkingYachtsAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: sinkingYahtsData,
+      status: sinkingYahtsData,
+    },
+  });
+
   res.status(200).json({
     walshy: walshyData,
     ipQualityScore: ipQualityScoreData,
