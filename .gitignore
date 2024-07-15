@@ -1,6 +1,5 @@
 .env
 prod.env
-node_modules/*
 .vscode/*
 yarn.lock
 dist/
@@ -10,3 +9,4 @@ prisma/data
 .env.*
 ! .env.example
 .vscode
+node_modules
