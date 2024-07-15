@@ -145,17 +145,18 @@ router.get("/check", async (req, res) => {
     });
   }
 
+  console.log(googleSafebrowsingData);
+
   // todo: figure out why ts is complaining about this
   // @ts-expect-error
-  let dbWalshyResponse = await prisma.WalshyAPIResponse.create({
+  let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
     data: {
       domain: {
         connect: {
           id: dbDomain.id,
         },
       },
-      badDomain: walshyData.badDomain,
-      data: walshyData,
+      data: googleSafebrowsingData,
     },
   });
 
@@ -220,6 +221,20 @@ router.get("/check", async (req, res) => {
       suspicious: virusTotalData.data.attributes.last_analysis_stats.suspicious
         ? true
         : false,
+    },
+  });
+
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let dbWalshyResponse = await prisma.WalshyAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      badDomain: walshyData.badDomain,
+      data: walshyData,
     },
   });
 

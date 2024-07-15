@@ -62,14 +62,12 @@ model Domain {
 }
 
 model GoogleSafeBrowsingAPIResponse {
-  id         Int      @id @default(autoincrement())
-  domainId   Int
-  domain     Domain   @relation(fields: [domainId], references: [id])
-  threatType String // Potential values like "MALWARE", "SOCIAL_ENGINEERING", etc.
-  matched    Boolean
-  data       Json // Store the raw JSON response from GoogleSafeBrowsing
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  domainId  Int
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  data      Json? // Store the raw JSON response from GoogleSafeBrowsing
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model IpQualityScoreAPIResponse {
