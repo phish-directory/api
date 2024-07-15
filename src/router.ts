@@ -1,6 +1,11 @@
 import * as express from "express";
 import moment from "moment";
 
+import { GoogleSafebrowsingService } from "./services/GoogleSafebrowsing";
+import { IpQualityScoreService } from "./services/IpQualityScore";
+import { PhishermanService } from "./services/Phisherman";
+import { SinkingYahtsService } from "./services/SinkingYahts";
+import { VirusTotalService } from "./services/VirusTotal";
 import { WalshyService } from "./services/Walshy";
 
 const router = express.Router();
@@ -104,9 +109,27 @@ router.get("/check", async (req, res) => {
   }
 
   const walshy = new WalshyService();
-  let walshyData = await walshy.check(domain);
+  const ipQualityScore = new IpQualityScoreService();
+  const googleSafebrowsing = new GoogleSafebrowsingService();
+  const sinkingYahts = new SinkingYahtsService();
+  const virusTotal = new VirusTotalService();
+  const phisherman = new PhishermanService();
 
-  res.status(200).json(walshyData);
+  let walshyData = await walshy.check(domain);
+  let ipQualityScoreData = await ipQualityScore.check(domain);
+  let googleSafebrowsingData = await googleSafebrowsing.check(domain);
+  let sinkingYahtsData = await sinkingYahts.check(domain);
+  let virusTotalData = await virusTotal.check(domain);
+  let phishermanData = await phisherman.check(domain);
+
+  res.status(200).json({
+    walshy: walshyData,
+    ipQualityScore: ipQualityScoreData,
+    googleSafebrowsing: googleSafebrowsingData,
+    sinkingYahts: sinkingYahtsData,
+    virusTotal: virusTotalData,
+    phisherman: phishermanData,
+  });
 });
 
 /**

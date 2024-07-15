@@ -1,21 +1,21 @@
 import axios from "axios";
 
 /**
- * A service that provides access to the IpQualityScore service for checking and reporting domains.
+ * A service that provides access to the VirusTotal service for checking and reporting domains.
  */
-export class IpQualityScoreService {
+export class VirusTotalService {
   /**
-   * Asynchronously checks a given domain against the IpQualityScore service for any known bad domains.
+   * Asynchronously checks a given domain against the VirusTotal service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
    * @returns
    */
   async check(domain: string) {
     const response = await axios.get(
-      `https://ipqualityscore.com/api/json/url/${process.env.IPQS_API_KEY!}/${domain}`,
+      `https://www.virustotal.com/api/v3/domains/${domain}`,
       {
-        // todo: extract headers to a seperate place to avoid duplication
         headers: {
+          "x-apikey": process.env.VIRUS_TOTAL_API_KEY,
           Referer: "https://phish.directory",
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
@@ -27,7 +27,7 @@ export class IpQualityScoreService {
   }
 
   /**
-   * Asynchronously reports a given domain to the IpQualityScore service for further processing or analysis.
+   * Asynchronously reports a given domain to the VirusTotal service for further processing or analysis.
    *
    * @param {string} domain - The domain name to be reported.
    * @returns

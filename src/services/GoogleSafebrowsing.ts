@@ -12,7 +12,7 @@ export class GoogleSafebrowsingService {
    */
   async check(domain: string) {
     const response = await axios.post(
-      `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.GOOGLE_SAFE_BROWSING_API_KEY}`,
+      `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process.env.GOOGLE_API_KEY!}`,
       {
         // todo: extract headers to a seperate place to avoid duplication
         headers: {

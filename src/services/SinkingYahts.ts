@@ -1,21 +1,21 @@
 import axios from "axios";
 
 /**
- * A service that provides access to the IpQualityScore service for checking and reporting domains.
+ * A service that provides access to the SinkingYahts service for checking and reporting domains.
  */
-export class IpQualityScoreService {
+export class SinkingYahtsService {
   /**
-   * Asynchronously checks a given domain against the IpQualityScore service for any known bad domains.
+   * Asynchronously checks a given domain against the SinkingYahts service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
    * @returns
    */
   async check(domain: string) {
-    const response = await axios.get(
-      `https://ipqualityscore.com/api/json/url/${process.env.IPQS_API_KEY!}/${domain}`,
+    const response = await axios.get<boolean>(
+      `https://phish.sinking.yachts/v2/check/${domain}`,
       {
-        // todo: extract headers to a seperate place to avoid duplication
         headers: {
+          accept: "application/json",
           Referer: "https://phish.directory",
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
@@ -27,7 +27,7 @@ export class IpQualityScoreService {
   }
 
   /**
-   * Asynchronously reports a given domain to the IpQualityScore service for further processing or analysis.
+   * Asynchronously reports a given domain to the SinkingYahts service for further processing or analysis.
    *
    * @param {string} domain - The domain name to be reported.
    * @returns
