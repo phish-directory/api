@@ -1,6 +1,8 @@
 import * as express from "express";
 import moment from "moment";
 
+import { WalshyService } from "./services/Walshy";
+
 const router = express.Router();
 
 router.use((req, res, next) => {
@@ -76,7 +78,7 @@ router.get("/metrics", (req, res) => {
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  *
  */
-router.get("/check", (req, res) => {
+router.get("/check", async (req, res) => {
   // look for the query parameter
   const query = req.query!;
 
@@ -101,7 +103,10 @@ router.get("/check", (req, res) => {
       );
   }
 
-  res.status(200).json("Check!");
+  const walshy = new WalshyService();
+  let walshyData = await walshy.check(domain);
+
+  res.status(200).json(walshyData);
 });
 
 /**
