@@ -145,8 +145,6 @@ router.get("/check", async (req, res) => {
     });
   }
 
-  console.log(googleSafebrowsingData);
-
   // todo: figure out why ts is complaining about this
   // @ts-expect-error
   let dbGbsResponse = await prisma.GoogleSafeBrowsingAPIResponse.create({
