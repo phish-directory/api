@@ -32,6 +32,7 @@ export class WalshyService {
     return responnse.data;
   }
 
+  // todo: log report counts and data to the database
   /**
    * Asynchronously reports a given domain to the walshy service for further processing or analysis.
    *
@@ -40,6 +41,20 @@ export class WalshyService {
    * @returns {Promise<void>} A promise that resolves when the report operation is complete.
    */
   async report(domain: string, prisma: PrismaClient): Promise<void> {
-    // todo: implement this
+    const response = await axios.post(
+      `https://bad-domains.walshy.dev/report`,
+      {
+        domain: domain,
+      },
+      {
+        headers: {
+          Referer: "https://phish.directory",
+          "User-Agent": "internal-server@phish.directory",
+          "X-Identity": "internal-server@phish.directory",
+        },
+      },
+    );
+
+    return response.data;
   }
 }

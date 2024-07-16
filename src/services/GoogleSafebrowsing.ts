@@ -35,15 +35,4 @@ export class GoogleSafebrowsingService {
 
     return response.data;
   }
-
-  /**
-   * Asynchronously reports a given domain to the google safebrowsing service for further processing or analysis.
-   *
-   * @param {string} domain - The domain name to be reported.
-   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
-   * @returns
-   */
-  async report(domain: string, prisma: PrismaClient) {
-    // todo: implement this
-  }
 }

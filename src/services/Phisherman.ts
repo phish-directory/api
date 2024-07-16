@@ -14,11 +14,11 @@ export class PhishermanService {
    */
   async check(domain: string, prisma: PrismaClient) {
     const response = await axios.get(
-      `https://api.phisherman.gg/v2/domains/check/${domain}`,
+      `https://api.phisherman.gg/v2/domains/info/${domain}`,
       {
         // todo: extract headers to a seperate place to avoid duplication (will need to handle adding the Authorization header)
         headers: {
-          Authorization: "Bearer " + process.env.PHISHERMAN_API_KEY,
+          Authorization: "Bearer " + process.env.PHISHERMAN_API_KEY!,
           Referer: "https://phish.directory",
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
@@ -27,16 +27,5 @@ export class PhishermanService {
     );
 
     return response.data;
-  }
-
-  /**
-   * Asynchronously reports a given domain to the Phisherman service for further processing or analysis.
-   *
-   * @param {string} domain - The domain name to be reported.
-   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
-   * @returns
-   */
-  async report(domain: string, prisma: PrismaClient) {
-    // todo: implement this
   }
 }
