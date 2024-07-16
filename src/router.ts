@@ -148,7 +148,8 @@ router.get("/check", async (req, res) => {
   console.log(googleSafebrowsingData);
 
   // todo: figure out why ts is complaining about this
-  let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
+  // @ts-expect-error
+  let dbGbsResponse = await prisma.GoogleSafeBrowsingAPIResponse.create({
     data: {
       domain: {
         connect: {
@@ -174,20 +175,24 @@ router.get("/check", async (req, res) => {
     },
   });
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbPhishermanResponse = await prisma.PhishermanAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
+  for (const [domain, data] of Object.entries(phishermanData)) {
+    // todo: figure out why ts is complaining about this
+    // @ts-expect-error
+    const dbPhishermanResponse = await prisma.PhishermanAPIResponse.create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
         },
+        // @ts-expect-error
+        classification: data.classification,
+        // @ts-expect-error
+        verifiedPhish: data.verifiedPhish,
+        data: data,
       },
-      classification: phishermanData.classification,
-      verifiedPhish: phishermanData.verifiedPhish,
-      data: phishermanData,
-    },
-  });
+    });
+  }
 
   // todo: figure out why ts is complaining about this
   // @ts-expect-error
