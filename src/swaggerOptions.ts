@@ -17,12 +17,15 @@ export const swaggerOptions = {
   },
   basePath: "/",
   tags: [],
-  /* security: {
-    BasicAuth: {
-      type: "http",
-      scheme: "basic",
+  securityDefinitions: {
+    auth: {
+      type: "apiKey",
+      scheme: "Authorization",
     },
-  }, */
+  },
+  security: {
+    auth: [],
+  },
   // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
   filesPattern: ["./router.ts", "./routes/*.ts"], // Glob pattern to find your jsdoc files
   swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
