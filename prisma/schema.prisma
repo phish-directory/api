@@ -31,14 +31,15 @@ enum DomainType {
 }
 
 model User {
-  id          Int         @id @unique @default(autoincrement())
-  uuid        String      @unique @default(uuid())
+  id          Int       @id @unique @default(autoincrement())
+  uuid        String    @unique @default(uuid())
   name        String
-  email       String      @unique
-  accountType AccountType @default(user)
-  dateCreated DateTime    @default(now())
-  dateUpdated DateTime    @updatedAt
-  deleted     Boolean     @default(false)
+  email       String    @unique
+  password    String
+  // accountType AccountType @default(user)
+  dateCreated DateTime  @default(now())
+  dateUpdated DateTime  @updatedAt
+  deleted     Boolean   @default(false)
   dateDeleted DateTime?
   // domainsReported Domain[]
 }

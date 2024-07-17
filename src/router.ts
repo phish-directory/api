@@ -49,7 +49,7 @@ router.get("/tmp", authenticateToken, (req, res) => {
 router.get("/tmp2", async (req, res) => {
   let tok = await generateAccessToken("test");
 
-  res.status(200).json(tok);
+  res.status(200).json("tmp2");
 });
 
 /**
