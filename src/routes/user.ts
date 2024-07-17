@@ -1,16 +1,19 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
+let saltRounds = 10;
+
 /**
  * POST /user/signup
  * @summary Sign up a user for the api
  * @tags User
+ * @param {string} name.body.required - name of the user
  * @param {string} email.body.required - email of the user
- * @param {string} password.body.required - password of the user
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
@@ -44,12 +47,15 @@ router.post("/signup", async (req, res) => {
     res.status(400).json("User with that email already exists");
   }
 
+  const salt = bcrypt.genSaltSync(saltRounds);
+  let passHash = await bcrypt.hash(password, salt);
+
   // create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
       email: email,
-      password: password,
+      password: passHash,
     },
   });
 
@@ -94,7 +100,9 @@ router.post("/login", async (req, res) => {
     return res.status(400).json("User not found");
   }
 
-  if (user.password !== password) {
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
     return res.status(400).json("Invalid password");
   }
 
