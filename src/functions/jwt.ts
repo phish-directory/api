@@ -1,9 +1,5 @@
 import * as jwt from "jsonwebtoken";
 
-export async function generateAccessToken(username: string) {
-  return jwt.sign(username, process.env.TOKEN_SECRET!);
-}
-
 export async function authenticateToken(req: any, res: any, next: any) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];

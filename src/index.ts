@@ -26,6 +26,14 @@ app.use("/", router);
 // todo: implement urlhaus - https://urlhaus-api.abuse.ch/
 // todo: implement urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
 
+/* todo: list for implements
+
+- https://securitytrails.com/
+- https://phish.report/
+- https://phish.observer/
+
+*/
+
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);
 });
