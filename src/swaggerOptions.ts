@@ -24,7 +24,17 @@ export const swaggerOptions = {
     },
   },
   security: {
-    auth: [],
+    auth: {
+      type: "apiKey",
+      scheme: "Authorization",
+    },
+  },
+  swaggerUiOptions: {
+    swaggerOptions: {
+      // This one removes the modals spec
+      // You can checkout more config info here: https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
+      defaultModelsExpandDepth: -1,
+    },
   },
   // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
   filesPattern: ["./router.ts", "./routes/*.ts"], // Glob pattern to find your jsdoc files
