@@ -1,10 +1,11 @@
 import * as express from "express";
 
-const router = express.Router();
-
+import { authenticateToken } from "./functions/jwt";
 import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
+
+const router = express.Router();
 
 router.use((req, res, next) => {
   res.setHeader("X-Api-Version", `${process.env.npm_package_version!}`);
@@ -35,7 +36,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("/user", userRouter);
-router.use("/domain", domainRouter);
 router.use("/misc", miscRouter);
+router.use("/domain", authenticateToken, domainRouter);
 
 export default router;
