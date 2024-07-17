@@ -10,3 +10,4 @@ prisma/data
 ! .env.example
 .vscode
 node_modules
+pnpm-lock.yaml
