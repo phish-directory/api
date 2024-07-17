@@ -31,17 +31,18 @@ enum DomainType {
 }
 
 model User {
-  id          Int       @id @unique @default(autoincrement())
-  uuid        String    @unique @default(uuid())
-  name        String
-  email       String    @unique
-  password    String
+  id              Int              @id @unique @default(autoincrement())
+  uuid            String           @unique @default(uuid())
+  name            String
+  email           String           @unique
+  password        String
   // accountType AccountType @default(user)
-  dateCreated DateTime  @default(now())
-  dateUpdated DateTime  @updatedAt
-  deleted     Boolean   @default(false)
-  dateDeleted DateTime?
+  dateCreated     DateTime         @default(now())
+  dateUpdated     DateTime         @updatedAt
+  deleted         Boolean          @default(false)
+  dateDeleted     DateTime?
   // domainsReported Domain[]
+  expressRequests ExpressRequest[]
 }
 
 model Domain {
@@ -60,6 +61,19 @@ model Domain {
   VirusTotalAPIResponse         VirusTotalAPIResponse[]
   // User                          User?                           @relation(fields: [userId], references: [id])
   // userId                        Int?
+}
+
+model ExpressRequest {
+  id          Int      @id @default(autoincrement())
+  method      String
+  url         String
+  headers     Json?
+  body        Json?
+  query       Json?
+  ip          String
+  dateCreated DateTime @default(now())
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
 }
 
 model GoogleSafeBrowsingAPIResponse {
