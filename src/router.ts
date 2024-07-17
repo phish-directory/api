@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import * as express from "express";
 import moment from "moment";
 
+import { authenticateToken, generateAccessToken } from "./functions/jwt";
 import { GoogleSafebrowsingService } from "./services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "./services/IpQualityScore";
 import { PhishermanService } from "./services/Phisherman";
@@ -39,6 +40,16 @@ router.use((req, res, next) => {
  */
 router.get("/", (req, res) => {
   res.status(301).redirect("/docs");
+});
+
+router.get("/tmp", authenticateToken, (req, res) => {
+  res.status(200).json("tmp");
+});
+
+router.get("/tmp2", async (req, res) => {
+  let tok = await generateAccessToken("test");
+
+  res.status(200).json(tok);
 });
 
 /**
