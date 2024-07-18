@@ -18,15 +18,15 @@ export async function parseData(
   }
 
   if (
-    ipQualityScoreData.data.unsafe ||
-    ipQualityScoreData.data.spam ||
-    ipQualityScoreData.data.phishing ||
-    ipQualityScoreData.data.malware
+    ipQualityScoreData.unsafe ||
+    ipQualityScoreData.spam ||
+    ipQualityScoreData.phishing ||
+    ipQualityScoreData.malware
   ) {
     return true;
   }
 
-  if (phishermanData.data.verifiedPhish) {
+  if (phishermanData.verifiedPhish) {
     return true;
   }
 
