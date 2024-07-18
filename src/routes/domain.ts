@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import * as express from "express";
 
+import { parseData } from "../functions/parseData";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
 import { PhishObserverService } from "../services/PhishObserver";
@@ -197,15 +198,53 @@ router.get("/check", async (req, res) => {
     },
   });
 
-  res.status(200).json({
-    walshy: walshyData,
-    ipQualityScore: ipQualityScoreData,
-    googleSafebrowsing: googleSafebrowsingData,
-    sinkingYahts: sinkingYahtsData,
-    virusTotal: virusTotalData,
-    phisherman: phishermanData,
-    phishObserver: phishObserverData,
-  });
+  let isPhish = await parseData(
+    walshyData,
+    ipQualityScoreData,
+    googleSafebrowsingData,
+    sinkingYahtsData,
+    virusTotalData,
+    phishermanData,
+    phishObserverData,
+  );
+
+  if (isPhish) {
+    return res.status(200).json({
+      phishing: true,
+      apiData: {
+        googleSafebrowsing: googleSafebrowsingData,
+        ipQualityScore: ipQualityScoreData,
+        phisherman: phishermanData,
+        phishObserver: phishObserverData,
+        sinkingYahts: sinkingYahtsData,
+        virusTotal: virusTotalData,
+        walshy: walshyData,
+      },
+    });
+  } else {
+    return res.status(200).json({
+      phishing: false,
+      apiData: {
+        googleSafebrowsing: googleSafebrowsingData,
+        ipQualityScore: ipQualityScoreData,
+        phisherman: phishermanData,
+        phishObserver: phishObserverData,
+        sinkingYahts: sinkingYahtsData,
+        virusTotal: virusTotalData,
+        walshy: walshyData,
+      },
+    });
+  }
+
+  // res.status(200).json({
+  //   walshy: walshyData,
+  //   ipQualityScore: ipQualityScoreData,
+  //   googleSafebrowsing: googleSafebrowsingData,
+  //   sinkingYahts: sinkingYahtsData,
+  //   virusTotal: virusTotalData,
+  //   phisherman: phishermanData,
+  //   phishObserver: phishObserverData,
+  // });
 });
 
 export default router;
