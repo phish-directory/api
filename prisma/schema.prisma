@@ -50,6 +50,7 @@ model Domain {
   uuid                          String                          @unique @default(uuid())
   type                          DomainType                      @default(unknown)
   domain                        String
+  malicious                     Boolean                         @default(false)
   // reportedBy                    User[]
   dateCreated                   DateTime                        @default(now())
   dateUpdated                   DateTime                        @updatedAt
