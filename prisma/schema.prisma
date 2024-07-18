@@ -59,6 +59,7 @@ model Domain {
   PhishermanAPIResponse         PhishermanAPIResponse[]
   SinkingYachtsAPIResponse      SinkingYachtsAPIResponse[]
   VirusTotalAPIResponse         VirusTotalAPIResponse[]
+  PhishObserverAPIResponse      PhishObserverAPIResponse[]
   // User                          User?                           @relation(fields: [userId], references: [id])
   // userId                        Int?
 }
@@ -143,4 +144,6 @@ model PhishObserverAPIResponse {
   data      Json // Store the raw JSON response from PhishObserver
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  domain    Domain?  @relation(fields: [domainId], references: [id])
+  domainId  Int?
 }
