@@ -53,29 +53,6 @@ router.get("/check", async (req, res) => {
       );
   }
 
-  const walshy = new WalshyService();
-  const ipQualityScore = new IpQualityScoreService();
-  const googleSafebrowsing = new GoogleSafebrowsingService();
-  const sinkingYahts = new SinkingYahtsService();
-  const virusTotal = new VirusTotalService();
-  const phisherman = new PhishermanService();
-  const phishObserver = new PhishObserverService();
-
-  let walshyData = await walshy.check(domain, prisma);
-  let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
-  let googleSafebrowsingData = await googleSafebrowsing.check(domain, prisma);
-  let sinkingYahtsData = await sinkingYahts.check(domain, prisma);
-  let virusTotalData = await virusTotal.check(domain, prisma);
-  let phishermanData = await phisherman.check(domain, prisma);
-  let phishObserverData = await phishObserver.check(domain, prisma);
-
-  // let dbDomain = await prisma.domain.findUnique({
-  //   // @ts-expect-error
-  //   where: {
-  //     domain: domain,
-  //   },
-  // });
-
   let dbDomain = await prisma.domain.findFirst({
     where: {
       domain: domain,
@@ -88,152 +65,174 @@ router.get("/check", async (req, res) => {
         domain: domain,
       },
     });
-  }
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbGbsResponse = await prisma.GoogleSafeBrowsingAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
-        },
-      },
-      data: googleSafebrowsingData,
-    },
-  });
+    const walshy = new WalshyService();
+    const ipQualityScore = new IpQualityScoreService();
+    const googleSafebrowsing = new GoogleSafebrowsingService();
+    const sinkingYahts = new SinkingYahtsService();
+    const virusTotal = new VirusTotalService();
+    const phisherman = new PhishermanService();
+    const phishObserver = new PhishObserverService();
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbIpQualityScoreResponse = await prisma.IpQualityScoreAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
-        },
-      },
-      proxy: ipQualityScoreData.proxy ? true : false,
-      countryCode: ipQualityScoreData.country_code,
-      data: ipQualityScoreData,
-    },
-  });
+    let walshyData = await walshy.check(domain, prisma);
+    let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
+    let googleSafebrowsingData = await googleSafebrowsing.check(domain, prisma);
+    let sinkingYahtsData = await sinkingYahts.check(domain, prisma);
+    let virusTotalData = await virusTotal.check(domain, prisma);
+    let phishermanData = await phisherman.check(domain, prisma);
+    let phishObserverData = await phishObserver.check(domain, prisma);
 
-  for (const [domain, data] of Object.entries(phishermanData)) {
-    // todo: figure out why ts is complaining about this
-    // @ts-expect-error
-    const dbPhishermanResponse = await prisma.PhishermanAPIResponse.create({
+    let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
       data: {
         domain: {
           connect: {
             id: dbDomain.id,
           },
         },
-        // @ts-expect-error
-        classification: data.classification,
-        // @ts-expect-error
-        verifiedPhish: data.verifiedPhish,
-        data: data,
+        data: googleSafebrowsingData,
       },
     });
-  }
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbSinkingYahtsResponse = await prisma.SinkingYachtsAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
+    let dbIpQualityScoreResponse =
+      await prisma.ipQualityScoreAPIResponse.create({
+        data: {
+          domain: {
+            connect: {
+              id: dbDomain.id,
+            },
+          },
+          proxy: ipQualityScoreData.proxy ? true : false,
+          countryCode: ipQualityScoreData.country_code,
+          data: ipQualityScoreData,
         },
-      },
-      data: sinkingYahtsData,
-      status: sinkingYahtsData,
-    },
-  });
+      });
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbVirusTotalResponse = await prisma.VirusTotalAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
+    for (const [domain, data] of Object.entries(phishermanData)) {
+      const dbPhishermanResponse = await prisma.phishermanAPIResponse.create({
+        data: {
+          domain: {
+            connect: {
+              id: dbDomain.id,
+            },
+          },
+          classification: data.classification,
+          verifiedPhish: data.verifiedPhish,
+          data: data,
         },
-      },
-      data: virusTotalData,
-      // virusTotalData.data.attributes.last_analysis_stats.malicious is 0 if false and 1 if true, convert to boolean
-      malicious: virusTotalData.data.attributes.last_analysis_stats.malicious
-        ? true
-        : false,
-      suspicious: virusTotalData.data.attributes.last_analysis_stats.suspicious
-        ? true
-        : false,
-    },
-  });
+      });
+    }
 
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let dbWalshyResponse = await prisma.WalshyAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
+    let dbSinkingYahtsResponse = await prisma.sinkingYachtsAPIResponse.create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
         },
-      },
-      badDomain: walshyData.badDomain,
-      data: walshyData,
-    },
-  });
-
-  // todo: figure out why ts is complaining about this
-  // @ts-expect-error
-  let phishObserverResponse = await prisma.PhishObserverAPIResponse.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
-        },
-      },
-      data: phishObserverData,
-    },
-  });
-
-  let isPhish = await parseData(
-    walshyData,
-    ipQualityScoreData,
-    googleSafebrowsingData,
-    sinkingYahtsData,
-    virusTotalData,
-    phishermanData,
-    phishObserverData,
-  );
-
-  if (isPhish) {
-    return res.status(200).json({
-      phishing: true,
-      apiData: {
-        googleSafebrowsing: googleSafebrowsingData,
-        ipQualityScore: ipQualityScoreData,
-        phisherman: phishermanData,
-        phishObserver: phishObserverData,
-        sinkingYahts: sinkingYahtsData,
-        virusTotal: virusTotalData,
-        walshy: walshyData,
+        data: sinkingYahtsData,
+        status: sinkingYahtsData,
       },
     });
+
+    let dbVirusTotalResponse = await prisma.virusTotalAPIResponse.create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: virusTotalData,
+        // virusTotalData.data.attributes.last_analysis_stats.malicious is 0 if false and 1 if true, convert to boolean
+        malicious: virusTotalData.data.attributes.last_analysis_stats.malicious
+          ? true
+          : false,
+        suspicious: virusTotalData.data.attributes.last_analysis_stats
+          .suspicious
+          ? true
+          : false,
+      },
+    });
+
+    let dbWalshyResponse = await prisma.walshyAPIResponse.create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        badDomain: walshyData.badDomain,
+        data: walshyData as any,
+      },
+    });
+
+    let phishObserverResponse = await prisma.phishObserverAPIResponse.create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: phishObserverData,
+      },
+    });
+
+    let isPhish = await parseData(
+      walshyData,
+      ipQualityScoreData,
+      googleSafebrowsingData,
+      sinkingYahtsData,
+      virusTotalData,
+      phishermanData,
+      phishObserverData,
+    );
+
+    if (isPhish) {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: true,
+        },
+      });
+
+      return res.status(200).json({
+        phishing: true,
+        apiData: {
+          googleSafebrowsing: googleSafebrowsingData,
+          ipQualityScore: ipQualityScoreData,
+          phisherman: phishermanData,
+          phishObserver: phishObserverData,
+          sinkingYahts: sinkingYahtsData,
+          virusTotal: virusTotalData,
+          walshy: walshyData,
+        },
+      });
+    } else {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: false,
+        },
+      });
+
+      return res.status(200).json({
+        phishing: false,
+        apiData: {
+          googleSafebrowsing: googleSafebrowsingData,
+          ipQualityScore: ipQualityScoreData,
+          phisherman: phishermanData,
+          phishObserver: phishObserverData,
+          sinkingYahts: sinkingYahtsData,
+          virusTotal: virusTotalData,
+          walshy: walshyData,
+        },
+      });
+    }
   } else {
-    return res.status(200).json({
-      phishing: false,
-      apiData: {
-        googleSafebrowsing: googleSafebrowsingData,
-        ipQualityScore: ipQualityScoreData,
-        phisherman: phishermanData,
-        phishObserver: phishObserverData,
-        sinkingYahts: sinkingYahtsData,
-        virusTotal: virusTotalData,
-        walshy: walshyData,
-      },
-    });
+    return res.status(200).json("Domain already checked");
   }
 
   // res.status(200).json({
