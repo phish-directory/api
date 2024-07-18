@@ -108,6 +108,8 @@ router.get("/check", async (req, res) => {
       });
 
     for (const [domain, data] of Object.entries(phishermanData)) {
+      const typedData = data as any;
+
       const dbPhishermanResponse = await prisma.phishermanAPIResponse.create({
         data: {
           domain: {
@@ -115,9 +117,9 @@ router.get("/check", async (req, res) => {
               id: dbDomain.id,
             },
           },
-          classification: data.classification,
-          verifiedPhish: data.verifiedPhish,
-          data: data,
+          classification: typedData.classification,
+          verifiedPhish: typedData.verifiedPhish,
+          data: typedData,
         },
       });
     }
@@ -165,6 +167,9 @@ router.get("/check", async (req, res) => {
       },
     });
 
+    // convert phishObserver data to json
+    let pojson = JSON.stringify(phishObserverData);
+
     let phishObserverResponse = await prisma.phishObserverAPIResponse.create({
       data: {
         domain: {
@@ -172,7 +177,7 @@ router.get("/check", async (req, res) => {
             id: dbDomain.id,
           },
         },
-        data: phishObserverData,
+        data: pojson,
       },
     });
 
