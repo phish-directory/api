@@ -111,7 +111,7 @@ router.post("/login", async (req, res) => {
       id: user.id,
       uuid: user.uuid,
     },
-    process.env.SECRET!,
+    process.env.JWT_SECRET!,
   );
 
   res.status(200).json({
@@ -143,7 +143,7 @@ router.get("/me", async (req, res) => {
   if (token == null) return res.sendStatus(401);
 
   // verify the jwt token
-  jwt.verify(token, process.env.SECRET!, async (err: any, user: any) => {
+  jwt.verify(token, process.env.JWT_SECRET!, async (err: any, user: any) => {
     if (err) return res.sendStatus(403);
 
     const dbUser = await prisma.user.findUnique({

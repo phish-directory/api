@@ -8,7 +8,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
 
   jwt.verify(
     token,
-    process.env.TOKEN_SECRET as string,
+    process.env.JWT_SECRET! as string,
     (err: any, user: any) => {
       console.log(err);
 
