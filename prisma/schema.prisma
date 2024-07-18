@@ -137,3 +137,10 @@ model WalshyAPIResponse {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model PhishObserverAPIResponse {
+  id        Int      @id @default(autoincrement())
+  data      Json // Store the raw JSON response from PhishObserver
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

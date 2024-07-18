@@ -3,6 +3,7 @@ import * as express from "express";
 
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
+import { PhishObserverService } from "../services/PhishObserver";
 import { PhishermanService } from "../services/Phisherman";
 import { SinkingYahtsService } from "../services/SinkingYahts";
 import { VirusTotalService } from "../services/VirusTotal";
@@ -57,6 +58,7 @@ router.get("/check", async (req, res) => {
   const sinkingYahts = new SinkingYahtsService();
   const virusTotal = new VirusTotalService();
   const phisherman = new PhishermanService();
+  const phishObserver = new PhishObserverService();
 
   let walshyData = await walshy.check(domain, prisma);
   let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
@@ -64,6 +66,7 @@ router.get("/check", async (req, res) => {
   let sinkingYahtsData = await sinkingYahts.check(domain, prisma);
   let virusTotalData = await virusTotal.check(domain, prisma);
   let phishermanData = await phisherman.check(domain, prisma);
+  let phishObserverData = await phishObserver.check(domain, prisma);
 
   // let dbDomain = await prisma.domain.findUnique({
   //   // @ts-expect-error
@@ -181,6 +184,19 @@ router.get("/check", async (req, res) => {
     },
   });
 
+  // todo: figure out why ts is complaining about this
+  // @ts-expect-error
+  let phishObserverResponse = await prisma.PhishObserverAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: phishObserverData,
+    },
+  });
+
   res.status(200).json({
     walshy: walshyData,
     ipQualityScore: ipQualityScoreData,
@@ -188,6 +204,7 @@ router.get("/check", async (req, res) => {
     sinkingYahts: sinkingYahtsData,
     virusTotal: virusTotalData,
     phisherman: phishermanData,
+    phishObserver: phishObserverData,
   });
 });
 
