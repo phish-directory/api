@@ -152,6 +152,13 @@ router.get("/me", async (req, res) => {
       },
     });
 
+    // get the count of requests made by the user
+    const count = await prisma.expressRequest.count({
+      where: {
+        userId: dbUser!.id,
+      },
+    });
+
     if (!dbUser) {
       return res.status(400).json("User not found");
     }
@@ -160,6 +167,7 @@ router.get("/me", async (req, res) => {
       name: dbUser.name,
       email: dbUser.email,
       uuid: dbUser.uuid,
+      requestCount: count,
     });
   });
 });
