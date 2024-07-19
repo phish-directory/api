@@ -1,2 +1,2 @@
-web: pnpm run start
+web: node dist/index.js
 release: npx prisma migrate deploy
