@@ -30,6 +30,13 @@ enum DomainType {
   other
 }
 
+enum verdict {
+  postal
+  banking
+  item_scams
+  other
+}
+
 model User {
   id              Int              @id @unique @default(autoincrement())
   uuid            String           @unique @default(uuid())
@@ -63,7 +70,10 @@ model Domain {
   PhishObserverAPIResponse      PhishObserverAPIResponse[]
   // User                          User?                           @relation(fields: [userId], references: [id])
   // userId                        Int?
+  TmpVerdict                    TmpVerdict[]
 }
+
+//todo: establish naming consistency with createdAt, dateCreated, etc.
 
 model ExpressRequest {
   id          Int      @id @default(autoincrement())
@@ -76,6 +86,15 @@ model ExpressRequest {
   dateCreated DateTime @default(now())
   User        User?    @relation(fields: [userId], references: [id])
   userId      Int?
+}
+
+model TmpVerdict {
+  id        Int      @id @default(autoincrement())
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  verdict   verdict
+  sUser     String
+  domainId  Int
+  createdAt DateTime @default(now())
 }
 
 model GoogleSafeBrowsingAPIResponse {

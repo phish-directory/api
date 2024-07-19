@@ -18,7 +18,7 @@ const prisma = new PrismaClient();
  * }
  *
  */
-router.get("/metrics", (req, res) => {
+router.get("/metrics", async (req, res) => {
   let uptime = process.uptime();
   // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
@@ -27,10 +27,63 @@ router.get("/metrics", (req, res) => {
   // format the date started with moment
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
 
+  let domainCount = await prisma.domain.count();
+  let userCount = await prisma.user.count();
+  let requestCount = await prisma.expressRequest.count();
+
   res.status(200).json({
     status: "up",
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
+    domainCount: domainCount,
+    userCount: userCount,
+    requests: {
+      lifetime: requestCount,
+      today: await prisma.expressRequest.count({
+        where: {
+          dateCreated: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          },
+        },
+      }),
+      "24 hours": await prisma.expressRequest.count({
+        where: {
+          dateCreated: {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+      week: await prisma.expressRequest.count({
+        where: {
+          dateCreated: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+      month: await prisma.expressRequest.count({
+        where: {
+          dateCreated: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+      year: await prisma.expressRequest.count({
+        where: {
+          dateCreated: {
+            gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+    },
+    responses: {
+      googleSafebrowsing: await prisma.googleSafeBrowsingAPIResponse.count(),
+      ipQualityScore: await prisma.ipQualityScoreAPIResponse.count(),
+      phisherman: await prisma.phishermanAPIResponse.count(),
+      phishObserver: await prisma.phishObserverAPIResponse.count(),
+      sinkingYahts: await prisma.sinkingYachtsAPIResponse.count(),
+      virusTotal: await prisma.virusTotalAPIResponse.count(),
+      walshy: await prisma.walshyAPIResponse.count(),
+    },
   });
 });
 
