@@ -11,7 +11,10 @@
     }
   ],
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "node dist/index.js",
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w",
     "dev": "nodemon --quiet --watch './**/*.ts' --exec 'ts-node' src/index.ts",
     "prepare": "husky install",
     "compile": "tsc",
@@ -68,5 +71,9 @@
   },
   "lint-staged": {
     "**/*.*": "prettier-eslint --write './**/*.ts'"
+  },
+  "engines": {
+    "node": ">=21.7.1",
+    "pnpm": ">=9.5.0"
   }
 }
