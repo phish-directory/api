@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
+import axios from "axios";
 import * as express from "express";
 
+import { authenticateToken } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
@@ -28,7 +30,7 @@ const prisma = new PrismaClient();
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  *
  */
-router.get("/check", async (req, res) => {
+router.get("/check", authenticateToken, async (req, res) => {
   // look for the query parameter
   const query = req.query!;
 
@@ -262,6 +264,60 @@ export default router;
  * @example response - 200 - Success message
  * "Report!"
  */
-router.post("/report", (req, res) => {
+router.post("/report", authenticateToken, (req, res) => {
   res.status(200).json("Report!");
+});
+
+router.post("/verdict", async (req, res) => {
+  const body = req.body;
+  const { domain, verdict, suser } = body;
+
+  // if (!domain || !verdict || !suser) {
+  //   return res.status(400).json("Missing domainm, verdict, or user");
+  // }
+
+  // check for the KEY parameter
+  if (process.env.PHISHBOT_KEY !== req.query.key) {
+    return res.status(401).json("Unauthorized");
+  }
+
+  let dbDomain = await prisma.domain.findFirst({
+    where: {
+      domain: domain,
+    },
+  });
+
+  if (!dbDomain) {
+    // make a request to the domain/check endpoint
+    // to check the domain
+
+    await axios.get(
+      `http://localhost:${process.env.PORT!}/domain/check?domain=${domain}`,
+    );
+
+    dbDomain = await prisma.domain.findFirst({
+      where: {
+        domain: domain,
+      },
+    });
+  }
+
+  await prisma.tmpVerdict
+    .create({
+      data: {
+        domain: {
+          connect: {
+            id: dbDomain!.id,
+          },
+        },
+        verdict: verdict,
+        sUser: suser,
+      },
+    })
+    .then(() => {
+      return res.status(200).json("Verdict added");
+    })
+    .catch((err) => {
+      return res.status(500).json("Failed to add verdict");
+    });
 });

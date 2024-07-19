@@ -168,6 +168,7 @@ router.get("/me", async (req, res) => {
       email: dbUser.email,
       uuid: dbUser.uuid,
       requestCount: count,
+      accountCreated: dbUser.dateCreated,
     });
   });
 });
