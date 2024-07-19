@@ -1,3 +1,5 @@
+# THIS IS BROKEN RN
+
 FROM node:21.7.1
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
