@@ -15,6 +15,13 @@ import { WalshyService } from "../services/Walshy";
 const router = express.Router();
 const prisma = new PrismaClient();
 
+enum Verdict {
+  postal,
+  banking,
+  item_scams,
+  other,
+}
+
 /**
  * GET /domain/check
  * @summary Checks if a domain is classified as something malicious (scam, phishing, etc.)
@@ -269,16 +276,40 @@ router.post("/report", authenticateToken, (req, res) => {
 });
 
 router.post("/verdict", async (req, res) => {
-  const body = req.body;
-  const { domain, verdict, suser } = body;
+  const query = req.query;
 
-  // if (!domain || !verdict || !suser) {
-  //   return res.status(400).json("Missing domainm, verdict, or user");
-  // }
+  let { domain, verdict, suser } = query;
+  domain = domain as string;
+  verdict = verdict as string;
+  suser = suser as string;
 
   // check for the KEY parameter
   if (process.env.PHISHBOT_KEY !== req.query.key) {
     return res.status(401).json("Unauthorized");
+  }
+
+  if (!domain || !verdict || !suser) {
+    return res.status(400).json("Missing domain, verdict, or user");
+  }
+
+  // convert verdict to type Verdict
+  let v: Verdict;
+
+  switch (verdict) {
+    case "postal":
+      v = Verdict.postal;
+      break;
+    case "banking":
+      v = Verdict.banking;
+      break;
+    case "item_scams":
+      v = Verdict.item_scams;
+      break;
+    case "other":
+      v = Verdict.other;
+      break;
+    default:
+      return res.status(400).json("Invalid verdict");
   }
 
   let dbDomain = await prisma.domain.findFirst({
@@ -293,6 +324,11 @@ router.post("/verdict", async (req, res) => {
 
     await axios.get(
       `http://localhost:${process.env.PORT!}/domain/check?domain=${domain}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
+        },
+      },
     );
 
     dbDomain = await prisma.domain.findFirst({

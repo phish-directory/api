@@ -14,40 +14,40 @@ export class PhishObserverService {
    */
   async check(domain: string, prisma: PrismaClient) {
     try {
-      let submissionResponse = await axios
-        .post(
-          `https://phish.observer/api/submit`,
-          {
-            url: `https://${domain}`, // required
-            tags: [
-              // optional
-              "phish.directory",
-            ],
+      let submissionResponse = await axios.post(
+        `https://phish.observer/api/submit`,
+        {
+          url: `https://${domain}`, // required
+          tags: [
+            // optional
+            "phish.directory",
+          ],
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
+            Referer: "https://phish.directory",
+            "User-Agent": "internal-server@phish.directory",
+            "X-Identity": "internal-server@phish.directory",
           },
-          {
-            headers: {
-              Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
-          },
-        )
-        .then(async (response) => {
-          let searchResponse: any = await axios.get(
-            `https://phish.observer/api/submission/${submissionResponse.data.id}`,
-            {
-              headers: {
-                Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
-                Referer: "https://phish.directory",
-                "User-Agent": "internal-server@phish.directory",
-                "X-Identity": "internal-server@phish.directory",
-              },
-            },
-          );
+        },
+      );
 
-          return searchResponse.data;
-        });
+      let subdata = await submissionResponse.data;
+
+      let searchResponse: any = await axios.get(
+        `https://phish.observer/api/submission/${subdata.id}`,
+        {
+          headers: {
+            Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
+            Referer: "https://phish.directory",
+            "User-Agent": "internal-server@phish.directory",
+            "X-Identity": "internal-server@phish.directory",
+          },
+        },
+      );
+
+      return searchResponse.data;
     } catch (error: any) {
       if (
         error.response &&
