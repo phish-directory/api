@@ -288,8 +288,16 @@ router.post("/verdict", async (req, res) => {
     return res.status(401).json("Unauthorized");
   }
 
-  if (!domain || !verdict || !suser) {
-    return res.status(400).json("Missing domain, verdict, or user");
+  if (!domain) {
+    return res.status(400).json("Missing domain");
+  }
+
+  if (!verdict) {
+    return res.status(400).json("Missing verdict");
+  }
+
+  if (!suser) {
+    return res.status(400).json("Missing user");
   }
 
   // convert verdict to type Verdict
