@@ -19,7 +19,7 @@
     "dev": "nodemon --quiet --watch './**/*.ts' --exec 'ts-node' src/index.ts",
     "build": "tsc",
     "compile": "tsc",
-    "heroku-prebuild": "echo This runs before Heroku installs dependencies.",
+    "heroku-prebuild": "pnpm run prisma generate",
     "heroku-postbuild": "echo This runs after Heroku installs dependencies, but before Heroku prunes and caches dependencies.",
     "heroku-cleanup": "echo This runs after Heroku prunes and caches dependencies."
   },
