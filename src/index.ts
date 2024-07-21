@@ -23,7 +23,6 @@ app.use(logRequest);
 app.use("/", router);
 
 // todo: @cron to run every 12 hours to pull a feed from https://openphish.com/phishing_feeds.html
-// todo: implement urlhaus - https://urlhaus-api.abuse.ch/
 // todo: implement urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
 
 /* todo: list for implements
@@ -31,7 +30,8 @@ app.use("/", router);
 - https://securitytrails.com/
 - https://phish.report/
 - https://phish.observer/
-
+- https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/get
+- https://urlhaus-api.abuse.ch/
 */
 
 app.listen(port, () => {
