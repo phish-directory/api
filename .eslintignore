@@ -1,8 +1,0 @@
-.env
-node_modules
-dist
-.husky
-.eslintrc
-.eslintignore
-.prettierrc
-.prettierignore
