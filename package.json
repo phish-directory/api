@@ -13,7 +13,7 @@
   "packageManager": "pnpm@9.5.0",
   "scripts": {
     "start": "node dist/index.js",
-    "postinstall": "tsc",
+    "postinstall": "pnpm run prisma generate && tsc",
     "watch-node": "nodemon dist/index.js",
     "watch-ts": "tsc -w",
     "dev": "nodemon --quiet --watch './**/*.ts' --exec 'ts-node' src/index.ts",
