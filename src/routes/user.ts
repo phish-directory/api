@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import * as express from "express";
-import * as jwt from "jsonwebtoken";
+import {
+  authenticateToken,
+  generateAccessToken,
+  getUserInfo,
+} from "../functions/jwt";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -106,13 +110,7 @@ router.post("/login", async (req, res) => {
     return res.status(400).json("Invalid password");
   }
 
-  let token = jwt.sign(
-    {
-      id: user.id,
-      uuid: user.uuid,
-    },
-    process.env.JWT_SECRET!,
-  );
+  let token = await generateAccessToken(user);
 
   res.status(200).json({
     token: token,
@@ -136,40 +134,26 @@ router.post("/login", async (req, res) => {
  * "User not found"
  *
  */
-router.get("/me", async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+router.get("/me", authenticateToken, async (req, res) => {
+  const userInfo = await getUserInfo(prisma, res, req);
 
-  if (token == null) return res.sendStatus(401);
+  if (!userInfo) {
+    return res.status(400).json("User not found");
+  }
 
-  // verify the jwt token
-  jwt.verify(token, process.env.JWT_SECRET!, async (err: any, user: any) => {
-    if (err) return res.sendStatus(403);
+  // get the count of requests made by the user
+  const count = await prisma.expressRequest.count({
+    where: {
+      userId: userInfo!.id,
+    },
+  });
 
-    const dbUser = await prisma.user.findUnique({
-      where: {
-        uuid: user.uuid,
-      },
-    });
-
-    // get the count of requests made by the user
-    const count = await prisma.expressRequest.count({
-      where: {
-        userId: dbUser!.id,
-      },
-    });
-
-    if (!dbUser) {
-      return res.status(400).json("User not found");
-    }
-
-    res.status(200).json({
-      name: dbUser.name,
-      email: dbUser.email,
-      uuid: dbUser.uuid,
-      requestCount: count,
-      accountCreated: dbUser.dateCreated,
-    });
+  res.status(200).json({
+    name: userInfo.name,
+    email: userInfo.email,
+    uuid: userInfo.uuid,
+    requestCount: count,
+    accountCreated: userInfo.dateCreated,
   });
 });
 

@@ -58,7 +58,7 @@ router.get("/check", authenticateToken, async (req, res) => {
     res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -197,7 +197,7 @@ router.get("/check", authenticateToken, async (req, res) => {
       sinkingYahtsData,
       virusTotalData,
       phishermanData,
-      phishObserverData,
+      phishObserverData
     );
 
     if (isPhish) {
@@ -248,19 +248,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   } else {
     return res.status(200).json("Domain already checked");
   }
-
-  // res.status(200).json({
-  //   walshy: walshyData,
-  //   ipQualityScore: ipQualityScoreData,
-  //   googleSafebrowsing: googleSafebrowsingData,
-  //   sinkingYahts: sinkingYahtsData,
-  //   virusTotal: virusTotalData,
-  //   phisherman: phishermanData,
-  //   phishObserver: phishObserverData,
-  // });
 });
-
-export default router;
 
 /**
  * POST /domain/report
@@ -272,7 +260,17 @@ export default router;
  * "Report!"
  */
 router.post("/report", authenticateToken, (req, res) => {
-  res.status(200).json("Report!");
+  let query = req.query;
+
+  let domain: string = query.domain! as string;
+
+  // check for domain parameter
+  if (!domain) {
+    res.status(400).json("No domain parameter found");
+  }
+
+  // get the userid from the token
+  let user;
 });
 
 router.post("/verdict", async (req, res) => {
@@ -336,7 +334,7 @@ router.post("/verdict", async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
         },
-      },
+      }
     );
 
     dbDomain = await prisma.domain.findFirst({
@@ -365,3 +363,5 @@ router.post("/verdict", async (req, res) => {
       return res.status(500).json("Failed to add verdict");
     });
 });
+
+export default router;
