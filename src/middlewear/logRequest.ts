@@ -48,6 +48,7 @@ export const logRequest = async (
         body: req.body,
         query: req.query,
         ip: ip,
+        userAgent: userAgent,
         User: usr
           ? {
               connect: {
