@@ -39,7 +39,6 @@ export async function generateAccessToken(user: any) {
 
 export async function getUserInfo(prisma: any, res: any, req: any) {
   const token = await getTokenFromHeader(req);
-  console.log(token);
 
   // decode the token
   let decoded = jwt.decode(token);
