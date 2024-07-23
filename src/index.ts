@@ -36,6 +36,7 @@ app.use("/", router);
 - https://phish.observer/
 - https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/get
 - https://urlhaus-api.abuse.ch/
+- https://openphish.com/
 */
 
 app.listen(port, () => {
