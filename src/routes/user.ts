@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import * as express from "express";
 import {
@@ -6,9 +5,9 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
+import { prisma } from "../prisma";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 let saltRounds = 10;
 
