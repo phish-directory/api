@@ -8,6 +8,7 @@ import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
 import { PhishObserverService } from "../services/PhishObserver";
 import { PhishermanService } from "../services/Phisherman";
+import { SecurityTrailsService } from "../services/SecurityTrails";
 import { SinkingYahtsService } from "../services/SinkingYahts";
 import { UrlScanService } from "../services/UrlScan";
 import { VirusTotalService } from "../services/VirusTotal";
@@ -83,6 +84,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   const phisherman = new PhishermanService();
   const phishObserver = new PhishObserverService();
   const urlScan = new UrlScanService();
+  const securitytrails = new SecurityTrailsService();
 
   let walshyData = await walshy.check(domain, prisma);
   let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
@@ -92,6 +94,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   let phishermanData = await phisherman.check(domain, prisma);
   let phishObserverData = await phishObserver.check(domain, prisma);
   let urlScanData = await urlScan.check(domain, prisma);
+  let securitytrailsData = await securitytrails.check(domain, prisma);
 
   let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
     data: {
@@ -178,7 +181,7 @@ router.get("/check", authenticateToken, async (req, res) => {
 
   let pojson = JSON.stringify(phishObserverData);
 
-  let phishObserverResponse = await prisma.phishObserverAPIResponse.create({
+  let dbphishObserverResponse = await prisma.phishObserverAPIResponse.create({
     data: {
       domain: {
         connect: {
@@ -199,6 +202,19 @@ router.get("/check", authenticateToken, async (req, res) => {
       data: urlScanData,
     },
   });
+
+  let dbSecurityTrailsResponse = await prisma.securityTrailsAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: securitytrailsData,
+    },
+  });
+
+  console.log(securitytrailsData);
 
   let isPhish = await parseData(
     walshyData,
@@ -233,6 +249,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         virusTotal: virusTotalData,
         walshy: walshyData,
         urlScan: urlScanData,
+        securitytrails: securitytrailsData,
       },
     });
   } else {
@@ -257,6 +274,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         virusTotal: virusTotalData,
         walshy: walshyData,
         urlScan: urlScanData,
+        securitytrails: securitytrailsData,
       },
     });
   }

@@ -74,6 +74,7 @@ model Domain {
   // userId                        Int?
   TmpVerdict                    TmpVerdict[]
   UrlScanAPIResponse            UrlScanAPIResponse[]
+  SecurityTrailsAPIResponse     SecurityTrailsAPIResponse[]
 }
 
 //todo: establish naming consistency with createdAt, dateCreated, etc.
@@ -173,6 +174,15 @@ model PhishObserverAPIResponse {
 }
 
 model UrlScanAPIResponse {
+  id        Int      @id @default(autoincrement())
+  data      Json // Store the raw JSON response from UrlScan
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  domainId  Int
+}
+
+model SecurityTrailsAPIResponse {
   id        Int      @id @default(autoincrement())
   data      Json // Store the raw JSON response from UrlScan
   createdAt DateTime @default(now())
