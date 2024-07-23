@@ -1,6 +1,6 @@
 {
   "name": "phish.directory",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A tool to help catch, prevent, and catalog phishing links & attempts",
   "main": "src/index.ts",
   "maintainers": [
