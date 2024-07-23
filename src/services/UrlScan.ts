@@ -4,6 +4,8 @@ import axios from "axios";
  * A service that provides access to the UrlScan service for checking and reporting domains.
  */
 export class UrlScanService {
+  // todo: add verdicts as part of report
+
   /**
    * Asynchronously checks a given domain against the UrlScan service for any known bad domains.
    *
