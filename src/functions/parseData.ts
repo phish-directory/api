@@ -6,6 +6,7 @@ export async function parseData(
   virusTotalData: any,
   phishermanData: any,
   phishObserverData: any,
+  urlScanData: any
 ): Promise<Boolean> {
   // return true;
 
@@ -34,7 +35,9 @@ export async function parseData(
     return true;
   }
 
-  //     urlScanResponse.data.verdicts.malicious
+  if (urlScanData.verdicts.overall.malicious === true) {
+    return true;
+  }
 
   if (
     virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||

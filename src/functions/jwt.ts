@@ -15,9 +15,10 @@ export async function authenticateToken(req: any, res: any, next: any) {
     token,
     process.env.JWT_SECRET! as string,
     (err: any, user: any) => {
-      console.log(err);
-
-      if (err) return res.sendStatus(403);
+      if (err) {
+        console.log(err);
+        return res.sendStatus(403);
+      }
 
       req.user = user;
 
