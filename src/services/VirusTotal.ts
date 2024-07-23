@@ -60,7 +60,7 @@ export class VirusTotalService {
         }
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -91,7 +91,7 @@ export class VirusTotalService {
         }
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
       })
       .catch((error) => {
         console.error(error);

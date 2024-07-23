@@ -28,6 +28,7 @@ app.use("/", router);
 // todo: add regex to domain ( ^(?!http:\/\/|https:\/\/)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$ )
 // todo: implement token refresh system
 // todo: use puppeteer to check if a domain is a phishing site
+// todo: log useragent and x-identity for each request
 
 /* todo: list for implements:
 - urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
@@ -37,6 +38,7 @@ app.use("/", router);
 - https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/get
 - https://urlhaus-api.abuse.ch/
 - https://openphish.com/
+- https://report.netcraft.com/api/v3#tag/Report/paths/~1report~1mistake/post
 */
 
 app.listen(port, () => {
