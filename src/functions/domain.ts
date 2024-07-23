@@ -2,6 +2,7 @@ import { prisma } from "../prisma";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
 import { PhishObserverService } from "../services/PhishObserver";
+import { PhishReportService } from "../services/PhishReport";
 import { PhishermanService } from "../services/Phisherman";
 import { SecurityTrailsService } from "../services/SecurityTrails";
 import { SinkingYahtsService } from "../services/SinkingYahts";
@@ -18,6 +19,7 @@ const phisherman = new PhishermanService();
 const phishObserver = new PhishObserverService();
 const urlScan = new UrlScanService();
 const securitytrails = new SecurityTrailsService();
+const phishreport = new PhishReportService();
 
 export async function domainCheck(domain: string, dbDomain: any) {
   let walshyData = await walshy.check(domain, prisma);
@@ -29,6 +31,7 @@ export async function domainCheck(domain: string, dbDomain: any) {
   let phishObserverData = await phishObserver.check(domain, prisma);
   let urlScanData = await urlScan.check(domain, prisma);
   let securitytrailsData = await securitytrails.check(domain, prisma);
+  let phishreportData = await phishreport.check(domain, prisma);
 
   let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
     data: {
@@ -145,6 +148,17 @@ export async function domainCheck(domain: string, dbDomain: any) {
         },
       },
       data: securitytrailsData,
+    },
+  });
+
+  let dbPhishReportResponse = await prisma.phishReportAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: phishreportData,
     },
   });
 
