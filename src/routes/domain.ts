@@ -189,6 +189,17 @@ router.get("/check", authenticateToken, async (req, res) => {
     },
   });
 
+  let dbUrlscanResponse = await prisma.urlScanAPIResponse.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      data: urlScanData,
+    },
+  });
+
   let isPhish = await parseData(
     walshyData,
     ipQualityScoreData,

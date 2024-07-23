@@ -31,7 +31,6 @@ app.use("/", router);
 // todo: log useragent and x-identity for each request
 
 /* todo: list for implements:
-- urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
 - https://securitytrails.com/
 - https://phish.report/
 - https://phish.observer/
