@@ -54,7 +54,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   // ex: google.com amazn.com
   // not: mail.google.com, docs.google.com)
 
-  let regex = new RegExp("^[a-zA-Z0-9-]{1,63}.[a-zA-Z]{2,}$");
+  let regex = new RegExp("^(?!http://|https://)[a-zA-Z0-9-]+.[a-zA-Z]{2,}$");
   if (!regex.test(domain)) {
     res
       .status(400)
