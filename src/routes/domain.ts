@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 import * as express from "express";
 
 import { authenticateToken } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
+import { prisma } from "../prisma";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
 import { PhishObserverService } from "../services/PhishObserver";
@@ -13,7 +13,6 @@ import { VirusTotalService } from "../services/VirusTotal";
 import { WalshyService } from "../services/Walshy";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 enum Verdict {
   postal,
@@ -207,6 +206,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         },
         data: {
           malicious: true,
+          lastChecked: new Date(),
         },
       });
 
@@ -229,6 +229,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         },
         data: {
           malicious: false,
+          lastChecked: new Date(),
         },
       });
 

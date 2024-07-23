@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import * as express from "express";
 import moment from "moment";
+import { prisma } from "../prisma";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 /**
  * GET /misc/metrics

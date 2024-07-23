@@ -23,14 +23,14 @@ app.use(logRequest);
 app.use("/", router);
 
 // todo: @cron to run every 12 hours to pull a feed from https://openphish.com/phishing_feeds.html
-// todo: implement urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
 // todo: build domain confirmation system
 // todo: scope for url and domain (both are different!)
 // todo: add regex to domain ( ^(?!http:\/\/|https:\/\/)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$ )
 // todo: implement token refresh system
+// todo: use puppeteer to check if a domain is a phishing site
 
-/* todo: list for implements
-
+/* todo: list for implements:
+- urlscan - https://urlscan.io/docs/api/#integrations w/ verdicts (see temp js script)
 - https://securitytrails.com/
 - https://phish.report/
 - https://phish.observer/

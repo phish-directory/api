@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // previewFeatures = ["tracing"]
 }
 
 datasource db {
@@ -61,6 +62,7 @@ model Domain {
   // reportedBy                    User[]
   dateCreated                   DateTime                        @default(now())
   dateUpdated                   DateTime                        @updatedAt
+  lastChecked                   DateTime?                       @default(now())
   WalshyAPIResponse             WalshyAPIResponse[]
   IpQualityScoreAPIResponse     IpQualityScoreAPIResponse[]
   GoogleSafeBrowsingAPIResponse GoogleSafeBrowsingAPIResponse[]

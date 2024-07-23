@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 
 /**
@@ -9,10 +8,10 @@ export class PhishermanService {
    * Asynchronously checks a given domain against the Phisherman service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
+   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: PrismaClient) {
+  async check(domain: string, prisma: any) {
     const response = await axios.get(
       `https://api.phisherman.gg/v2/domains/info/${domain}`,
       {
@@ -23,7 +22,7 @@ export class PhishermanService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      },
+      }
     );
 
     return response.data;

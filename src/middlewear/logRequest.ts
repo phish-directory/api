@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import requestIp from "request-ip";
 
 import { getUserInfo } from "../functions/jwt";
+import { prisma } from "../prisma";
 import { log } from "../utils/logger";
-const prisma = new PrismaClient();
 
 /**
  * Middleware to log requests to the console

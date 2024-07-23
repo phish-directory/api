@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 
 /**
@@ -9,10 +8,10 @@ export class PhishObserverService {
    * Asynchronously checks a given domain against the PhishObserver service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {PrismaClient} prisma - The Prisma client instance to use for database operations.
+   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: PrismaClient) {
+  async check(domain: string, prisma: any) {
     try {
       let submissionResponse = await axios.post(
         `https://phish.observer/api/submit`,
@@ -30,7 +29,7 @@ export class PhishObserverService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       let subdata = await submissionResponse.data;
@@ -44,7 +43,7 @@ export class PhishObserverService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       return searchResponse.data;
