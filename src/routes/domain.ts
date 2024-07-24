@@ -61,272 +61,273 @@ router.get("/check", authenticateToken, async (req, res) => {
     },
   });
 
-  // if (!dbDomain) {
-  dbDomain = await prisma.domain.create({
-    data: {
-      domain: domain,
-    },
-  });
-
-  let data = await domainCheck(domain, dbDomain);
-
-  let walshyData = data.walshyData;
-  let ipQualityScoreData = data.ipQualityScoreData;
-  let googleSafebrowsingData = data.googleSafebrowsingData;
-  let sinkingYahtsData = data.sinkingYahtsData;
-  let virusTotalData = data.virusTotalData;
-  let phishermanData = data.phishermanData;
-  let phishObserverData = data.phishObserverData;
-  let urlScanData = data.urlScanData;
-  let securitytrailsData = data.securitytrailsData;
-  let phishreportData = data.phishreportData;
-
-  let isPhish = await parseData(
-    walshyData,
-    ipQualityScoreData,
-    googleSafebrowsingData,
-    sinkingYahtsData,
-    virusTotalData,
-    phishermanData,
-    phishObserverData,
-    urlScanData
-  );
-
-  if (isPhish) {
-    await prisma.domain.update({
-      where: {
-        id: dbDomain.id,
-      },
+  if (!dbDomain) {
+    dbDomain = await prisma.domain.create({
       data: {
-        malicious: true,
-        lastChecked: new Date(),
+        domain: domain,
       },
     });
 
-    return res.status(200).json({
-      phishing: true,
-      apiData: {
-        googleSafebrowsing: googleSafebrowsingData,
-        ipQualityScore: ipQualityScoreData,
-        phisherman: phishermanData,
-        phishObserver: phishObserverData,
-        sinkingYahts: sinkingYahtsData,
-        virusTotal: virusTotalData,
-        walshy: walshyData,
-        urlScan: urlScanData,
-        securitytrails: securitytrailsData,
-        phishReport: phishreportData,
-      },
-    });
+    let data = await domainCheck(domain, dbDomain);
+
+    let walshyData = data.walshyData;
+    let ipQualityScoreData = data.ipQualityScoreData;
+    let googleSafebrowsingData = data.googleSafebrowsingData;
+    let sinkingYahtsData = data.sinkingYahtsData;
+    let virusTotalData = data.virusTotalData;
+    let phishermanData = data.phishermanData;
+    let phishObserverData = data.phishObserverData;
+    let urlScanData = data.urlScanData;
+    let securitytrailsData = data.securitytrailsData;
+    let phishreportData = data.phishreportData;
+
+    let isPhish = await parseData(
+      walshyData,
+      ipQualityScoreData,
+      googleSafebrowsingData,
+      sinkingYahtsData,
+      virusTotalData,
+      phishermanData,
+      phishObserverData,
+      urlScanData
+    );
+
+    if (isPhish) {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: true,
+          lastChecked: new Date(),
+        },
+      });
+
+      return res.status(200).json({
+        phishing: true,
+        apiData: {
+          googleSafebrowsing: googleSafebrowsingData,
+          ipQualityScore: ipQualityScoreData,
+          phisherman: phishermanData,
+          phishObserver: phishObserverData,
+          sinkingYahts: sinkingYahtsData,
+          virusTotal: virusTotalData,
+          walshy: walshyData,
+          urlScan: urlScanData,
+          securitytrails: securitytrailsData,
+          phishReport: phishreportData,
+        },
+      });
+    } else {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: false,
+          lastChecked: new Date(),
+        },
+      });
+
+      return res.status(200).json({
+        phishing: false,
+        apiData: {
+          googleSafebrowsing: googleSafebrowsingData,
+          ipQualityScore: ipQualityScoreData,
+          phisherman: phishermanData,
+          phishObserver: phishObserverData,
+          sinkingYahts: sinkingYahtsData,
+          virusTotal: virusTotalData,
+          walshy: walshyData,
+          urlScan: urlScanData,
+          securitytrails: securitytrailsData,
+          phishReport: phishreportData,
+        },
+      });
+    }
+    // l148-l319
   } else {
-    await prisma.domain.update({
-      where: {
-        id: dbDomain.id,
-      },
-      data: {
-        malicious: false,
-        lastChecked: new Date(),
-      },
-    });
-
-    return res.status(200).json({
-      phishing: false,
-      apiData: {
-        googleSafebrowsing: googleSafebrowsingData,
-        ipQualityScore: ipQualityScoreData,
-        phisherman: phishermanData,
-        phishObserver: phishObserverData,
-        sinkingYahts: sinkingYahtsData,
-        virusTotal: virusTotalData,
-        walshy: walshyData,
-        urlScan: urlScanData,
-        securitytrails: securitytrailsData,
-        phishReport: phishreportData,
-      },
-    });
+    if (dbDomain.malicious) {
+      return res.status(200).json({
+        phishing: true,
+        apiData: {
+          googleSafebrowsing:
+            await prisma.googleSafeBrowsingAPIResponse.findFirst({
+              where: {
+                domainId: dbDomain.id,
+              },
+            }),
+          ipQualityScore: await prisma.ipQualityScoreAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phisherman: await prisma.phishermanAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phishObserver: await prisma.phishObserverAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          sinkingYahts: await prisma.sinkingYachtsAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          virusTotal: await prisma.virusTotalAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          walshy: await prisma.walshyAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          urlScan: await prisma.urlScanAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          securitytrails: await prisma.securityTrailsAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phishReport: await prisma.phishReportAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+        },
+      });
+    } else {
+      return res.status(200).json({
+        phishing: false,
+        apiData: {
+          googleSafebrowsing:
+            await prisma.googleSafeBrowsingAPIResponse.findFirst({
+              where: {
+                domainId: dbDomain.id,
+              },
+            }),
+          ipQualityScore: await prisma.ipQualityScoreAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phisherman: await prisma.phishermanAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phishObserver: await prisma.phishObserverAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          sinkingYahts: await prisma.sinkingYachtsAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          virusTotal: await prisma.virusTotalAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          walshy: await prisma.walshyAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          urlScan: await prisma.urlScanAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          securitytrails: await prisma.securityTrailsAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          phishReport: await prisma.phishReportAPIResponse.findFirst({
+            where: {
+              domainId: dbDomain.id,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+        },
+      });
+    }
   }
-  // } else {
-  //   if (dbDomain.malicious) {
-  //     return res.status(200).json({
-  //       phishing: true,
-  //       apiData: {
-  //         googleSafebrowsing:
-  //           await prisma.googleSafeBrowsingAPIResponse.findFirst({
-  //             where: {
-  //               domainId: dbDomain.id,
-  //             },
-  //           }),
-  //         ipQualityScore: await prisma.ipQualityScoreAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phisherman: await prisma.phishermanAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phishObserver: await prisma.phishObserverAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         sinkingYahts: await prisma.sinkingYachtsAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         virusTotal: await prisma.virusTotalAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         walshy: await prisma.walshyAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         urlScan: await prisma.urlScanAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         securitytrails: await prisma.securityTrailsAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phishReport: await prisma.phishReportAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //       },
-  //     });
-  //   } else {
-  //     return res.status(200).json({
-  //       phishing: false,
-  //       apiData: {
-  //         googleSafebrowsing:
-  //           await prisma.googleSafeBrowsingAPIResponse.findFirst({
-  //             where: {
-  //               domainId: dbDomain.id,
-  //             },
-  //           }),
-  //         ipQualityScore: await prisma.ipQualityScoreAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phisherman: await prisma.phishermanAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phishObserver: await prisma.phishObserverAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         sinkingYahts: await prisma.sinkingYachtsAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         virusTotal: await prisma.virusTotalAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         walshy: await prisma.walshyAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         urlScan: await prisma.urlScanAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         securitytrails: await prisma.securityTrailsAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //         phishReport: await prisma.phishReportAPIResponse.findFirst({
-  //           where: {
-  //             domainId: dbDomain.id,
-  //           },
-  //           orderBy: {
-  //             createdAt: "desc",
-  //           },
-  //         }),
-  //       },
-  //     });
-  //   }
-  // }
 });
 
-/**
- * POST /domain/report
- * @summary Report a domain as malicious
- * @tags Domain
- * @return {string} 200 - Success message
- * @return {string} 400 - Error message
- * @example response - 200 - Success message
- * "Report!"
- */
+// /**
+//  * POST /domain/report
+//  * @summary Report a domain as malicious
+//  * @tags Domain
+//  * @return {string} 200 - Success message
+//  * @return {string} 400 - Error message
+//  * @example response - 200 - Success message
+//  * "Report!"
+//  */
 router.post("/report", authenticateToken, (req, res) => {
   let query = req.query;
 
