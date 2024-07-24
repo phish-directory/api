@@ -1,3 +1,11 @@
+let filePattern;
+
+if (process.env.NODE_ENV === "production") {
+  filePattern = ["./router.js", "./routes/*.js"];
+} else {
+  filePattern = ["./router.ts", "./routes/*.ts"];
+}
+
 /**
  * Swagger Options, used to configure the swagger-ui-express package
  */
@@ -37,7 +45,7 @@ export const swaggerOptions = {
     },
   },
   // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
-  filesPattern: ["./router.ts", "./routes/*.ts"], // Glob pattern to find your jsdoc files
+  filesPattern: filePattern, // Glob pattern to find your jsdoc files
   swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
   baseDir: __dirname,
   // disable the default tag
