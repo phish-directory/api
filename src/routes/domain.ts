@@ -318,15 +318,15 @@ router.get("/check", authenticateToken, async (req, res) => {
   // }
 });
 
-/**
- * POST /domain/report
- * @summary Report a domain as malicious
- * @tags Domain
- * @return {string} 200 - Success message
- * @return {string} 400 - Error message
- * @example response - 200 - Success message
- * "Report!"
- */
+// /**
+//  * POST /domain/report
+//  * @summary Report a domain as malicious
+//  * @tags Domain
+//  * @return {string} 200 - Success message
+//  * @return {string} 400 - Error message
+//  * @example response - 200 - Success message
+//  * "Report!"
+//  */
 router.post("/report", authenticateToken, (req, res) => {
   let query = req.query;
 
