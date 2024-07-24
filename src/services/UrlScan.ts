@@ -33,6 +33,7 @@ export class UrlScanService {
         "https://urlscan.io/api/v1/scan/",
         {
           url: domain,
+          tags: ["https://phish.directory", "api.phish.directory"],
         },
         {
           headers: {
