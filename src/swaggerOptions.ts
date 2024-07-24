@@ -13,9 +13,9 @@ export const swaggerOptions = {
   openapi: "3.0.0",
   info: {
     title: "phish.directory API",
-    version: `${process.env.npm_package_version!}`,
+    version: `1.0.0`,
     description:
-      "insert description here | in development | not for production use",
+      "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
     termsOfService: "",
     contact: {
       name: "phish.directory",
