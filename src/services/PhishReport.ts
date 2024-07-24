@@ -13,7 +13,14 @@ export class PhishReportService {
    */
   async check(domain: string, prisma: any) {
     let rsp = await axios.get(
-      `hhttps://phish.report/api/v0/hosting?domain=${domain}`
+      `https://phish.report/api/v0/hosting?url=${domain}`,
+      {
+        headers: {
+          Referer: "https://phish.directory",
+          "User-Agent": "internal-server@phish.directory",
+          "X-Identity": "internal-server@phish.directory",
+        },
+      }
     );
 
     return rsp.data;
@@ -28,5 +35,6 @@ export class PhishReportService {
    */
   async report(domain: string, prisma: any) {
     // todo: implement this
+    // https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post
   }
 }
