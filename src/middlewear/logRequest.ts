@@ -35,9 +35,11 @@ export const logRequest = async (
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
-    if (token != null) {
+    if (token !== null && token !== undefined) {
       userinfo = await getUserInfo(prisma, res, req);
-      usr = userinfo.uuid;
+      if (userinfo) {
+        usr = userinfo.uuid;
+      }
     }
   }
 
