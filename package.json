@@ -1,7 +1,7 @@
 {
   "name": "phish.directory",
-  "version": "0.2.1",
-  "description": "A tool to help catch, prevent, and catalog phishing links & attempts",
+  "version": "1.0.0",
+  "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
   "main": "src/index.ts",
   "maintainers": [
     {
