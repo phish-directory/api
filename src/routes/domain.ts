@@ -79,6 +79,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   let phishObserverData = data.phishObserverData;
   let urlScanData = data.urlScanData;
   let securitytrailsData = data.securitytrailsData;
+  let phishreportData = data.phishreportData;
 
   let isPhish = await parseData(
     walshyData,
@@ -114,6 +115,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         walshy: walshyData,
         urlScan: urlScanData,
         securitytrails: securitytrailsData,
+        phishReport: phishreportData,
       },
     });
   } else {
@@ -139,6 +141,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         walshy: walshyData,
         urlScan: urlScanData,
         securitytrails: securitytrailsData,
+        phishReport: phishreportData,
       },
     });
   }
@@ -217,6 +220,14 @@ router.get("/check", authenticateToken, async (req, res) => {
   //             createdAt: "desc",
   //           },
   //         }),
+  //         phishReport: await prisma.phishReportAPIResponse.findFirst({
+  //           where: {
+  //             domainId: dbDomain.id,
+  //           },
+  //           orderBy: {
+  //             createdAt: "desc",
+  //           },
+  //         }),
   //       },
   //     });
   //   } else {
@@ -286,6 +297,14 @@ router.get("/check", authenticateToken, async (req, res) => {
   //           },
   //         }),
   //         securitytrails: await prisma.securityTrailsAPIResponse.findFirst({
+  //           where: {
+  //             domainId: dbDomain.id,
+  //           },
+  //           orderBy: {
+  //             createdAt: "desc",
+  //           },
+  //         }),
+  //         phishReport: await prisma.phishReportAPIResponse.findFirst({
   //           where: {
   //             domainId: dbDomain.id,
   //           },

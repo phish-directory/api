@@ -172,5 +172,6 @@ export async function domainCheck(domain: string, dbDomain: any) {
     phishObserverData,
     urlScanData,
     securitytrailsData,
+    phishreportData,
   };
 }
