@@ -25,6 +25,11 @@ export const logRequest = async (
 
   let userinfo;
   let usr;
+  let method = req.method;
+  let url = req.url;
+  let headers = req.headers;
+  let body = req.body;
+  let query = req.query;
 
   if (req.headers.authorization) {
     const authHeader = req.headers["authorization"];
@@ -36,16 +41,20 @@ export const logRequest = async (
     }
   }
 
+  if (req.url === "/user/signup") {
+    body.password = "REDACTED BY API FOR PRIVACY";
+  }
+
   let ip = requestIp.getClientIp(req)!;
 
   await prisma.expressRequest
     .create({
       data: {
-        method: req.method,
-        url: req.url,
-        headers: req.headers as any,
-        body: req.body,
-        query: req.query,
+        method: method,
+        url: url,
+        headers: headers,
+        body: body,
+        query: query,
         ip: ip,
         userAgent: userAgent,
         User: usr
