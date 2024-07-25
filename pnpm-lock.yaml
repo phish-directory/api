@@ -57,8 +57,8 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       stripe:
-        specifier: ^16.4.0
-        version: 16.4.0
+        specifier: ^16.5.0
+        version: 16.5.0
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.19.2)
@@ -97,8 +97,8 @@ importers:
         specifier: ^13.12.0
         version: 13.12.0
       husky:
-        specifier: ^9.1.1
-        version: 9.1.1
+        specifier: ^9.1.2
+        version: 9.1.2
       lint-staged:
         specifier: ^15.2.7
         version: 15.2.7
@@ -738,8 +738,8 @@ packages:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
 
-  husky@9.1.1:
-    resolution: {integrity: sha512-fCqlqLXcBnXa/TJXmT93/A36tJsjdJkibQ1MuIiFyCCYUlpYpIaj2mv1w+3KR6Rzu1IC3slFTje5f6DUp2A2rg==}
+  husky@9.1.2:
+    resolution: {integrity: sha512-1/aDMXZdhr1VdJJTLt6e7BipM0Jd9qkpubPiIplon1WmCeOy3nnzsCMeBqS9AsL5ioonl8F8y/F2CLOmk19/Pw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -1230,8 +1230,8 @@ packages:
     resolution: {integrity: sha512-dOESqjYr96iWYylGObzd39EuNTa5VJxyvVAEm5Jnh7KGo75V43Hk1odPQkNDyXNmUR6k+gEiDVXnjB8HJ3crXw==}
     engines: {node: '>=12'}
 
-  stripe@16.4.0:
-    resolution: {integrity: sha512-rFIcDJaF+z28BsR4GXoy0YhAjE24D0AymJRsrAS0YbQAIJi0gOO/4mctbhNzrySS+bLVJOQLefdblDQMMNm58Q==}
+  stripe@16.5.0:
+    resolution: {integrity: sha512-5qY2Va8pmnqS/dcKsQKJnk9kkYCtS6hqjN7kktZEmdxVohZHvbT9pOWK8UUKRInTXYkCNl6x505tO5416KLPsQ==}
     engines: {node: '>=12.*'}
 
   supports-color@5.5.0:
@@ -2071,7 +2071,7 @@ snapshots:
 
   human-signals@5.0.0: {}
 
-  husky@9.1.1: {}
+  husky@9.1.2: {}
 
   iconv-lite@0.4.24:
     dependencies:
@@ -2542,7 +2542,7 @@ snapshots:
 
   strip-final-newline@3.0.0: {}
 
-  stripe@16.4.0:
+  stripe@16.5.0:
     dependencies:
       '@types/node': 20.14.12
       qs: 6.11.0
