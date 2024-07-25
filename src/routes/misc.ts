@@ -1,10 +1,14 @@
 import * as express from "express";
 import moment from "moment";
+import { logRequest } from "../middlewear/logRequest";
+import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
+router.use(logRequest);
+router.use(stripeMeter);
 
 /**
  * GET /misc/metrics

@@ -6,12 +6,15 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
+import { logRequest } from "../middlewear/logRequest";
+import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
+router.use(logRequest);
 
 let saltRounds = 10;
 
@@ -34,8 +37,6 @@ let saltRounds = 10;
  */
 router.post("/signup", async (req, res) => {
   const body = req.body;
-
-  console.log(req);
 
   const { name, email, password } = body;
 
@@ -131,6 +132,7 @@ router.post("/login", async (req, res) => {
  * GET /user/me
  * @summary Gets your user details
  * @tags User
+ * @security BearerAuth
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
@@ -143,7 +145,7 @@ router.post("/login", async (req, res) => {
  * "User not found"
  *
  */
-router.get("/me", authenticateToken, async (req, res) => {
+router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
   const userInfo = await getUserInfo(prisma, res, req);
 
   if (!userInfo) {
@@ -170,6 +172,7 @@ router.get("/me", authenticateToken, async (req, res) => {
  * GET /user/stripe/usage
  * @summary Gets your stripe usage details
  * @tags User
+ * @security BearerAuth
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message

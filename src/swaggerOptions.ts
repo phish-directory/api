@@ -3,7 +3,7 @@ let filePattern;
 if (process.env.NODE_ENV === "production") {
   filePattern = ["./router.js", "./routes/*.js"];
 } else {
-  filePattern = ["./router.ts", "./routes/*.ts"];
+  filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
 }
 
 /**
@@ -26,15 +26,15 @@ export const swaggerOptions = {
   basePath: "/",
   tags: [],
   securityDefinitions: {
-    auth: {
-      type: "apiKey",
-      scheme: "Authorization",
+    BearerAuth: {
+      type: "http",
+      scheme: "bearer",
     },
   },
   security: {
-    auth: {
-      type: "apiKey",
-      scheme: "Authorization",
+    BearerAuth: {
+      type: "http",
+      scheme: "bearer",
     },
   },
   swaggerUiOptions: {

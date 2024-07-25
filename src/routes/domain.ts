@@ -4,11 +4,15 @@ import * as express from "express";
 import { domainCheck } from "../functions/domain";
 import { authenticateToken } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
+import { logRequest } from "../middlewear/logRequest";
+import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
+router.use(logRequest);
+router.use(stripeMeter);
 
 enum Verdict {
   postal,
@@ -21,6 +25,7 @@ enum Verdict {
  * GET /domain/check
  * @summary Checks if a domain is classified as something malicious (scam, phishing, etc.)
  * @tags Domain
+ * @security BearerAuth
  * @param {string} domain.query.required - domain to check
  * @return {string} 200 - Success message
  * @return {string} 400 - Error message
