@@ -7,6 +7,8 @@ import { parseData } from "../functions/parseData";
 import { prisma } from "../prisma";
 
 const router = express.Router();
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
 
 enum Verdict {
   postal,

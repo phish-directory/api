@@ -3,6 +3,8 @@ import moment from "moment";
 import { prisma } from "../prisma";
 
 const router = express.Router();
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
 
 /**
  * GET /misc/metrics

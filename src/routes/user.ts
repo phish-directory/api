@@ -10,6 +10,8 @@ import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
 
 const router = express.Router();
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
 
 let saltRounds = 10;
 
@@ -33,7 +35,7 @@ let saltRounds = 10;
 router.post("/signup", async (req, res) => {
   const body = req.body;
 
-  console.log(body);
+  console.log(req);
 
   const { name, email, password } = body;
 
