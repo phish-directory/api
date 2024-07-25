@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { stripeMeter } from "./middlewear/stripeMeter";
 import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
@@ -19,7 +20,7 @@ router.get("/", (req, res) => {
 });
 
 router.use("/user", userRouter);
-router.use("/misc", miscRouter);
+router.use("/misc", stripeMeter, miscRouter);
 router.use("/domain", domainRouter);
 router.use("/stripe", stripeRouter);
 

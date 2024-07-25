@@ -1,7 +1,7 @@
 // @ts-expect-error
 import bodyParser from "body-parser";
 import * as express from "express";
-import { stripe } from "../stripe";
+import { stripe, stripeEndpointSecret, stripePriceId } from "../stripe";
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.post("/checkout", async (req, res) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: "price_1PgWrcGDyk1UUUaViGdl9NTp",
+          price: stripePriceId,
         },
       ],
       success_url: `http://localhost:5000/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -30,8 +30,7 @@ router.post("/checkout", async (req, res) => {
 });
 
 router.post("/webhook", async (req, res) => {
-  const endpointSecret =
-    "whsec_ca64a8557f06a1f4677af52daeb4d2023b3b592464ad7903e14c70057ae433e8";
+  const endpointSecret = stripeEndpointSecret;
   const sig = req.headers["stripe-signature"];
 
   if (!sig) {
@@ -40,7 +39,6 @@ router.post("/webhook", async (req, res) => {
   }
 
   let event;
-
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
@@ -55,6 +53,29 @@ router.post("/webhook", async (req, res) => {
   switch (event.type) {
     case "checkout.session.completed":
       console.log(data);
+      // Data included in the event object:
+      // @ts-expect-error
+      const customerId = data.object.customer;
+      // @ts-expect-error
+      const subscriptionId = data.object.subscription;
+
+      console.log(
+        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`
+      );
+
+      // Get the subscription. The first item is the plan the user subscribed to.
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const itemId = subscription.items.data[0].id;
+
+      // Generate API key
+      // const { apiKey, hashedAPIKey } = generateAPIKey();
+      // console.log(`User's API Key: ${apiKey}`);
+      // console.log(`Hashed API Key: ${hashedAPIKey}`);
+
+      // Store the API key in your database.
+      // customers[customerId] = { apikey: hashedAPIKey, itemId, active: true };
+      // apiKeys[hashedAPIKey] = customerId;
+
       break;
     case "invoice.paid":
       break;
