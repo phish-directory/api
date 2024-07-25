@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import express, { json, urlencoded } from "express";
+import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
 
@@ -15,8 +15,6 @@ const app = express();
 
 expressJSDocSwagger(app)(swaggerOptions);
 
-app.use(json());
-app.use(urlencoded({ extended: false }));
 app.use(helmet({}));
 app.use(logRequest);
 
