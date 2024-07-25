@@ -56,6 +56,9 @@ importers:
       request-ip:
         specifier: ^3.3.0
         version: 3.3.0
+      stripe:
+        specifier: ^16.4.0
+        version: 16.4.0
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.19.2)
@@ -1226,6 +1229,10 @@ packages:
   strip-final-newline@3.0.0:
     resolution: {integrity: sha512-dOESqjYr96iWYylGObzd39EuNTa5VJxyvVAEm5Jnh7KGo75V43Hk1odPQkNDyXNmUR6k+gEiDVXnjB8HJ3crXw==}
     engines: {node: '>=12'}
+
+  stripe@16.4.0:
+    resolution: {integrity: sha512-rFIcDJaF+z28BsR4GXoy0YhAjE24D0AymJRsrAS0YbQAIJi0gOO/4mctbhNzrySS+bLVJOQLefdblDQMMNm58Q==}
+    engines: {node: '>=12.*'}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -2534,6 +2541,11 @@ snapshots:
       ansi-regex: 6.0.1
 
   strip-final-newline@3.0.0: {}
+
+  stripe@16.4.0:
+    dependencies:
+      '@types/node': 20.14.12
+      qs: 6.11.0
 
   supports-color@5.5.0:
     dependencies:
