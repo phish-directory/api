@@ -37,6 +37,7 @@ app.use("/", router);
 - https://openphish.com/
 - https://report.netcraft.com/api/v3#tag/Report/paths/~1report~1mistake/post
 */
+console.log(new Date().getTime());
 
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);

@@ -8,3 +8,11 @@ export enum DomainType {
   facebook,
   other,
 }
+
+export enum Metertime {
+  hour,
+  day,
+  month,
+  year,
+  alltime,
+}

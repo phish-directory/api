@@ -39,18 +39,20 @@ enum verdict {
 }
 
 model User {
-  id              Int              @id @unique @default(autoincrement())
-  uuid            String           @unique @default(uuid())
-  name            String
-  email           String           @unique
-  password        String
+  id                Int              @id @unique @default(autoincrement())
+  uuid              String           @unique @default(uuid())
+  name              String
+  email             String           @unique
+  password          String
+  stripeCustomerId  String           @unique
+  subscriptionItems String[]         @default([])
   // accountType AccountType @default(user)
-  dateCreated     DateTime         @default(now())
-  dateUpdated     DateTime         @updatedAt
-  deleted         Boolean          @default(false)
-  dateDeleted     DateTime?
+  dateCreated       DateTime         @default(now())
+  dateUpdated       DateTime         @updatedAt
+  deleted           Boolean          @default(false)
+  dateDeleted       DateTime?
   // domainsReported Domain[]
-  expressRequests ExpressRequest[]
+  expressRequests   ExpressRequest[]
 }
 
 model Domain {

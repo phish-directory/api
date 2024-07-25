@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt";
 import * as express from "express";
+
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
 import { prisma } from "../prisma";
+import { getCustomerUsage } from "../stripe";
 
 const router = express.Router();
 
@@ -154,6 +156,12 @@ router.get("/me", authenticateToken, async (req, res) => {
     requestCount: count,
     accountCreated: userInfo.dateCreated,
   });
+});
+
+router.get("/usage", authenticateToken, async (req, res) => {
+  let data = await getCustomerUsage("cus_QXd0R2qtH6FLkY");
+
+  res.status(200);
 });
 
 export default router;
