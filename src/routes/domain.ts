@@ -12,7 +12,6 @@ const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
-router.use(stripeMeter);
 
 enum Verdict {
   postal,
@@ -37,7 +36,7 @@ enum Verdict {
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  *
  */
-router.get("/check", authenticateToken, async (req, res) => {
+router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
   // look for the query parameter
   const query = req.query!;
 
@@ -335,7 +334,7 @@ router.get("/check", authenticateToken, async (req, res) => {
 //  * @example response - 200 - Success message
 //  * "Report!"
 //  */
-router.post("/report", authenticateToken, (req, res) => {
+router.post("/report", authenticateToken, stripeMeter, (req, res) => {
   let query = req.query;
 
   let domain: string = query.domain! as string;
