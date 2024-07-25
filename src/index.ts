@@ -3,7 +3,6 @@ import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
 
-import { logRequest } from "./middlewear/logRequest";
 import router from "./router";
 import { swaggerOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
@@ -16,7 +15,6 @@ const app = express();
 expressJSDocSwagger(app)(swaggerOptions);
 
 app.use(helmet({}));
-app.use(logRequest);
 
 app.use("/", router);
 
