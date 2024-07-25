@@ -45,8 +45,14 @@ export const logRequest = async (
 
   let ip = requestIp.getClientIp(req)!;
 
+  // Clone the body object to avoid modifying the original request body
+  let bdytmp = { ...body };
+
   if (url === "/user/signup") {
-    body.password = "REDACTED BY API FOR PRIVACY";
+    // Redact password in the cloned body object
+    if (bdytmp.password) {
+      bdytmp.password = "REDACTED BY API FOR PRIVACY";
+    }
   }
 
   await prisma.expressRequest
@@ -55,7 +61,7 @@ export const logRequest = async (
         method: method,
         url: url,
         headers: headers,
-        body: body,
+        body: bdytmp,
         query: query,
         ip: ip,
         userAgent: userAgent,
