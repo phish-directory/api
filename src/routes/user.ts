@@ -1,13 +1,20 @@
 import bcrypt from "bcrypt";
-import * as express from "express";
+import express, { Request, Response } from "express";
+
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
+import { logRequest } from "../middlewear/logRequest";
+import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
+import { createCustomer, getCustomerUsage } from "../stripe";
 
 const router = express.Router();
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
+router.use(logRequest);
 
 let saltRounds = 10;
 
@@ -53,12 +60,16 @@ router.post("/signup", async (req, res) => {
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
 
+  let customer = await createCustomer(email, name);
+  let stripeCustomerId = customer.id;
+
   // create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
       email: email,
       password: passHash,
+      stripeCustomerId: stripeCustomerId,
     },
   });
 
@@ -121,6 +132,7 @@ router.post("/login", async (req, res) => {
  * GET /user/me
  * @summary Gets your user details
  * @tags User
+ * @security BearerAuth
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
@@ -133,7 +145,7 @@ router.post("/login", async (req, res) => {
  * "User not found"
  *
  */
-router.get("/me", authenticateToken, async (req, res) => {
+router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
   const userInfo = await getUserInfo(prisma, res, req);
 
   if (!userInfo) {
@@ -155,5 +167,30 @@ router.get("/me", authenticateToken, async (req, res) => {
     accountCreated: userInfo.dateCreated,
   });
 });
+
+/**
+ * GET /user/stripe/usage
+ * @summary Gets your stripe usage details
+ * @tags User
+ * @security BearerAuth
+ * @return {object} 200 - Success message
+ * @return {object} 400 - Error message
+ * @example response - 200 - Success message
+ * {
+ *  "data": "data"
+ * }
+ * @example response - 400 - Error message
+ * "User not found"
+ *
+ */
+router.get(
+  "/stripe/usage",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    let data = await getCustomerUsage(prisma, req, res);
+
+    res.status(200).json(data);
+  }
+);
 
 export default router;

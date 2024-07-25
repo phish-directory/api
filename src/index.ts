@@ -1,9 +1,8 @@
 import * as dotenv from "dotenv";
-import express, { json, urlencoded } from "express";
+import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
 
-import { logRequest } from "./middlewear/logRequest";
 import router from "./router";
 import { swaggerOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
@@ -15,10 +14,7 @@ const app = express();
 
 expressJSDocSwagger(app)(swaggerOptions);
 
-app.use(json());
-app.use(urlencoded({ extended: false }));
 app.use(helmet({}));
-app.use(logRequest);
 
 app.use("/", router);
 
@@ -38,7 +34,9 @@ app.use("/", router);
 - https://urlhaus-api.abuse.ch/
 - https://openphish.com/
 - https://report.netcraft.com/api/v3#tag/Report/paths/~1report~1mistake/post
+- https://any.run/api-documentation/
 */
+console.log(new Date().getTime());
 
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);
