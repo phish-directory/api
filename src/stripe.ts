@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getUserInfo } from "./functions/jwt";
 
 export const stripe = new Stripe(process.env.STRIPE_SK_KEY!, {
   apiVersion: "2024-06-20",
@@ -22,23 +23,37 @@ if (process.env.NODE_ENV === "production") {
   stripeMeterId = "mtr_test_61Qpvz00X0w37791V41GDyk1UUUaVOhM";
 }
 
-async function getCustomerUsage(customerId: string) {
+async function createCustomer(email: string, name: string) {
+  const customer = await stripe.customers.create({
+    email: email,
+    name: name,
+  });
+
+  return customer;
+}
+
+async function getCustomerUsage(prisma: any, req: any, res: any) {
+  let user = await getUserInfo(prisma, req, res);
+
+  let cusId = user.stripeCustomerId;
+
   let beginning = 1721940357677;
   let now = new Date().getTime();
 
   const usageRecords = await stripe.billing.meters.listEventSummaries(
     stripeMeterId,
     {
-      customer: customerId,
+      customer: cusId,
       start_time: beginning,
       end_time: now,
     }
   );
 
-  console.log(usageRecords.data);
+  return usageRecords;
 }
 
 export {
+  createCustomer,
   getCustomerUsage,
   stripeEndpointSecret,
   stripePriceId,

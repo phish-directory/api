@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import * as express from "express";
+import express, { Request, Response } from "express";
 
 import {
   authenticateToken,
@@ -7,7 +7,7 @@ import {
   getUserInfo,
 } from "../functions/jwt";
 import { prisma } from "../prisma";
-import { getCustomerUsage } from "../stripe";
+import { createCustomer, getCustomerUsage } from "../stripe";
 
 const router = express.Router();
 
@@ -33,6 +33,8 @@ let saltRounds = 10;
 router.post("/signup", async (req, res) => {
   const body = req.body;
 
+  console.log(body);
+
   const { name, email, password } = body;
 
   if (!name || !email || !password) {
@@ -55,12 +57,16 @@ router.post("/signup", async (req, res) => {
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
 
+  let customer = await createCustomer(email, name);
+  let stripeCustomerId = customer.id;
+
   // create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
       email: email,
       password: passHash,
+      stripeCustomerId: stripeCustomerId,
     },
   });
 
@@ -158,10 +164,28 @@ router.get("/me", authenticateToken, async (req, res) => {
   });
 });
 
-router.get("/usage", authenticateToken, async (req, res) => {
-  let data = await getCustomerUsage("cus_QXd0R2qtH6FLkY");
+/**
+ * GET /user/stripe/usage
+ * @summary Gets your stripe usage details
+ * @tags User
+ * @return {object} 200 - Success message
+ * @return {object} 400 - Error message
+ * @example response - 200 - Success message
+ * {
+ *  "data": "data"
+ * }
+ * @example response - 400 - Error message
+ * "User not found"
+ *
+ */
+router.get(
+  "/stripe/usage",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    let data = await getCustomerUsage(prisma, req, res);
 
-  res.status(200);
-});
+    res.status(200).json(data);
+  }
+);
 
 export default router;

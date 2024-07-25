@@ -43,11 +43,15 @@ export const logRequest = async (
     }
   }
 
-  if (req.url === "/user/signup") {
-    body.password = "REDACTED BY API FOR PRIVACY";
-  }
-
   let ip = requestIp.getClientIp(req)!;
+
+  // if (req.url === "/user/signup") {
+  //   // wipe the password from the logs
+  //   body = {
+  //     ...body,
+  //     password: "REDACTED",
+  //   };
+  // }
 
   await prisma.expressRequest
     .create({
