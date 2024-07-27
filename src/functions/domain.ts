@@ -21,6 +21,12 @@ const urlScan = new UrlScanService();
 const securitytrails = new SecurityTrailsService();
 const phishreport = new PhishReportService();
 
+/**
+ * Check the domain against all the services
+ * @param domain - Domain to check
+ * @param dbDomain - Domain from the database
+ * @returns void
+ */
 export async function domainCheck(domain: string, dbDomain: any) {
   let walshyData = await walshy.check(domain, prisma);
   let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
