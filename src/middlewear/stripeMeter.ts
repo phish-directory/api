@@ -15,17 +15,21 @@ export const stripeMeter = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  let userInfo = await getUserInfo(prisma, res, req);
+  if (process.env.NODE_ENV === "production") {
+    let userInfo = await getUserInfo(prisma, res, req);
 
-  let cusId = userInfo.stripeCustomerId;
+    let cusId = userInfo.stripeCustomerId;
 
-  const record = await stripe.billing.meterEvents.create({
-    event_name: "phish.directory_api_requests",
-    payload: {
-      value: "1",
-      stripe_customer_id: cusId,
-    },
-  });
+    const record = await stripe.billing.meterEvents.create({
+      event_name: "phish.directory_api_requests",
+      payload: {
+        value: "1",
+        stripe_customer_id: cusId,
+      },
+    });
 
-  next();
+    next();
+  } else {
+    next();
+  }
 };

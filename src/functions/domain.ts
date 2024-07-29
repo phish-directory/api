@@ -1,3 +1,5 @@
+import puppeteer from "puppeteer";
+
 import { prisma } from "../prisma";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
@@ -38,6 +40,37 @@ export async function domainCheck(domain: string, dbDomain: any) {
   let urlScanData = await urlScan.check(domain, prisma);
   let securitytrailsData = await securitytrails.check(domain, prisma);
   let phishreportData = await phishreport.check(domain, prisma);
+
+  // Launch the browser and open a new blank page
+  const browser = await puppeteer.launch({ headless: "shell" });
+  const page = await browser.newPage();
+
+  // Navigate the page to a URL.
+  await page.goto(`https://${domain}`, {
+    waitUntil: "networkidle2",
+  });
+
+  // Set screen size.
+  await page.setViewport({ width: 1080, height: 1024 });
+
+  // Capture screenshot to a buffer
+  let pageimgBuffer = await page.screenshot({
+    type: "png",
+    encoding: "binary",
+  });
+
+  await prisma.screencapture.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      binary: pageimgBuffer,
+    },
+  });
+
+  await browser.close();
 
   let dbGbsResponse = await prisma.googleSafeBrowsingAPIResponse.create({
     data: {

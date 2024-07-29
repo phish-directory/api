@@ -44,7 +44,7 @@ model User {
   name              String
   email             String           @unique
   password          String
-  stripeCustomerId  String           @unique
+  stripeCustomerId  String?          @unique
   subscriptionItems String[]         @default([])
   // accountType AccountType @default(user)
   dateCreated       DateTime         @default(now())
@@ -78,6 +78,7 @@ model Domain {
   UrlScanAPIResponse            UrlScanAPIResponse[]
   SecurityTrailsAPIResponse     SecurityTrailsAPIResponse[]
   PhishReportAPIResponse        PhishReportAPIResponse[]
+  Screencapture                 Screencapture[]
 }
 
 //todo: establish naming consistency with createdAt, dateCreated, etc.
@@ -91,9 +92,17 @@ model ExpressRequest {
   query       Json?
   ip          String
   userAgent   String   @default("")
+  xIdentity   String   @default("")
   dateCreated DateTime @default(now())
   User        User?    @relation(fields: [userId], references: [id])
   userId      Int?
+}
+
+model Screencapture {
+  id       Int     @id @default(autoincrement())
+  domain   Domain? @relation(fields: [domainId], references: [id])
+  domainId Int?
+  binary   Bytes
 }
 
 model TmpVerdict {
