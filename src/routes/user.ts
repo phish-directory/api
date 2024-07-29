@@ -19,11 +19,23 @@ router.use(logRequest);
 let saltRounds = 10;
 
 /**
+ * User w/ Name
+ * @typedef {object} User
+ * @property {string} name.required - The name of the user
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
+ */
+type User = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+/**
  * POST /user/signup
  * @summary Sign up a user for the api
  * @tags User
- * @param {string} name.body.required - name of the user
- * @param {string} email.body.required - email of the user
+ * @param {User} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
@@ -80,11 +92,21 @@ router.post("/signup", async (req, res) => {
 });
 
 /**
+ * User Login
+ * @typedef {object} UserLogin
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
+ */
+type UserLogin = {
+  email: string;
+  password: string;
+};
+
+/**
  * POST /user/login
  * @summary Log in a user to the api
  * @tags User
- * @param {string} email.body.required - email of the user
- * @param {string} password.body.required - password of the user
+ * @param {UserLogin} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
@@ -190,7 +212,7 @@ router.get(
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);
-  }
+  },
 );
 
 export default router;

@@ -34,7 +34,6 @@ enum Verdict {
  * "No domain parameter found"
  * @example response - 400 - Error: Invalid domain parameter
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
- *
  */
 router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
   // look for the query parameter
@@ -57,7 +56,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
       );
   }
 
@@ -95,7 +94,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     virusTotalData,
     phishermanData,
     phishObserverData,
-    urlScanData
+    urlScanData,
   );
 
   if (isPhish) {
@@ -409,7 +408,7 @@ router.post("/verdict", async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
         },
-      }
+      },
     );
 
     dbDomain = await prisma.domain.findFirst({
