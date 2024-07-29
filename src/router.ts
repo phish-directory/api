@@ -1,5 +1,6 @@
 import * as express from "express";
 
+import { logRequest } from "./middlewear/logRequest";
 import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
@@ -14,7 +15,7 @@ const router = express.Router();
  * @example response - 301 - Redirect to /docs
  *  "Redirecting to /docs"
  */
-router.get("/", (req, res) => {
+router.get("/", logRequest, (req, res) => {
   res.status(301).redirect("/docs");
 });
 
@@ -27,7 +28,7 @@ router.get("/", (req, res) => {
  * "status": "up"
  * }
  */
-router.get("/up", (req, res) => {
+router.get("/up", logRequest, (req, res) => {
   res.status(200).json({
     status: "up",
   });
