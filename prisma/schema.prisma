@@ -91,6 +91,7 @@ model ExpressRequest {
   query       Json?
   ip          String
   userAgent   String   @default("")
+  xIdentity   String   @default("")
   dateCreated DateTime @default(now())
   User        User?    @relation(fields: [userId], references: [id])
   userId      Int?
