@@ -10,11 +10,12 @@ import { log } from "../utils/logger";
  * @param req - Express Request Object
  * @param res - Express Response Object
  * @param next - Express Next Function
+ * @returns void
  */
 export const logRequest = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   let userAgent = req.headers["user-agent"];
   if (userAgent) {

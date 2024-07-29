@@ -8,11 +8,12 @@ import { stripe } from "../stripe";
  * @param req - Express Request Object
  * @param res - Express Response Object
  * @param next - Express Next Function
+ * @returns void
  */
 export const stripeMeter = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   let userInfo = await getUserInfo(prisma, res, req);
 
