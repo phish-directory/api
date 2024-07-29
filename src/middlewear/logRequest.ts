@@ -21,7 +21,14 @@ export const logRequest = async (
   if (userAgent) {
     userAgent = userAgent.toString();
   } else {
-    userAgent = "no user-agent";
+    userAgent = "";
+  }
+
+  let xIdentity = req.headers["x-identity"];
+  if (xIdentity) {
+    xIdentity = xIdentity.toString();
+  } else {
+    xIdentity = "";
   }
 
   let userinfo;
@@ -66,6 +73,7 @@ export const logRequest = async (
         query: query,
         ip: ip,
         userAgent: userAgent,
+        xIdentity: xIdentity,
         User: usr
           ? {
               connect: {
