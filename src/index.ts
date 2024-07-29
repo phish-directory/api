@@ -36,7 +36,8 @@ app.use("/", router);
 - https://report.netcraft.com/api/v3#tag/Report/paths/~1report~1mistake/post
 - https://any.run/api-documentation/
 */
-console.log(new Date().getTime());
+
+// console.log(new Date().getTime());
 
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);

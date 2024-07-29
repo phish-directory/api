@@ -1,4 +1,6 @@
-// make sure to update this in schema.prisma as well
+/**
+ * @description: DomainType enum, used to define the type of domain
+ */
 export enum DomainType {
   unknown,
   discord,
@@ -9,6 +11,9 @@ export enum DomainType {
   other,
 }
 
+/**
+ * @description: Metertime enum, used to define the time period for the meter for stripe
+ */
 export enum Metertime {
   hour,
   day,
