@@ -13,12 +13,25 @@ import { stripe } from "../stripe";
 export const stripeMeter = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
     let userInfo = await getUserInfo(prisma, res, req);
 
+    if (!userInfo) {
+      // 401 is Unauthorized
+      res.status(401).json({
+        error: "Unauthorized",
+      });
+    }
+
     let cusId = userInfo.stripeCustomerId;
+
+    if (!cusId) {
+      res.status(400).json({
+        error: "No Stripe Customer ID",
+      });
+    }
 
     const record = await stripe.billing.meterEvents.create({
       event_name: "phish.directory_api_requests",
