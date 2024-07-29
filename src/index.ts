@@ -24,7 +24,6 @@ app.use("/", router);
 // todo: add regex to domain ( ^(?!http:\/\/|https:\/\/)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$ )
 // todo: implement token refresh system
 // todo: use puppeteer to check if a domain is a phishing site
-// todo: log useragent and x-identity for each request
 // todo: speed things up by returning last cached result if the domain is already scanned (still run scans after)
 
 /* todo: list for implements:
