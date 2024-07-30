@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the VirusTotal service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class VirusTotalService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.virustotal");
+
     const response = await axios.get(
       `https://www.virustotal.com/api/v3/domains/${domain}`,
       {
@@ -21,7 +24,7 @@ export class VirusTotalService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return response.data;
@@ -35,6 +38,8 @@ export class VirusTotalService {
    * @returns
    */
   async report(domain: string, prisma: any) {
+    metrics.increment("domain.report.api.virustotal");
+
     const commentData = {
       data: {
         type: "comment",
@@ -57,7 +62,7 @@ export class VirusTotalService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        }
+        },
       )
       .then((response) => {
         // console.log(response.data);
@@ -88,7 +93,7 @@ export class VirusTotalService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        }
+        },
       )
       .then((response) => {
         // console.log(response.data);

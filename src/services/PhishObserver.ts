@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the PhishObserver service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class PhishObserverService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.phishobserver");
+
     try {
       let submissionResponse = await axios.post(
         `https://phish.observer/api/submit`,
@@ -29,7 +32,7 @@ export class PhishObserverService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        }
+        },
       );
 
       let subdata = await submissionResponse.data;
@@ -43,7 +46,7 @@ export class PhishObserverService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        }
+        },
       );
 
       return searchResponse.data;

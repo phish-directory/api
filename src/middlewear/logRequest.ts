@@ -4,6 +4,7 @@ import requestIp from "request-ip";
 import { getUserInfo } from "../functions/jwt";
 import { prisma } from "../prisma";
 import { log } from "../utils/logger";
+import metrics from "../metrics";
 
 /**
  * Middleware to log requests to the console
@@ -17,6 +18,8 @@ export const logRequest = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
+  metrics.increment("api.requests");
+
   let userAgent = req.headers["user-agent"];
   if (userAgent) {
     userAgent = userAgent.toString();

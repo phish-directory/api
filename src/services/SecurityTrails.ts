@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the SecurityTrails service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class SecurityTrailsService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.securitytrails");
+
     const options = {
       method: "GET",
       url: `https://api.securitytrails.com/v1/domain/${domain}`,

@@ -1,13 +1,20 @@
 import * as jwt from "jsonwebtoken";
 
+import metrics from "../metrics";
+
 /**
  * Function to get the token from the header
  * @param req - Express Request Object
  * @returns token
  */
 export async function getTokenFromHeader(req: any) {
+  const tsStart = Date.now();
+  metrics.increment("functions.jwt.getTokenFromHeader");
+
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
+  const tsEnd = Date.now();
+  metrics.timing("functions.jwt.getTokenFromHeader", tsEnd - tsStart);
 
   return token;
 }
@@ -20,6 +27,9 @@ export async function getTokenFromHeader(req: any) {
  * @returns void
  */
 export async function authenticateToken(req: any, res: any, next: any) {
+  const tsStart = Date.now();
+  metrics.increment("functions.jwt.authenticateToken");
+
   const token = await getTokenFromHeader(req);
   if (token == null) return res.sendStatus(401);
 
@@ -34,6 +44,8 @@ export async function authenticateToken(req: any, res: any, next: any) {
 
       req.user = user;
 
+      const tsEnd = Date.now();
+      metrics.timing("functions.jwt.authenticateToken", tsEnd - tsStart);
       next();
     },
   );
@@ -45,6 +57,9 @@ export async function authenticateToken(req: any, res: any, next: any) {
  * @returns token
  */
 export async function generateAccessToken(user: any) {
+  const tsStart = Date.now();
+  metrics.increment("functions.jwt.generateAccessToken");
+
   let token = jwt.sign(
     {
       id: user.id,
@@ -52,6 +67,8 @@ export async function generateAccessToken(user: any) {
     },
     process.env.JWT_SECRET!,
   );
+  const tsEnd = Date.now();
+  metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
   return token;
 }
 
@@ -63,6 +80,9 @@ export async function generateAccessToken(user: any) {
  * @returns user
  */
 export async function getUserInfo(prisma: any, res: any, req: any) {
+  const tsStart = Date.now();
+  metrics.increment("functions.jwt.getUserInfo");
+
   const token = await getTokenFromHeader(req);
 
   // decode the token
@@ -76,6 +96,9 @@ export async function getUserInfo(prisma: any, res: any, req: any) {
       id: id,
     },
   });
+
+  const tsEnd = Date.now();
+  metrics.timing("functions.jwt.getUserInfo", tsEnd - tsStart);
 
   return user;
 }

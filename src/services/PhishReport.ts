@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the PhishReport service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class PhishReportService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.phishreport");
+
     let rsp = await axios.get(
       `https://phish.report/api/v0/hosting?url=${domain}`,
       {
@@ -20,7 +23,7 @@ export class PhishReportService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return rsp.data;
@@ -34,6 +37,8 @@ export class PhishReportService {
    * @returns
    */
   async report(domain: string, prisma: any) {
+    metrics.increment("domain.report.api.phishreport");
+
     // todo: implement this
     // https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post
   }

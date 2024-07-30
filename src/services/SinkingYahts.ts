@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the SinkingYahts service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class SinkingYahtsService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.sinkingyahts");
+
     const response = await axios.get<boolean>(
       `https://phish.sinking.yachts/v2/check/${domain}`,
       {
@@ -21,7 +24,7 @@ export class SinkingYahtsService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return response.data;

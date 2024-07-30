@@ -1,7 +1,9 @@
 import * as express from "express";
 import moment from "moment";
+
 import { logRequest } from "../middlewear/logRequest";
 import { prisma } from "../prisma";
+import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
@@ -22,6 +24,8 @@ router.use(logRequest);
  *
  */
 router.get("/metrics", async (req, res) => {
+  metrics.increment("endpoint.misc.metrics");
+
   let uptime = process.uptime();
   // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);

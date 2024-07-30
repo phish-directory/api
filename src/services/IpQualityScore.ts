@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the IpQualityScore service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class IpQualityScoreService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.ipqualityscore");
+
     const response = await axios.get(
       `https://ipqualityscore.com/api/json/url/${process.env
         .IPQS_API_KEY!}/${domain}`,
@@ -22,7 +25,7 @@ export class IpQualityScoreService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return response.data;

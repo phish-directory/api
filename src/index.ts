@@ -2,10 +2,13 @@ import * as dotenv from "dotenv";
 import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
+import { CronJob } from "cron";
+import axios from "axios";
 
 import router from "./router";
 import { swaggerOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
+import metrics from "./metrics";
 
 dotenv.config();
 
@@ -15,6 +18,30 @@ const app = express();
 expressJSDocSwagger(app)(swaggerOptions);
 
 app.use(helmet({}));
+
+// Add metric interceptors for axios
+axios.interceptors.request.use((config: any) => {
+  config.metadata = { startTs: performance.now() };
+  return config;
+});
+
+axios.interceptors.response.use((res: any) => {
+  const stat = (res.config.method + "/" + res.config.url?.split("/")[1])
+    .toLowerCase()
+    .replace(/[:.]/g, "")
+    .replace(/\//g, "_");
+
+  const httpCode = res.status;
+  const timingStatKey = `http.request.${stat}`;
+  const codeStatKey = `http.request.${stat}.${httpCode}`;
+  metrics.timing(
+    timingStatKey,
+    performance.now() - res.config.metadata.startTs,
+  );
+  metrics.increment(codeStatKey, 1);
+
+  return res;
+});
 
 app.use("/", router);
 
@@ -38,6 +65,18 @@ app.use("/", router);
 
 // console.log(new Date().getTime());
 
+// Heartbeat
+new CronJob(
+  "0 * * * * *",
+  async function () {
+    metrics.increment("heartbeat");
+  },
+  null,
+  true,
+  "America/New_York",
+);
+
 app.listen(port, () => {
+  metrics.increment("app.startup");
   logger.info(`Server is running on port ${port}`);
 });

@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { getUserInfo } from "./functions/jwt";
+import metrics from "./metrics";
 
 export const stripe = new Stripe(process.env.STRIPE_SK_KEY!, {
   apiVersion: "2024-06-20",
@@ -24,6 +25,8 @@ if (process.env.NODE_ENV === "production") {
 }
 
 async function createCustomer(email: string, name: string) {
+  metrics.increment("stripe.createCustomer");
+
   const customer = await stripe.customers.create({
     email: email,
     name: name,
@@ -33,6 +36,8 @@ async function createCustomer(email: string, name: string) {
 }
 
 async function getCustomerUsage(prisma: any, req: any, res: any) {
+  metrics.increment("stripe.getCustomerUsage");
+
   let user = await getUserInfo(prisma, req, res);
 
   let cusId = user.stripeCustomerId;
@@ -46,7 +51,7 @@ async function getCustomerUsage(prisma: any, req: any, res: any) {
       customer: cusId,
       start_time: beginning,
       end_time: now,
-    }
+    },
   );
 
   return usageRecords;

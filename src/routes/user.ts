@@ -10,6 +10,7 @@ import { logRequest } from "../middlewear/logRequest";
 import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
+import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
@@ -48,6 +49,8 @@ type User = {
  *
  */
 router.post("/signup", async (req, res) => {
+  metrics.increment("endpoint.user.signup");
+
   const body = req.body;
 
   const { name, email, password } = body;
@@ -119,6 +122,8 @@ type UserLogin = {
  *
  */
 router.post("/login", async (req, res) => {
+  metrics.increment("endpoint.user.login");
+
   const body = req.body;
   const { email, password } = body;
 
@@ -168,6 +173,8 @@ router.post("/login", async (req, res) => {
  *
  */
 router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
+  metrics.increment("endpoint.user.me");
+
   const userInfo = await getUserInfo(prisma, res, req);
 
   if (!userInfo) {
@@ -209,6 +216,8 @@ router.get(
   "/stripe/usage",
   authenticateToken,
   async (req: Request, res: Response) => {
+    metrics.increment("endpoint.user.stripe.usage");
+
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);

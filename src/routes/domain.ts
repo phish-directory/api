@@ -7,6 +7,7 @@ import { parseData } from "../functions/parseData";
 import { logRequest } from "../middlewear/logRequest";
 import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
+import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
@@ -37,6 +38,8 @@ enum Verdict {
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  */
 router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
+  metrics.increment("endpoint.domain.check");
+
   // look for the query parameter
   const query = req.query!;
 
@@ -373,6 +376,8 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
 //  * "Report!"
 //  */
 router.post("/report", authenticateToken, stripeMeter, (req, res) => {
+  metrics.increment("endpoint.domain.report");
+
   let query = req.query;
 
   let domain: string = query.domain! as string;
@@ -387,6 +392,8 @@ router.post("/report", authenticateToken, stripeMeter, (req, res) => {
 });
 
 router.post("/verdict", async (req, res) => {
+  metrics.increment("endpoint.domain.verdict");
+
   const query = req.query;
 
   let { domain, verdict, suser } = query;

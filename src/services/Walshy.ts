@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the walshy service for checking and reporting domains.
@@ -13,8 +14,10 @@ export class WalshyService {
    */
   async check(
     domain: string,
-    prisma: any
+    prisma: any,
   ): Promise<{ badDomain: boolean; detection: "discord" | "community" }> {
+    metrics.increment("domain.check.api.walshy");
+
     const responnse = await axios.post<{
       badDomain: boolean;
       detection: "discord" | "community";
@@ -40,6 +43,8 @@ export class WalshyService {
    * @returns {Promise<void>} A promise that resolves when the report operation is complete.
    */
   async report(domain: string, prisma: any): Promise<void> {
+    metrics.increment("domain.report.api.walshy");
+
     const response = await axios.post(
       `https://bad-domains.walshy.dev/report`,
       {
@@ -51,7 +56,7 @@ export class WalshyService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return response.data;

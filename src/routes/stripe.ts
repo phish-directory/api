@@ -1,7 +1,9 @@
 // @ts-expect-error
 import bodyParser from "body-parser";
 import * as express from "express";
+
 import { stripe, stripeEndpointSecret, stripePriceId } from "../stripe";
+import metrics from "../metrics";
 
 const router = express.Router();
 
@@ -9,6 +11,7 @@ const router = express.Router();
 router.use(bodyParser.raw({ type: "application/json" }));
 
 router.post("/checkout", async (req, res) => {
+  metrics.increment("endpoint.stripe.checkout");
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -30,6 +33,8 @@ router.post("/checkout", async (req, res) => {
 });
 
 router.post("/webhook", async (req, res) => {
+  metrics.increment("endpoint.stripe.webhook");
+
   const endpointSecret = stripeEndpointSecret;
   const sig = req.headers["stripe-signature"];
 
@@ -60,7 +65,7 @@ router.post("/webhook", async (req, res) => {
       const subscriptionId = data.object.subscription;
 
       console.log(
-        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`
+        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`,
       );
 
       // Get the subscription. The first item is the plan the user subscribed to.
