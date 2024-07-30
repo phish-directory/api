@@ -1,4 +1,5 @@
-// import axios from "axios";
+import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the TEMPLATE service for checking and reporting domains.
@@ -11,7 +12,9 @@ export class TEMPLATEService {
    * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {}
+  async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.template");
+  }
 
   /**
    * Asynchronously reports a given domain to the TEMPLATE service for further processing or analysis.
@@ -21,6 +24,7 @@ export class TEMPLATEService {
    * @returns
    */
   async report(domain: string, prisma: any) {
+    metrics.increment("domain.report.api.template");
     // todo: implement this
   }
 }

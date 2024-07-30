@@ -1,4 +1,5 @@
 import axios from "axios";
+import metrics from "../metrics";
 
 /**
  * A service that provides access to the Phisherman service for checking and reporting domains.
@@ -12,6 +13,8 @@ export class PhishermanService {
    * @returns
    */
   async check(domain: string, prisma: any) {
+    metrics.increment("domain.check.api.phisherman");
+
     const response = await axios.get(
       `https://api.phisherman.gg/v2/domains/info/${domain}`,
       {
@@ -22,7 +25,7 @@ export class PhishermanService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-      }
+      },
     );
 
     return response.data;

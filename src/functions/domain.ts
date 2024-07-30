@@ -11,6 +11,7 @@ import { SinkingYahtsService } from "../services/SinkingYahts";
 import { UrlScanService } from "../services/UrlScan";
 import { VirusTotalService } from "../services/VirusTotal";
 import { WalshyService } from "../services/Walshy";
+import metrics from "../metrics";
 
 const walshy = new WalshyService();
 const ipQualityScore = new IpQualityScoreService();
@@ -30,6 +31,10 @@ const phishreport = new PhishReportService();
  * @returns void
  */
 export async function domainCheck(domain: string, dbDomain: any) {
+  const tsStart = Date.now();
+
+  metrics.increment("functions.domainCheck");
+
   let walshyData = await walshy.check(domain, prisma);
   let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
   let googleSafebrowsingData = await googleSafebrowsing.check(domain, prisma);
@@ -200,6 +205,8 @@ export async function domainCheck(domain: string, dbDomain: any) {
       data: phishreportData,
     },
   });
+
+  metrics.timing("functions.timing.domainCheck", Date.now() - tsStart);
 
   return {
     walshyData,

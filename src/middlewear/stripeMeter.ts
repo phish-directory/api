@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { getUserInfo } from "../functions/jwt";
 import { prisma } from "../prisma";
 import { stripe } from "../stripe";
+import metrics from "../metrics";
 
 /**
  * Middleware to log requests to the console
@@ -13,9 +14,10 @@ import { stripe } from "../stripe";
 export const stripeMeter = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   if (process.env.NODE_ENV === "production") {
+    metrics.increment("stripeMeter.requests");
     let userInfo = await getUserInfo(prisma, res, req);
 
     if (!userInfo) {

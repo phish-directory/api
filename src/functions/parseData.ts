@@ -1,3 +1,5 @@
+import metrics from "../metrics";
+
 /**
  * parses the data from the different sources and returns a boolean value
  * @param walshyData - Data from Walshy API
@@ -22,43 +24,46 @@ export async function parseData(
 ): Promise<Boolean> {
   // return true;
 
+  const tsStart = Date.now();
+  metrics.increment("functions.domain.parseData");
+
+  let verdict: boolean;
+
   if (walshyData.badDomain) {
-    return true;
-  }
-
-  if (Object.keys(googleSafebrowsingData).length !== 0) {
-    return true;
-  }
-
-  if (
+    verdict = true;
+  } else if (Object.keys(googleSafebrowsingData).length !== 0) {
+    verdict = true;
+  } else if (
     ipQualityScoreData.unsafe ||
     ipQualityScoreData.spam ||
     ipQualityScoreData.phishing ||
     ipQualityScoreData.malware
   ) {
-    return true;
-  }
-
-  if (phishermanData.verifiedPhish) {
-    return true;
-  }
-
-  if (sinkingYahtsData) {
-    return true;
-  }
-
-  if (urlScanData.verdicts.overall.malicious === true) {
-    return true;
-  }
-
-  if (
+    verdict = true;
+  } else if (phishermanData.verifiedPhish) {
+    verdict = true;
+  } else if (sinkingYahtsData) {
+    verdict = true;
+  } else if (urlScanData.verdicts.overall.malicious === true) {
+    verdict = true;
+  } else if (
     virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||
     virusTotalData.data.attributes.last_analysis_stats.suspicious > 0
   ) {
-    return true;
+    verdict = true;
+  } else {
+    verdict = false;
   }
 
-  // todo: add correct phishobserver check
+  metrics.timing("functions.domain.parseData", Date.now() - tsStart);
 
-  return false;
+  if ((verdict = true)) {
+    metrics.increment("functions.domain.parseData.true");
+  } else {
+    metrics.increment("functions.domain.parseData.false");
+  }
+
+  return verdict;
+
+  // todo: add correct phishobserver check
 }
