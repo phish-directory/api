@@ -17,7 +17,25 @@ const app = express();
 
 expressJSDocSwagger(app)(swaggerOptions);
 
-app.use(helmet({}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'"],
+        scriptSrcAttr: ["'none'"],
+        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  }),
+);
 
 // Add metric interceptors for axios
 axios.interceptors.request.use((config: any) => {
@@ -61,20 +79,37 @@ app.use("/", router);
 - https://openphish.com/
 - https://report.netcraft.com/api/v3#tag/Report/paths/~1report~1mistake/post
 - https://any.run/api-documentation/
+- https://phishstats.info/
+- https://pulsedive.com/api/
+- https://whoisjsonapi.com/
+- https://whoisfreaks.com/
 */
 
 // console.log(new Date().getTime());
 
-// Heartbeat
+// run cron every 1 sec
 new CronJob(
-  "0 * * * * *",
+  "* * * * * *",
   async function () {
+    console.log("Thump Thump");
     metrics.increment("heartbeat");
   },
   null,
   true,
   "America/New_York",
 );
+
+// Heartbeat
+// new CronJob(
+//   "0 * * * * *",
+//   async function () {
+//     console.log("Thump Thump");
+//     metrics.increment("heartbeat");
+//   },
+//   null,
+//   true,
+//   "America/New_York",
+// );
 
 app.listen(port, () => {
   metrics.increment("app.startup");
