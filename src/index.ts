@@ -19,6 +19,8 @@ expressJSDocSwagger(app)(swaggerOptions);
 
 app.use(
   helmet({
+    xFrameOptions: { action: "deny" },
+    xContentTypeOptions: true,
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -33,6 +35,11 @@ app.use(
         styleSrc: ["'self'", "https:", "'unsafe-inline'"],
         upgradeInsecureRequests: [],
       },
+    },
+    referrerPolicy: { policy: "strict-origin" },
+    strictTransportSecurity: {
+      maxAge: 63072000,
+      preload: true,
     },
   }),
 );
