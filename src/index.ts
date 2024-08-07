@@ -17,6 +17,8 @@ const app = express();
 
 expressJSDocSwagger(app)(swaggerOptions);
 
+app.disable("x-powered-by");
+
 app.use(
   helmet({
     xFrameOptions: { action: "deny" },
@@ -41,6 +43,7 @@ app.use(
       maxAge: 63072000,
       preload: true,
     },
+    xPoweredBy: false,
   }),
 );
 
