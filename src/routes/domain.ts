@@ -97,7 +97,45 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishreportData
     );
 
-    res.send(isPhish);
+    if (isPhish) {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: true,
+          lastChecked: new Date(),
+        },
+      });
+
+      return res.status(200).json({
+        phishing: true,
+      });
+    } else {
+      await prisma.domain.update({
+        where: {
+          id: dbDomain.id,
+        },
+        data: {
+          malicious: false,
+          lastChecked: new Date(),
+        },
+      });
+
+      return res.status(200).json({
+        phishing: false,
+      });
+    }
+  } else {
+    if (dbDomain.malicious) {
+      return res.status(200).json({
+        phishing: true,
+      });
+    } else {
+      return res.status(200).json({
+        phishing: false,
+      });
+    }
   }
 });
 
@@ -146,6 +184,12 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
   let trustedTypes = ["trusted", "admin"];
 
   if (user.permission !== "basic" && trustedTypes.includes(user.permission)) {
+    let dbDomain = await prisma.domain.findFirst({
+      where: {
+        domain: domain,
+      },
+    });
+
     let databaseDomain = await prisma.domain.findFirst({
       where: {
         domain: domain,
@@ -156,7 +200,7 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
       return res.status(400).json("Domain not found! Please run /check first.");
     }
 
-    let dbClassification = await prisma.classification.create({
+    await prisma.classification.create({
       data: {
         domain: {
           connect: {
@@ -170,11 +214,6 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
         },
         classification: classification,
       },
-    });
-
-    return res.status(200).json({
-      message: "Classification added successfully!",
-      classification: dbClassification,
     });
   } else {
     console.log(user.permission);
