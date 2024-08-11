@@ -104,11 +104,11 @@ model Classification {
   id             Int             @id @default(autoincrement())
   classification Classifications
   domain         Domain          @relation(fields: [domainId], references: [id])
-  classifier     User            @relation(fields: [classifierId], references: [id])
-  domainId       Int
-  classifierId   Int
+  classifier     User            @relation(fields: [userId], references: [id])
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  domainId       Int
+  userId         Int
 }
 
 model GoogleSafeBrowsingAPIResponse {

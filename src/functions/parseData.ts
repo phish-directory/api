@@ -10,6 +10,8 @@ import metrics from "../metrics";
  * @param phishermanData - Data from Phisherman API
  * @param phishObserverData - Data from PhishObserver API
  * @param urlScanData - Data from URLScan API
+ * @param securitytrailsData - Data from SecurityTrails API
+ * @param phishreportData - Data from Phishreport API
  * @returns boolean
  **/
 export async function parseData(
@@ -21,6 +23,8 @@ export async function parseData(
   phishermanData: any,
   phishObserverData: any,
   urlScanData: any,
+  securitytrailsData: any,
+  phishreportData: any
 ): Promise<Boolean> {
   // return true;
 
@@ -29,31 +33,33 @@ export async function parseData(
 
   let verdict: boolean;
 
-  if (walshyData.badDomain) {
-    verdict = true;
-  } else if (Object.keys(googleSafebrowsingData).length !== 0) {
-    verdict = true;
-  } else if (
-    ipQualityScoreData.unsafe ||
-    ipQualityScoreData.spam ||
-    ipQualityScoreData.phishing ||
-    ipQualityScoreData.malware
-  ) {
-    verdict = true;
-  } else if (phishermanData.verifiedPhish) {
-    verdict = true;
-  } else if (sinkingYahtsData) {
-    verdict = true;
-  } else if (urlScanData.verdicts.overall.malicious === true) {
-    verdict = true;
-  } else if (
-    virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||
-    virusTotalData.data.attributes.last_analysis_stats.suspicious > 0
-  ) {
-    verdict = true;
-  } else {
-    verdict = false;
-  }
+  // if (walshyData.badDomain) {
+  //   verdict = true;
+  // }
+  // else if (Object.keys(googleSafebrowsingData).length !== 0) {
+  //   verdict = true;
+  // } else if (
+  //   ipQualityScoreData.unsafe ||
+  //   ipQualityScoreData.spam ||
+  //   ipQualityScoreData.phishing ||
+  //   ipQualityScoreData.malware
+  // ) {
+  //   verdict = true;
+  // } else if (phishermanData.verifiedPhish) {
+  //   verdict = true;
+  // } else if (sinkingYahtsData) {
+  //   verdict = true;
+  // } else if (urlScanData.verdicts.overall.malicious === true) {
+  //   verdict = true;
+  // } else if (
+  //   virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||
+  //   virusTotalData.data.attributes.last_analysis_stats.suspicious > 0
+  // ) {
+  //   verdict = true;
+  // }
+  // else {
+  verdict = false;
+  // }
 
   metrics.timing("functions.domain.parseData", Date.now() - tsStart);
 
