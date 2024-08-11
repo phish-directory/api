@@ -1,9 +1,9 @@
 import * as express from "express";
 import moment from "moment";
 
+import metrics from "../metrics";
 import { logRequest } from "../middlewear/logRequest";
 import { prisma } from "../prisma";
-import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
@@ -49,11 +49,11 @@ router.get("/metrics", async (req, res) => {
     .trim();
   const shaSliced = sha.slice(0, 7);
 
-  let enviorment = process.env.NODE_ENV;
+  let enviornment = process.env.NODE_ENV;
 
   res.status(200).json({
     status: "up",
-    enviorment: enviorment,
+    enviornment: enviornment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
     version: npmVersion,
@@ -72,35 +72,35 @@ router.get("/metrics", async (req, res) => {
       lifetime: requestCount,
       today: await prisma.expressRequest.count({
         where: {
-          dateCreated: {
+          createdAt: {
             gte: new Date(new Date().setHours(0, 0, 0, 0)),
           },
         },
       }),
       "24 hours": await prisma.expressRequest.count({
         where: {
-          dateCreated: {
+          createdAt: {
             gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
           },
         },
       }),
       week: await prisma.expressRequest.count({
         where: {
-          dateCreated: {
+          createdAt: {
             gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
           },
         },
       }),
       month: await prisma.expressRequest.count({
         where: {
-          dateCreated: {
+          createdAt: {
             gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           },
         },
       }),
       year: await prisma.expressRequest.count({
         where: {
-          dateCreated: {
+          createdAt: {
             gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
           },
         },

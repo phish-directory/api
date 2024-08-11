@@ -1,14 +1,13 @@
+import axios from "axios";
 import * as dotenv from "dotenv";
 import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
-import { CronJob } from "cron";
-import axios from "axios";
 
+import metrics from "./metrics";
 import router from "./router";
 import { swaggerOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
-import metrics from "./metrics";
 
 dotenv.config();
 
@@ -44,7 +43,7 @@ app.use(
       preload: true,
     },
     xPoweredBy: false,
-  }),
+  })
 );
 
 // Add metric interceptors for axios
@@ -64,7 +63,7 @@ axios.interceptors.response.use((res: any) => {
   const codeStatKey = `http.request.${stat}.${httpCode}`;
   metrics.timing(
     timingStatKey,
-    performance.now() - res.config.metadata.startTs,
+    performance.now() - res.config.metadata.startTs
   );
   metrics.increment(codeStatKey, 1);
 
@@ -98,16 +97,16 @@ app.use("/", router);
 // console.log(new Date().getTime());
 
 // run cron every 1 sec
-new CronJob(
-  "* * * * * *",
-  async function () {
-    console.log("Thump Thump");
-    metrics.increment("heartbeat");
-  },
-  null,
-  true,
-  "America/New_York",
-);
+// new CronJob(
+//   "* * * * * *",
+//   async function () {
+//     console.log("Thump Thump");
+//     metrics.increment("heartbeat");
+//   },
+//   null,
+//   true,
+//   "America/New_York",
+// );
 
 // Heartbeat
 // new CronJob(

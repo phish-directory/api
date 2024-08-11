@@ -7,8 +7,11 @@
     "skipLibCheck": true,
     "rootDir": "src",
     "outDir": "dist",
-    "typeRoots": ["node_modules/@types"],
-    "esModuleInterop": true
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "esModuleInterop": true,
+    "noImplicitAny": false
   },
   "exclude": [
     "node_modules",

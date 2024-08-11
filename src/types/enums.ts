@@ -1,13 +1,19 @@
-/**
- * @description: DomainType enum, used to define the type of domain
- */
-export enum DomainType {
-  unknown,
-  discord,
-  slack,
-  instagram,
-  twitter,
-  facebook,
+export enum AccountType {
+  user,
+  bot,
+  admin,
+}
+
+export enum Permissions {
+  basic,
+  trusted,
+  admin,
+}
+
+export enum Classifications {
+  postal,
+  banking,
+  item_scams,
   other,
 }
 
@@ -20,4 +26,11 @@ export enum Metertime {
   month,
   year,
   alltime,
+}
+
+export enum Verdict {
+  postal,
+  banking,
+  item_scams,
+  other,
 }

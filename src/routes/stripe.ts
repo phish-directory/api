@@ -1,9 +1,8 @@
-// @ts-expect-error
 import bodyParser from "body-parser";
 import * as express from "express";
 
-import { stripe, stripeEndpointSecret, stripePriceId } from "../stripe";
 import metrics from "../metrics";
+import { stripe, stripeEndpointSecret, stripePriceId } from "../stripe";
 
 const router = express.Router();
 
@@ -59,13 +58,11 @@ router.post("/webhook", async (req, res) => {
     case "checkout.session.completed":
       console.log(data);
       // Data included in the event object:
-      // @ts-expect-error
       const customerId = data.object.customer;
-      // @ts-expect-error
       const subscriptionId = data.object.subscription;
 
       console.log(
-        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`,
+        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`
       );
 
       // Get the subscription. The first item is the plan the user subscribed to.

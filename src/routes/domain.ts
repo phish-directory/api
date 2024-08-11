@@ -1,25 +1,17 @@
-import axios from "axios";
 import * as express from "express";
 
 import { domainCheck } from "../functions/domain";
-import { authenticateToken } from "../functions/jwt";
+import { authenticateToken, getPermissionLevel } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
+import metrics from "../metrics";
 import { logRequest } from "../middlewear/logRequest";
 import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
-import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
-
-enum Verdict {
-  postal,
-  banking,
-  item_scams,
-  other,
-}
 
 /**
  * GET /domain/check
@@ -74,7 +66,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -112,7 +104,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       virusTotalData,
       phishermanData,
       phishObserverData,
-      urlScanData,
+      urlScanData
     );
 
     if (isPhish) {
@@ -375,113 +367,112 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
 //  * @example response - 200 - Success message
 //  * "Report!"
 //  */
-router.post("/report", authenticateToken, stripeMeter, (req, res) => {
-  metrics.increment("endpoint.domain.report");
-
-  let query = req.query;
-
-  let domain: string = query.domain! as string;
-
+router.post("/report", authenticateToken, stripeMeter, async (req, res) => {
+  res.send("Report!");
+  let plevel = await getPermissionLevel(prisma, req, res);
+  console.log(plevel);
+  // metrics.increment("endpoint.domain.report");
+  // let query = req.query;
+  // let domain: string = query.domain! as string;
   // check for domain parameter
-  if (!domain) {
-    res.status(400).json("No domain parameter found");
-  }
-
+  // if (!domain) {
+  //   res.status(400).json("No domain parameter found");
+  // }
   // get the userid from the token
-  let user;
+  // let user;
 });
 
 router.post("/verdict", async (req, res) => {
   metrics.increment("endpoint.domain.verdict");
 
-  const query = req.query;
+  // const query = req.query;
 
-  let { domain, verdict, suser } = query;
-  domain = domain as string;
-  verdict = verdict as string;
-  suser = suser as string;
+  // let { domain, verdict, suser } = query;
+  // domain = domain as string;
+  // verdict = verdict as string;
+  // suser = suser as string;
 
-  // check for the KEY parameter
-  if (process.env.PHISHBOT_KEY !== req.query.key) {
-    return res.status(401).json("Unauthorized");
-  }
+  // // check for the KEY parameter
+  // if (process.env.PHISHBOT_KEY !== req.query.key) {
+  //   return res.status(401).json("Unauthorized");
+  // }
 
-  if (!req.query.domain) {
-    return res.status(400).json("Missing domain");
-  }
+  // if (!req.query.domain) {
+  //   return res.status(400).json("Missing domain");
+  // }
 
-  if (!req.query.verdict) {
-    return res.status(400).json("Missing verdict");
-  }
+  // if (!req.query.verdict) {
+  //   return res.status(400).json("Missing verdict");
+  // }
 
-  if (!req.query.suser) {
-    return res.status(400).json("Missing user");
-  }
+  // if (!req.query.suser) {
+  //   return res.status(400).json("Missing user");
+  // }
 
-  // convert verdict to type Verdict
-  let v: Verdict;
+  // // convert verdict to type Verdict
+  // let v: Verdict;
 
-  switch (verdict) {
-    case "postal":
-      v = Verdict.postal;
-      break;
-    case "banking":
-      v = Verdict.banking;
-      break;
-    case "item_scams":
-      v = Verdict.item_scams;
-      break;
-    case "other":
-      v = Verdict.other;
-      break;
-    default:
-      return res.status(400).json("Invalid verdict");
-  }
+  // switch (verdict) {
+  //   case "postal":
+  //     v = Verdict.postal;
+  //     break;
+  //   case "banking":
+  //     v = Verdict.banking;
+  //     break;
+  //   case "item_scams":
+  //     v = Verdict.item_scams;
+  //     break;
+  //   case "other":
+  //     v = Verdict.other;
+  //     break;
+  //   default:
+  //     return res.status(400).json("Invalid verdict");
+  // }
 
-  let dbDomain = await prisma.domain.findFirst({
-    where: {
-      domain: domain,
-    },
-  });
+  // let dbDomain = await prisma.domain.findFirst({
+  //   where: {
+  //     domain: domain,
+  //   },
+  // });
 
-  if (!dbDomain) {
-    // make a request to the domain/check endpoint
-    // to check the domain
+  // if (!dbDomain) {
+  //   // make a request to the domain/check endpoint
+  //   // to check the domain
 
-    await axios.get(
-      `http://localhost:${process.env.PORT!}/domain/check?domain=${domain}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
-        },
-      },
-    );
+  //   await axios.get(
+  //     `http://localhost:${process.env.PORT!}/domain/check?domain=${domain}`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${process.env.INTERNAL_API_KEY}`,
+  //       },
+  //     }
+  //   );
 
-    dbDomain = await prisma.domain.findFirst({
-      where: {
-        domain: domain,
-      },
-    });
-  }
+  //   dbDomain = await prisma.domain.findFirst({
+  //     where: {
+  //       domain: domain,
+  //     },
+  //   });
+  // }
 
-  await prisma.tmpVerdict
-    .create({
-      data: {
-        domain: {
-          connect: {
-            id: dbDomain!.id,
-          },
-        },
-        verdict: verdict,
-        sUser: suser,
-      },
-    })
-    .then(() => {
-      return res.status(200).json("Verdict added");
-    })
-    .catch((err) => {
-      return res.status(500).json("Failed to add verdict");
-    });
+  // await prisma.tmpVerdict
+  //   .create({
+  //     data: {
+  //       domain: {
+  //         connect: {
+  //           id: dbDomain!.id,
+  //         },
+  //       },
+  //       verdict: verdict,
+  //       sUser: suser,
+  //     },
+  //   })
+  //   .then(() => {
+  //     return res.status(200).json("Verdict added");
+  //   })
+  //   .catch((err) => {
+  //     return res.status(500).json("Failed to add verdict");
+  //   });
 });
 
 export default router;

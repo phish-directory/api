@@ -20,18 +20,13 @@ enum AccountType {
   admin
 }
 
-// make sure to update this in src/types/enums.ts
-enum DomainType {
-  unknown
-  discord
-  slack
-  instagram
-  twitter
-  facebook
-  other
+enum Permissions {
+  basic
+  trusted
+  admin
 }
 
-enum verdict {
+enum Classifications {
   postal
   banking
   item_scams
@@ -44,27 +39,30 @@ model User {
   name              String
   email             String           @unique
   password          String
+  permission        Permissions      @default(basic)
   stripeCustomerId  String?          @unique
   subscriptionItems String[]         @default([])
-  // accountType AccountType @default(user)
-  dateCreated       DateTime         @default(now())
-  dateUpdated       DateTime         @updatedAt
+  accountType       AccountType      @default(user)
   deleted           Boolean          @default(false)
-  dateDeleted       DateTime?
-  // domainsReported Domain[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+  domainsReported   Domain[]
   expressRequests   ExpressRequest[]
+  classifications   Classification[]
 }
 
 model Domain {
   id                            Int                             @id @unique @default(autoincrement())
   uuid                          String                          @unique @default(uuid())
-  type                          DomainType                      @default(unknown)
   domain                        String
   malicious                     Boolean                         @default(false)
-  // reportedBy                    User[]
-  dateCreated                   DateTime                        @default(now())
-  dateUpdated                   DateTime                        @updatedAt
-  lastChecked                   DateTime?                       @default(now())
+  reportedBy                    User[]
+  captures                      Capture[]
+  classifications               Classification[]
+  createdAt                     DateTime                        @default(now())
+  updatedAt                     DateTime                        @updatedAt
+  lastChecked                   DateTime?
   WalshyAPIResponse             WalshyAPIResponse[]
   IpQualityScoreAPIResponse     IpQualityScoreAPIResponse[]
   GoogleSafeBrowsingAPIResponse GoogleSafeBrowsingAPIResponse[]
@@ -72,46 +70,45 @@ model Domain {
   SinkingYachtsAPIResponse      SinkingYachtsAPIResponse[]
   VirusTotalAPIResponse         VirusTotalAPIResponse[]
   PhishObserverAPIResponse      PhishObserverAPIResponse[]
-  // User                          User?                           @relation(fields: [userId], references: [id])
-  // userId                        Int?
-  TmpVerdict                    TmpVerdict[]
   UrlScanAPIResponse            UrlScanAPIResponse[]
   SecurityTrailsAPIResponse     SecurityTrailsAPIResponse[]
   PhishReportAPIResponse        PhishReportAPIResponse[]
-  Screencapture                 Screencapture[]
 }
-
-//todo: establish naming consistency with createdAt, dateCreated, etc.
 
 model ExpressRequest {
-  id          Int      @id @default(autoincrement())
-  method      String
-  url         String
-  headers     Json?
-  body        Json?
-  query       Json?
-  ip          String
-  userAgent   String   @default("")
-  xIdentity   String   @default("")
-  dateCreated DateTime @default(now())
-  User        User?    @relation(fields: [userId], references: [id])
-  userId      Int?
-}
-
-model Screencapture {
-  id       Int     @id @default(autoincrement())
-  domain   Domain? @relation(fields: [domainId], references: [id])
-  domainId Int?
-  binary   Bytes
-}
-
-model TmpVerdict {
   id        Int      @id @default(autoincrement())
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  verdict   verdict
-  sUser     String
-  domainId  Int
+  method    String
+  url       String
+  headers   Json?
+  body      Json?
+  query     Json?
+  ip        String
+  userAgent String   @default("")
+  xIdentity String   @default("")
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Capture {
+  id        Int      @id @default(autoincrement())
+  domain    Domain?  @relation(fields: [domainId], references: [id])
+  domainId  Int?
+  binary    Bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Classification {
+  id             Int             @id @default(autoincrement())
+  classification Classifications
+  domain         Domain          @relation(fields: [domainId], references: [id])
+  classifier     User            @relation(fields: [classifierId], references: [id])
+  domainId       Int
+  classifierId   Int
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model GoogleSafeBrowsingAPIResponse {
@@ -179,35 +176,35 @@ model WalshyAPIResponse {
 model PhishObserverAPIResponse {
   id        Int      @id @default(autoincrement())
   data      Json // Store the raw JSON response from PhishObserver
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id])
   domainId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UrlScanAPIResponse {
   id        Int      @id @default(autoincrement())
   data      Json // Store the raw JSON response from UrlScan
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id])
   domainId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SecurityTrailsAPIResponse {
   id        Int      @id @default(autoincrement())
   data      Json // Store the raw JSON response from UrlScan
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id])
   domainId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PhishReportAPIResponse {
   id        Int      @id @default(autoincrement())
   data      Json // Store the raw JSON response from UrlScan
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   domain    Domain   @relation(fields: [domainId], references: [id])
   domainId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
