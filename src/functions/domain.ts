@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 
+import metrics from "../metrics";
 import { prisma } from "../prisma";
 import { GoogleSafebrowsingService } from "../services/GoogleSafebrowsing";
 import { IpQualityScoreService } from "../services/IpQualityScore";
@@ -11,7 +12,6 @@ import { SinkingYahtsService } from "../services/SinkingYahts";
 import { UrlScanService } from "../services/UrlScan";
 import { VirusTotalService } from "../services/VirusTotal";
 import { WalshyService } from "../services/Walshy";
-import metrics from "../metrics";
 
 const walshy = new WalshyService();
 const ipQualityScore = new IpQualityScoreService();
@@ -64,7 +64,7 @@ export async function domainCheck(domain: string, dbDomain: any) {
     encoding: "binary",
   });
 
-  await prisma.screencapture.create({
+  await prisma.capture.create({
     data: {
       domain: {
         connect: {

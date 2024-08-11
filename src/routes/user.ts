@@ -6,11 +6,11 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
+import metrics from "../metrics";
 import { logRequest } from "../middlewear/logRequest";
 import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
-import metrics from "../metrics";
 
 const router = express.Router();
 router.use(express.json());
@@ -193,7 +193,7 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
     email: userInfo.email,
     uuid: userInfo.uuid,
     requestCount: count,
-    accountCreated: userInfo.dateCreated,
+    accountCreated: userInfo.createdAt,
   });
 });
 
@@ -221,7 +221,7 @@ router.get(
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);
-  },
+  }
 );
 
 export default router;
