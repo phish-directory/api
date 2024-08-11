@@ -49,8 +49,6 @@ export async function generateAccessToken(user: any) {
     {
       id: user.id,
       uuid: user.uuid,
-      permission: user.permission,
-      name: user.name,
     },
     process.env.JWT_SECRET!
   );

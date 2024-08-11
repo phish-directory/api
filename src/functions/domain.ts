@@ -30,7 +30,7 @@ const phishreport = new PhishReportService();
  * @param dbDomain - Domain from the database
  * @returns void
  */
-export async function domainCheck(domain: string, dbDomain: any) {
+export async function domainCheck(domain: string) {
   const tsStart = Date.now();
 
   metrics.increment("functions.domainCheck");
@@ -45,6 +45,20 @@ export async function domainCheck(domain: string, dbDomain: any) {
   let urlScanData = await urlScan.check(domain, prisma);
   let securitytrailsData = await securitytrails.check(domain, prisma);
   let phishreportData = await phishreport.check(domain, prisma);
+
+  let dbDomain = await prisma.domain.findFirst({
+    where: {
+      domain: domain,
+    },
+  });
+
+  if (!dbDomain) {
+    dbDomain = await prisma.domain.create({
+      data: {
+        domain: domain,
+      },
+    });
+  }
 
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch({ headless: "shell" });
