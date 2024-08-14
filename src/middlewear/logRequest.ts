@@ -90,6 +90,9 @@ export const logRequest = async (
       console.error("Failed to log request to the database", err);
     });
 
-  log(`${req.method} ${req.url} ${userAgent}`, "log");
+  if (process.env.NODE_ENV === "development") {
+    log(`${req.method} ${req.url} ${userAgent}`, "log");
+  }
+
   next();
 };
