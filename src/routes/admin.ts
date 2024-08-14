@@ -30,7 +30,8 @@ router.use(async (req, res, next) => {
 
 /**
  * GET /admin/metrics
- * @summary Get the status, environment, uptime, date started, versions, and counts of various metrics.
+ * @summary Returns ADVANCED metrics / information about the API for administrators.
+ * @description Get the status, environment, uptime, date started, versions, and counts of various metrics.
  * @tags Admin - Endpoints restricted to API administrators.
  * @security BearerAuth
  * @return {object} 200 - Success message

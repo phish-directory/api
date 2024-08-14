@@ -167,6 +167,7 @@ router.post("/login", async (req, res) => {
  *   "name": "John Doe",
  *   "email": "john.doe@example.com",
  *   "uuid": "123e4567-e89b-12d3-a456-426614174000",
+ *   "permission": "basic",
  *   "metrics": {
  *     "requests": {
  *       "count": 3,
@@ -257,6 +258,7 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
     name: userInfo.name,
     email: userInfo.email,
     uuid: userInfo.uuid,
+    permission: userInfo.permission,
     metrics: {
       requests: {
         count: count,
