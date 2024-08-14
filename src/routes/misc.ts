@@ -13,7 +13,7 @@ router.use(logRequest);
 /**
  * GET /misc/metrics
  * @summary Get the uptime and date started of the API
- * @tags Miscalleanous
+ * @tags Miscalleanous - Endpoints that don't fit into any other category.
  * @return {object} 200 - Success message
  * @example response - 200 - Success message
  * {

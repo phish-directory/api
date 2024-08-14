@@ -31,7 +31,8 @@ router.use(async (req, res, next) => {
 /**
  * GET /admin/metrics
  * @summary Get the uptime and date started of the API
- * @tags Miscalleanous
+ * @tags Admin - Endpoints restricted to API administrators.
+ * @security BearerAuth
  * @return {object} 200 - Success message
  * @example response - 200 - Success message
  * {
