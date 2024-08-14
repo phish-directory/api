@@ -11,6 +11,7 @@ import { logRequest } from "../middlewear/logRequest";
 import { stripeMeter } from "../middlewear/stripeMeter";
 import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
+import type { User, UserLogin } from "../types/enums";
 
 const router = express.Router();
 router.use(express.json());
@@ -20,33 +21,21 @@ router.use(logRequest);
 let saltRounds = 10;
 
 /**
- * User w/ Name
- * @typedef {object} User
- * @property {string} name.required - The name of the user
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-type User = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-/**
  * POST /user/signup
- * @summary Sign up a user for the api
- * @tags User - User Management / Info and Authentication endpoints.
+ * @summary Sign up a user for the API
+ * @tags User - User Management / Info and Authentication endpoints
  * @param {User} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
  * {
- *  "token": "token",
- *  "uuid": "uuid"
+ *   "message": "User created successfully, please login.",
+ *   "uuid": "uuid"
  * }
  * @example response - 400 - Error message
- * "Invalid email or password"
- *
+ * "Invalid arguments. Please provide name, email, and password"
+ * @example response - 400 - Error message
+ * "User with that email already exists"
  */
 router.post("/signup", async (req, res) => {
   metrics.increment("endpoint.user.signup");
@@ -59,9 +48,10 @@ router.post("/signup", async (req, res) => {
     res
       .status(400)
       .json("Invalid arguments. Please provide name, email, and password");
+    return;
   }
 
-  // check if the user already exists
+  // Check if the user already exists
   const user = await prisma.user.findUnique({
     where: {
       email: email,
@@ -70,6 +60,7 @@ router.post("/signup", async (req, res) => {
 
   if (user) {
     res.status(400).json("User with that email already exists");
+    return;
   }
 
   const salt = bcrypt.genSaltSync(saltRounds);
@@ -78,7 +69,7 @@ router.post("/signup", async (req, res) => {
   let customer = await createCustomer(email, name);
   let stripeCustomerId = customer.id;
 
-  // create the user
+  // Create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
@@ -95,31 +86,23 @@ router.post("/signup", async (req, res) => {
 });
 
 /**
- * User Login
- * @typedef {object} UserLogin
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-type UserLogin = {
-  email: string;
-  password: string;
-};
-
-/**
  * POST /user/login
- * @summary Log in a user to the api
- * @tags User - User Management / Info and Authentication endpoints.
+ * @summary Log in a user to the API
+ * @tags User - User Management / Info and Authentication endpoints
  * @param {UserLogin} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
  * {
- *  "token": "token",
- *  "uuid": "uuid"
+ *   "token": "token",
+ *   "uuid": "uuid"
  * }
  * @example response - 400 - Error message
+ * "Missing email or password"
+ * @example response - 400 - Error message
  * "Invalid email or password"
- *
+ * @example response - 403 - Error message
+ * "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
  */
 router.post("/login", async (req, res) => {
   metrics.increment("endpoint.user.login");
@@ -129,6 +112,7 @@ router.post("/login", async (req, res) => {
 
   if (!email || !password) {
     res.status(400).json("Missing email or password");
+    return;
   }
 
   const user = await prisma.user.findUnique({
@@ -168,7 +152,7 @@ router.post("/login", async (req, res) => {
  * @summary Gets your user details
  * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
- * @return {object} 200 - Success message
+ * @return {object} 200 - User details and metrics
  * @return {string} 400 - Error message
  * @example response - 200 - Success message
  * {
@@ -279,19 +263,84 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
 });
 
 /**
- * GET /user/stripe/usage
- * @summary Gets your stripe usage details
- * @tags User - User Management / Info and Authentication endpoints.
+ * PATCH /user/me
+ * @summary Update user details
+ * @description update your own user details (name, email, password) - requires a valid JWT token.
+ Ask an admin if you don't have access to your account / a valid token.
+
+ Not all feilds are mandatory! Only send what needs to be updated!
+
+ If you want to update your password, you must send the current password as well.
+ To update your email, you must email the support team at team@phish.directory.
+ * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
+ * @param {User} request.body.required - User information
  * @return {object} 200 - Success message
+ * @return {object} 400 - Error message
+ * @example request - User information
+ * {
+ *   "name": "John Doe",
+ *   "password": ""
+ * }
+ */
+router.patch("/me", authenticateToken, async (req, res) => {
+  metrics.increment("endpoint.user.me.patch");
+
+  const userInfo = await getUserInfo(prisma, res, req);
+
+  if (!userInfo) {
+    return res.status(400).json("User not found");
+  }
+
+  const { name, password } = req.body;
+
+  if (!name && !password) {
+    return res.status(400).json("No fields to update");
+  }
+
+  if (name) {
+    await prisma.user.update({
+      where: {
+        id: userInfo.id,
+      },
+      data: {
+        name: name,
+      },
+    });
+  }
+
+  if (password) {
+    const valid = await bcrypt.compare(password, userInfo.password);
+    if (!valid) {
+      return res.status(400).json("Invalid password");
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: {
+        id: userInfo.id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+  }
+
+  res.status(200).json("User updated successfully");
+});
+
+/**
+ * GET /user/stripe/usage
+ * @summary Gets your Stripe usage details
+ * @tags User - User Management / Info and Authentication endpoints
+ * @security BearerAuth
+ * @return {object} 200 - Usage details
  * @return {object} 400 - Error message
  * @example response - 200 - Success message
  * {
- *  "data": "data"
+ *   "data": "data"
  * }
  * @example response - 400 - Error message
  * "User not found"
- *
  */
 router.get(
   "/stripe/usage",
