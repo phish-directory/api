@@ -18,8 +18,11 @@ router.use(logRequest);
  * @example response - 200 - Success message
  * {
  *  "status": "up",
+ * "environment": "production",
  * "uptime": "00:00:00",
- * "dateStarted": "01-01-21 0:0:0 AM +00:00"
+ * "dateStarted": "01-01-21 0:0:0 AM +00:00",
+ * "version": "1.0.0",
+ * "domains": 0
  * }
  *
  */
@@ -34,11 +37,11 @@ router.get("/metrics", async (req, res) => {
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
   let domainCount = await prisma.domain.count();
   let npmVersion = process.env.npm_package_version;
-  let enviornment = process.env.NODE_ENV;
+  let environment = process.env.NODE_ENV;
 
   res.status(200).json({
     status: "up",
-    enviornment: enviornment,
+    environment: environment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
     version: npmVersion,

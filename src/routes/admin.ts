@@ -30,17 +30,53 @@ router.use(async (req, res, next) => {
 
 /**
  * GET /admin/metrics
- * @summary Get the uptime and date started of the API
+ * @summary Get the status, environment, uptime, date started, versions, and counts of various metrics.
  * @tags Admin - Endpoints restricted to API administrators.
  * @security BearerAuth
  * @return {object} 200 - Success message
  * @example response - 200 - Success message
  * {
- *  "status": "up",
- * "uptime": "00:00:00",
- * "dateStarted": "01-01-21 0:0:0 AM +00:00"
+ *   "status": "up",
+ *   "environment": "production",
+ *   "uptime": "00:00:00",
+ *   "dateStarted": "01-01-21 00:00:00 AM +00:00",
+ *   "versions": {
+ *     "api": "1.0.0",
+ *     "node": "v14.17.0",
+ *     "packages": {
+ *       "express": "4.17.1",
+ *       "prisma": "2.28.0",
+ *       "axios": "0.21.1",
+ *       "cron": "1.8.2",
+ *       "helmet": "4.6.0",
+ *       "jsonwebtoken": "8.5.1"
+ *     }
+ *   },
+ *   "counts": {
+ *     "domains": 0,
+ *     "users": 0,
+ *     "requests": {
+ *       "lifetime": 0,
+ *       "today": 0,
+ *       "24 hours": 0,
+ *       "week": 0,
+ *       "month": 0,
+ *       "year": 0
+ *     },
+ *     "responses": {
+ *       "googleSafebrowsing": 0,
+ *       "ipQualityScore": 0,
+ *       "phisherman": 0,
+ *       "phishObserver": 0,
+ *       "phishReport": 0,
+ *       "securityTrails": 0,
+ *       "sinkingYahts": 0,
+ *       "urlScan": 0,
+ *       "virusTotal": 0,
+ *       "walshy": 0
+ *     }
+ *   }
  * }
- *
  */
 router.get("/metrics", authenticateToken, async (req, res) => {
   metrics.increment("endpoint.misc.metrics");
@@ -68,11 +104,11 @@ router.get("/metrics", authenticateToken, async (req, res) => {
 
   const requestsCount = await prisma.expressRequest.count();
 
-  let enviornment = process.env.NODE_ENV;
+  let environment = process.env.NODE_ENV;
 
   res.status(200).json({
     status: "up",
-    enviornment: enviornment,
+    environment: environment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
     versions: {
