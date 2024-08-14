@@ -18,7 +18,7 @@ router.use(logRequest);
 /**
  * GET /domain/check
  * @summary Checks if a domain is classified as something malicious (scam, phishing, etc.)
- * @tags Domain
+ * @tags Domain - Endpoints related to domain checking
  * @security BearerAuth
  * @param {string} domain.query.required - domain to check
  * @param {string} returnRawData.query - boolean value, if true, also returns the raw data from the API, if false, only returns the verdict

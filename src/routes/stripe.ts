@@ -42,7 +42,8 @@ router.post("/webhook", async (req, res) => {
     return res.status(400).send("Missing Stripe-Signature header");
   }
 
-  let event;
+  let event: any;
+
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
@@ -62,7 +63,7 @@ router.post("/webhook", async (req, res) => {
       const subscriptionId = data.object.subscription;
 
       console.log(
-        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`
+        `💰 Customer ${customerId} subscribed to plan ${subscriptionId}`,
       );
 
       // Get the subscription. The first item is the plan the user subscribed to.

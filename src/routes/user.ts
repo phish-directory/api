@@ -35,7 +35,7 @@ type User = {
 /**
  * POST /user/signup
  * @summary Sign up a user for the api
- * @tags User
+ * @tags User - User Management / Info and Authentication endpoints.
  * @param {User} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
@@ -108,7 +108,7 @@ type UserLogin = {
 /**
  * POST /user/login
  * @summary Log in a user to the api
- * @tags User
+ * @tags User - User Management / Info and Authentication endpoints.
  * @param {UserLogin} request.body.required - User information
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
@@ -158,7 +158,7 @@ router.post("/login", async (req, res) => {
 /**
  * GET /user/me
  * @summary Gets your user details
- * @tags User
+ * @tags User - User Management / Info and Authentication endpoints.
  * @security BearerAuth
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
@@ -250,7 +250,7 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
 /**
  * GET /user/stripe/usage
  * @summary Gets your stripe usage details
- * @tags User
+ * @tags User - User Management / Info and Authentication endpoints.
  * @security BearerAuth
  * @return {object} 200 - Success message
  * @return {object} 400 - Error message
