@@ -29,26 +29,11 @@ router.get("/metrics", async (req, res) => {
   let uptime = process.uptime();
   // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
-
   let dateStarted = new Date(Date.now() - uptime * 1000);
   // format the date started with moment
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
-
   let domainCount = await prisma.domain.count();
-  let userCount = await prisma.user.count();
-  let requestCount = await prisma.expressRequest.count();
-
   let npmVersion = process.env.npm_package_version;
-  let expressVersion = process.env.npm_package_dependencies_express;
-  let prismaVersion = process.env.npm_package_dependencies;
-  let nodeVersion = process.version;
-
-  const sha = require("child_process")
-    .execSync("git rev-parse HEAD")
-    .toString()
-    .trim();
-  const shaSliced = sha.slice(0, 7);
-
   let enviornment = process.env.NODE_ENV;
 
   res.status(200).json({
