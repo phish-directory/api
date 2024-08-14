@@ -1,11 +1,10 @@
 import * as express from "express";
 import moment from "moment";
 
+import { authenticateToken, getUserInfo } from "../functions/jwt";
+import metrics from "../metrics";
 import { logRequest } from "../middlewear/logRequest";
 import { prisma } from "../prisma";
-import metrics from "../metrics";
-import { authenticateToken } from "../functions/jwt";
-import { getUserInfo } from "../functions/jwt";
 
 const router = express.Router();
 router.use(express.json());
@@ -16,8 +15,6 @@ router.use(logRequest);
 // middleware to check if the user is an admin
 router.use(async (req, res, next) => {
   let user = await getUserInfo(prisma, res, req);
-
-  console.log(user);
 
   if (user.permission !== "admin") {
     res.status(403).json({

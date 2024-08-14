@@ -1,6 +1,7 @@
 import * as jwt from "jsonwebtoken";
 
 import metrics from "../metrics";
+import { prisma } from "../prisma";
 
 /**
  * Function to authenticate the token
@@ -10,7 +11,6 @@ import metrics from "../metrics";
  * @returns void
  */
 export async function authenticateToken(req: any, res: any, next: any) {
-  const tsStart = Date.now();
   metrics.increment("functions.jwt.authenticateToken");
 
   const authHeader = req.headers["authorization"];
@@ -18,22 +18,40 @@ export async function authenticateToken(req: any, res: any, next: any) {
 
   if (token == null) return res.sendStatus(401);
 
-  jwt.verify(
+  let jwUser = jwt.verify(
     token,
     process.env.JWT_SECRET! as string,
     (err: any, user: any) => {
       if (err) {
         console.log(err);
         return res.sendStatus(403);
+      } else {
+        return user;
       }
-
-      req.user = user;
-
-      const tsEnd = Date.now();
-      metrics.timing("functions.jwt.authenticateToken", tsEnd - tsStart);
-      next();
-    }
+    },
   );
+
+  let user = await prisma.user.findUnique({
+    where: {
+      // @ts-expect-error
+      id: jwUser.id,
+    },
+  });
+
+  if (!user) {
+    return res.status(400).json("User not found");
+  }
+
+  if (user.deleted === true) {
+    return res
+      .status(403)
+      .json(
+        "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+      );
+  }
+
+  req.user = user;
+  next();
 }
 
 /**
@@ -50,7 +68,7 @@ export async function generateAccessToken(user: any) {
       id: user.id,
       uuid: user.uuid,
     },
-    process.env.JWT_SECRET!
+    process.env.JWT_SECRET!,
   );
   const tsEnd = Date.now();
   metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
