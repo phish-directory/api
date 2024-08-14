@@ -181,18 +181,68 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
     return res.status(400).json("User not found");
   }
 
-  // get the count of requests made by the user
+  // Get the count of requests made by the user
   const count = await prisma.expressRequest.count({
     where: {
       userId: userInfo!.id,
     },
   });
 
+  // Fetch all requests made by the user
+  const userRequests = await prisma.expressRequest.findMany({
+    where: {
+      userId: userInfo!.id,
+    },
+  });
+
+  // Normalize the URLs by removing query parameters
+  const normalizedRequests = userRequests.map((req) => {
+    const urlWithoutQuery = req.url.split("?")[0]; // Remove query params
+    return {
+      ...req,
+      url: urlWithoutQuery,
+    };
+  });
+
+  // Group the requests by the normalized URL and count occurrences
+  const requestCountsByUrl = normalizedRequests.reduce((acc, req) => {
+    acc[req.url] = (acc[req.url] || 0) + 1;
+    return acc;
+  }, {});
+
+  const requestUrls = Object.keys(requestCountsByUrl).map((url) => ({
+    url,
+    count: requestCountsByUrl[url],
+  }));
+
+  // Group by request methods using Prisma
+  const groupByMethod = await prisma.expressRequest.groupBy({
+    by: ["method"],
+    where: {
+      userId: userInfo!.id,
+    },
+    _count: {
+      method: true,
+    },
+  });
+
+  // Transform the data to a more readable format
+  const requestMethods = groupByMethod.map((methodGroup) => ({
+    method: methodGroup.method,
+    count: methodGroup._count.method,
+  }));
+
   res.status(200).json({
     name: userInfo.name,
     email: userInfo.email,
     uuid: userInfo.uuid,
-    requestCount: count,
+    metrics: {
+      requests: {
+        count: count,
+        methods: requestMethods,
+        urls: requestUrls,
+      },
+    },
     accountCreated: userInfo.createdAt,
   });
 });
@@ -221,7 +271,7 @@ router.get(
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);
-  }
+  },
 );
 
 export default router;
