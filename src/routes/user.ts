@@ -158,19 +158,40 @@ router.post("/login", async (req, res) => {
 /**
  * GET /user/me
  * @summary Gets your user details
- * @tags User - User Management / Info and Authentication endpoints.
+ * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
  * @return {object} 200 - Success message
- * @return {object} 400 - Error message
+ * @return {string} 400 - Error message
  * @example response - 200 - Success message
  * {
- *  "name": "name",
- *  "email": "email",
- *  "uuid": "uuid"
+ *   "name": "John Doe",
+ *   "email": "john.doe@example.com",
+ *   "uuid": "123e4567-e89b-12d3-a456-426614174000",
+ *   "metrics": {
+ *     "requests": {
+ *       "count": 3,
+ *       "methods": [
+ *         {
+ *           "method": "GET",
+ *           "count": 3
+ *         }
+ *       ],
+ *       "urls": [
+ *         {
+ *           "url": "/user/me",
+ *           "count": 2
+ *         },
+ *         {
+ *           "url": "/up",
+ *           "count": 1
+ *         }
+ *       ]
+ *     }
+ *   },
+ *   "accountCreated": "2024-08-14T02:11:02.626Z"
  * }
  * @example response - 400 - Error message
  * "User not found"
- *
  */
 router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
   metrics.increment("endpoint.user.me");
