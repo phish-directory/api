@@ -67,12 +67,6 @@ router.get("/metrics", authenticateToken, async (req, res) => {
 
   const requestsCount = await prisma.expressRequest.count();
 
-  const sha = require("child_process")
-    .execSync("git rev-parse HEAD")
-    .toString()
-    .trim();
-  const shaSliced = sha.slice(0, 7);
-
   let enviornment = process.env.NODE_ENV;
 
   res.status(200).json({
@@ -145,10 +139,6 @@ router.get("/metrics", authenticateToken, async (req, res) => {
         virusTotal: await prisma.virusTotalAPIResponse.count(),
         walshy: await prisma.walshyAPIResponse.count(),
       },
-    },
-    SHAs: {
-      full: sha,
-      short: shaSliced,
     },
   });
 });
