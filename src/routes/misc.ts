@@ -12,7 +12,8 @@ router.use(logRequest);
 
 /**
  * GET /misc/metrics
- * @summary Get the uptime and date started of the API
+ * @summary Returns basic metrics / information about the API for users.
+ * @description Basic information about the API, such as status, environment, uptime, date started, version, and domain count.
  * @tags Miscalleanous - Endpoints that don't fit into any other category.
  * @return {object} 200 - Success message
  * @example response - 200 - Success message

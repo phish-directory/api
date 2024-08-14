@@ -17,7 +17,21 @@ router.use(logRequest);
 
 /**
  * GET /domain/check
- * @summary Checks if a domain is classified as something malicious (scam, phishing, etc.)
+ * @summary Checks if a domain is phishing/malicious.
+ * @description This endpoint checks if a domain is phishing/malicious.
+ It will return a boolean value of true if it is phishing/malicious and false if it is not, and some other data.
+
+ Internally, this queries multiple sources to check if the domain is phishing/malicious, including but not limited to:
+    - Walshy's API
+    - IPQualityScore
+    - Google Safebrowsing
+    - Sinking Yahts
+    - PhishTank
+    - OpenPhish
+    - Lots more...
+
+We also keep our own database of domains and their status, so we can return the status of the domain quickly if it has been checked before.
+
  * @tags Domain - Endpoints related to domain checking
  * @security BearerAuth
  * @param {string} domain.query.required - Domain to check
@@ -172,6 +186,24 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
   }
 });
 
+/**
+ * PUT /domain/classify
+ * @summary Classify a domain to specific types (scam, phishing, etc.)
+ * @description Classify a domain to specific types (scam, phishing, etc.).
+ The classification parameter should be one of the following: "postal", "banking", "item_scams", or "other".
+
+ This endpoint requires TRUSTED level access. To check if you have this access run /user/me with your token.
+
+ To request trusted level access or a new classification type, contact Jasper via email at jasper@phish.directory or via Slack.
+ * @tags Domain - Endpoints related to domain checking
+ * @security BearerAuth
+ * @body {string} domain - Domain to classify
+ * @body {string} classification - Classification to assign to the domain
+ * @return {object} 200 - Success message
+ * @return {string} 400 - Error message
+ * @example response - 200 - Success message
+ * "Domain classified successfully"
+ */
 router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
   const data = req.body;
   const domain = data.domain;
@@ -248,6 +280,8 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
         classification: classification,
       },
     });
+
+    return res.status(200).json("Domain classified successfully");
   } else {
     console.log(user.permission);
     return res.status(403).json("Unauthorized");
