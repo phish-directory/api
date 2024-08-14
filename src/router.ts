@@ -6,6 +6,7 @@ import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
+import adminRouter from "./routes/admin";
 import metrics from "./metrics";
 
 const router = express.Router();
@@ -57,5 +58,6 @@ router.use("/user", userRouter);
 router.use("/misc", miscRouter);
 router.use("/domain", domainRouter);
 router.use("/stripe", stripeRouter);
+router.use("/admin", adminRouter);
 
 export default router;
