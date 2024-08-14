@@ -54,7 +54,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
       );
   }
 
@@ -94,7 +94,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData
+      phishreportData,
     );
 
     if (isPhish) {
@@ -109,7 +109,13 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       });
 
       return res.status(200).json({
+        domain: domain,
         phishing: true,
+        times: {
+          createdAt: dbDomain.createdAt,
+          updatedAd: dbDomain.updatedAt,
+          lastChecked: dbDomain.lastChecked,
+        },
       });
     } else {
       await prisma.domain.update({
@@ -123,17 +129,37 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       });
 
       return res.status(200).json({
+        domain: domain,
         phishing: false,
+        times: {
+          createdAt: dbDomain.createdAt,
+          updatedAd: dbDomain.updatedAt,
+          lastChecked: dbDomain.lastChecked,
+        },
       });
     }
   } else {
+    domainCheck(domain);
+
     if (dbDomain.malicious) {
       return res.status(200).json({
+        domain: domain,
         phishing: true,
+        times: {
+          createdAt: dbDomain.createdAt,
+          updatedAd: dbDomain.updatedAt,
+          lastChecked: dbDomain.lastChecked,
+        },
       });
     } else {
       return res.status(200).json({
+        domain: domain,
         phishing: false,
+        times: {
+          createdAt: dbDomain.createdAt,
+          updatedAd: dbDomain.updatedAt,
+          lastChecked: dbDomain.lastChecked,
+        },
       });
     }
   }
