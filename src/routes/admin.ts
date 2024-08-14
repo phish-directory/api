@@ -10,6 +10,7 @@ import { getUserInfo } from "../functions/jwt";
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
+router.use(authenticateToken);
 router.use(logRequest);
 
 // middleware to check if the user is an admin
@@ -79,7 +80,7 @@ router.use(async (req, res, next) => {
  *   }
  * }
  */
-router.get("/metrics", authenticateToken, async (req, res) => {
+router.get("/metrics", async (req, res) => {
   metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
@@ -179,6 +180,43 @@ router.get("/metrics", authenticateToken, async (req, res) => {
       },
     },
   });
+});
+
+/**
+ * DELETE /admin/user/:id
+ * @summary Deletes a user by their ID.
+ * @tags Admin - Endpoints restricted to API administrators.
+ * @security BearerAuth
+ * @param {number} id.path - The ID of the user to delete.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
+ * {
+ *   "message": "User deleted successfully."
+ * }
+ */
+router.delete("/user/:id", async (req, res) => {
+  metrics.increment("endpoint.admin.user.delete");
+  try {
+    const { id } = req.params;
+
+    await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        deletedAt: new Date(),
+        deleted: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "User deleted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
 });
 
 export default router;

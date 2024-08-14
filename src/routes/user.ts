@@ -138,13 +138,21 @@ router.post("/login", async (req, res) => {
   });
 
   if (!user) {
-    return res.status(400).json("User not found");
+    return res.status(400).json("Invalid email or password");
   }
 
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    return res.status(400).json("Invalid password");
+    return res.status(400).json("Invalid email or password");
+  }
+
+  if (user.deleted === true) {
+    return res
+      .status(403)
+      .json(
+        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+      );
   }
 
   let token = await generateAccessToken(user);
