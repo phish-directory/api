@@ -20,12 +20,19 @@ router.use(logRequest);
  * @summary Checks if a domain is classified as something malicious (scam, phishing, etc.)
  * @tags Domain - Endpoints related to domain checking
  * @security BearerAuth
- * @param {string} domain.query.required - domain to check
- * @param {string} returnRawData.query - boolean value, if true, also returns the raw data from the API, if false, only returns the verdict
- * @return {string} 200 - Success message
+ * @param {string} domain.query.required - Domain to check
+ * @return {object} 200 - Success message
  * @return {string} 400 - Error message
  * @example response - 200 - Success message
- * "Check!"
+ * {
+ *   "domain": "google.com",
+ *   "phishing": false,
+ *   "times": {
+ *     "createdAt": "2024-08-14T00:00:00.000Z",
+ *     "updatedAt": "2024-08-14T00:00:00.000Z",
+ *     "lastChecked": "2024-08-14T00:00:00.000Z"
+ *   }
+ * }
  * @example response - 400 - Error: No domain parameter
  * "No domain parameter found"
  * @example response - 400 - Error: Invalid domain parameter
@@ -113,7 +120,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
         phishing: true,
         times: {
           createdAt: dbDomain.createdAt,
-          updatedAd: dbDomain.updatedAt,
+          updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
       });
@@ -133,7 +140,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
         phishing: false,
         times: {
           createdAt: dbDomain.createdAt,
-          updatedAd: dbDomain.updatedAt,
+          updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
       });
@@ -147,7 +154,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
         phishing: true,
         times: {
           createdAt: dbDomain.createdAt,
-          updatedAd: dbDomain.updatedAt,
+          updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
       });
@@ -157,7 +164,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
         phishing: false,
         times: {
           createdAt: dbDomain.createdAt,
-          updatedAd: dbDomain.updatedAt,
+          updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
       });
