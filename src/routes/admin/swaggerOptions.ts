@@ -3,9 +3,10 @@ import { describe } from "node:test";
 let filePattern;
 
 if (process.env.NODE_ENV === "production") {
-  filePattern = ["./admin.js"];
+  filePattern = ["./admin.js", "./routes/*/*.js"];
 } else {
-  filePattern = ["./admin.{ts,js}"];
+  filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
+  // "./routes/*.{ts,js}"
 }
 
 /**
