@@ -4,7 +4,7 @@ import { getVersion } from "../../functions/getVersion";
 let filePattern;
 
 if (process.env.NODE_ENV === "production") {
-  filePattern = ["./admin.js", "./routes/*/*.js"];
+  filePattern = ["./admin.js", "./routes/*.js"];
 } else {
   filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
   // "./routes/*.{ts,js}"
