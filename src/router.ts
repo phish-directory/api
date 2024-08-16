@@ -6,7 +6,7 @@ import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
-import adminRouter from "./routes/admin/admin";
+import adminRouter from "./routes/admin/router";
 import metrics from "./metrics";
 
 const router = express.Router();
