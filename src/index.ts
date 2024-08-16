@@ -5,7 +5,6 @@ import helmet from "helmet";
 
 import { app } from "./app";
 import { server } from "./server";
-import { io } from "./socket";
 import { prisma } from "./prisma";
 import router from "./router";
 import metrics from "./metrics";
