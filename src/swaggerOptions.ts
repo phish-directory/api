@@ -48,6 +48,4 @@ export const swaggerOptions = {
   filesPattern: filePattern, // Glob pattern to find your jsdoc files
   swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
   baseDir: __dirname,
-  // disable the default tag
-  defaultTag: false,
 };

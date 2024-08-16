@@ -6,7 +6,7 @@ import domainRouter from "./routes/domain";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
-import adminRouter from "./routes/admin";
+import adminRouter from "./routes/admin/admin";
 import metrics from "./metrics";
 
 const router = express.Router();
@@ -53,6 +53,16 @@ router.get("/up", logRequest, (req, res) => {
     status: "up",
   });
 });
+
+/**
+ * GET /docs
+ * @summary Swagger UI for API documentation.
+ */
+
+/**
+ * GET /admin/docs
+ * @summary Swagger UI for admin API documentation.
+ */
 
 router.use("/user", userRouter);
 router.use("/misc", miscRouter);

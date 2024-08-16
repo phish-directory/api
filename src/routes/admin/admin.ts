@@ -2,12 +2,12 @@ import moment from "moment";
 import bcrypt from "bcrypt";
 import express, { Request, Response } from "express";
 
-import { authenticateToken, getUserInfo } from "../functions/jwt";
-import metrics from "../metrics";
-import { logRequest } from "../middlewear/logRequest";
-import { prisma } from "../prisma";
-import { createCustomer } from "../stripe";
-import type { User } from "../types/enums";
+import { authenticateToken, getUserInfo } from "../../functions/jwt";
+import metrics from "../../metrics";
+import { logRequest } from "../../middlewear/logRequest";
+import { prisma } from "../../prisma";
+import { createCustomer } from "../../stripe";
+import type { User } from "../../types/enums";
 
 const router = express.Router();
 router.use(express.json());
@@ -35,7 +35,7 @@ router.use(async (req, res, next) => {
  * GET /admin/metrics
  * @summary Returns ADVANCED metrics / information about the API for administrators.
  * @description Get the status, environment, uptime, date started, versions, and counts of various metrics.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Misc - Miscellaneous endpoints
  * @security BearerAuth
  * @return {object} 200 - Success message
  * @example response - 200 - Success message
@@ -187,7 +187,7 @@ router.get("/metrics", async (req, res) => {
 /**
  * GET /admin/users
  * @summary Returns a list of all users.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Users - Operations about user
  * @security BearerAuth
  * @return {object} 200 - An array of user objects.
  * @example response - 200 - An array of user objects.
@@ -220,7 +220,7 @@ router.get("/users", async (req, res) => {
 /**
  * GET /admin/user/:id
  * @summary Returns a user by their ID.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Users - Operations about user
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to retrieve.
  * @return {object} 200 - A user object.
@@ -257,7 +257,7 @@ router.get("/user/:id", async (req, res) => {
 /**
  * DELETE /admin/user/:id
  * @summary Deletes a user by their ID.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Users - Operations about user
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to delete.
  * @return {object} 200 - Success message
@@ -294,7 +294,7 @@ router.delete("/user/:id", async (req, res) => {
 /**
  * PATCH /admin/user/:id
  * @summary Updates a user by their ID.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Users - Operations about user
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to update.
  * @param {object} user.body.required - The user object to update.
@@ -340,7 +340,7 @@ router.patch("/user/:id", async (req, res) => {
 /**
  * POST /admin/user/new
  * @summary Creates a new user.
- * @tags Admin - Endpoints restricted to API administrators.
+ * @tags Users - Operations about user
  * @security BearerAuth
  * @param {User} user.body.required - The user object to create.
  * @return {object} 200 - Success message
