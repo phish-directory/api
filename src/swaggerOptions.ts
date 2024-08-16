@@ -6,6 +6,8 @@ if (process.env.NODE_ENV === "production") {
   filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
 }
 
+let version = process.env.npm_package_version;
+
 /**
  * Swagger Options, used to configure the swagger-ui-express package
  */
@@ -13,7 +15,7 @@ export const swaggerOptions = {
   openapi: "3.0.0",
   info: {
     title: "phish.directory API",
-    version: `1.0.0`,
+    version: `${version}`,
     description:
       "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
     termsOfService: "",
