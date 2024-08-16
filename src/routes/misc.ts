@@ -4,6 +4,7 @@ import moment from "moment";
 import metrics from "../metrics";
 import { logRequest } from "../middlewear/logRequest";
 import { prisma } from "../prisma";
+import { getVersion } from "../functions/getVersion";
 
 const router = express.Router();
 router.use(express.json());
@@ -31,13 +32,11 @@ router.get("/metrics", async (req, res) => {
   metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
-  // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);
-  // format the date started with moment
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
   let domainCount = await prisma.domain.count();
-  let npmVersion = process.env.npm_package_version;
+  let npmVersion = getVersion();
   let environment = process.env.NODE_ENV;
 
   res.status(200).json({

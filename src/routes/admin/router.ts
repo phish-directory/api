@@ -6,6 +6,7 @@ import metrics from "../../metrics";
 import { prisma } from "../../prisma";
 import type { User } from "../../types/enums";
 import userRouter from "./routes/user";
+import { getVersion, getPackageVersion } from "../../functions/getVersion";
 
 const router = express.Router();
 router.use(express.json());
@@ -92,16 +93,14 @@ router.get("/metrics", async (req, res) => {
   let userCount = await prisma.user.count();
   let requestCount = await prisma.expressRequest.count();
 
-  let npmVersion = process.env.npm_package_version;
-  let expressVersion = process.env.npm_package_dependencies_express;
-  let prismaVersion = process.env.npm_package_dependencies_prisma;
-  let axiosVersion = process.env.npm_package_dependencies_axios;
-  let cronVersion = process.env.npm_package_dependencies_cron;
-  let helmetVersion = process.env.npm_package_dependencies_helmet;
-  let jsonwebtokenVersion = process.env.npm_package_dependencies_jsonwebtoken;
+  let npmVersion = getVersion();
+  let expressVersion = getPackageVersion("express");
+  let prismaVersion = getPackageVersion("@prisma/client");
+  let axiosVersion = getPackageVersion("axios");
+  let cronVersion = getPackageVersion("cron");
+  let helmetVersion = getPackageVersion("helmet");
+  let jsonwebtokenVersion = getPackageVersion("jsonwebtoken");
   let nodeVersion = process.version;
-
-  const requestsCount = await prisma.expressRequest.count();
 
   let environment = process.env.NODE_ENV;
 
