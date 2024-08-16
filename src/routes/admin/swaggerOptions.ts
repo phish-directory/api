@@ -9,6 +9,8 @@ if (process.env.NODE_ENV === "production") {
   // "./routes/*.{ts,js}"
 }
 
+let version = process.env.npm_package_version;
+
 /**
  * Swagger Options, used to configure the swagger-ui-express package
  */
@@ -17,7 +19,7 @@ export const swaggerOptions = {
   info: {
     title: "phish.directory Admin Endpoints",
     description: "Admin docs for phish.directory",
-    version: `1.0.0`,
+    version: `${version}`,
     basePath: "/admin",
     securityDefinitions: {
       BearerAuth: {
