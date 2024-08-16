@@ -1,3 +1,5 @@
+import { getVersion } from "./functions/getVersion";
+
 let filePattern;
 
 if (process.env.NODE_ENV === "production") {
@@ -6,7 +8,7 @@ if (process.env.NODE_ENV === "production") {
   filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
 }
 
-let version = process.env.npm_package_version;
+let version = getVersion();
 
 /**
  * Swagger Options, used to configure the swagger-ui-express package
