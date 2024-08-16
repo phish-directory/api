@@ -6,7 +6,8 @@ import helmet from "helmet";
 
 import metrics from "./metrics";
 import router from "./router";
-import { swaggerOptions } from "./swaggerOptions";
+import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
+import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
 import * as logger from "./utils/logger";
 
 dotenv.config();
@@ -14,7 +15,8 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 const app = express();
 
-expressJSDocSwagger(app)(swaggerOptions);
+expressJSDocSwagger(app)(mainSwagOptions);
+expressJSDocSwagger(app)(adminSwagOptions);
 
 app.disable("x-powered-by");
 
@@ -43,7 +45,7 @@ app.use(
       preload: true,
     },
     xPoweredBy: false,
-  })
+  }),
 );
 
 // Add metric interceptors for axios
@@ -63,7 +65,7 @@ axios.interceptors.response.use((res: any) => {
   const codeStatKey = `http.request.${stat}.${httpCode}`;
   metrics.timing(
     timingStatKey,
-    performance.now() - res.config.metadata.startTs
+    performance.now() - res.config.metadata.startTs,
   );
   metrics.increment(codeStatKey, 1);
 
