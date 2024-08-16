@@ -6,6 +6,7 @@ import metrics from "../../metrics";
 import { prisma } from "../../prisma";
 import type { User } from "../../types/enums";
 import userRouter from "./routes/user";
+import domainRouter from "./routes/domain";
 import { getVersion, getPackageVersion } from "../../functions/getVersion";
 
 const router = express.Router();
@@ -178,7 +179,7 @@ router.get("/metrics", async (req, res) => {
   });
 });
 
-// router.use("/domain", domainRouter)
+router.use("/domain", domainRouter);
 router.use("/user", userRouter);
 
 export default router;
