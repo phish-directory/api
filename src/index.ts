@@ -1,11 +1,14 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
-import express from "express";
 import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
 
-import metrics from "./metrics";
+import { app } from "./app";
+import { server } from "./server";
+import { io } from "./socket";
+import { prisma } from "./prisma";
 import router from "./router";
+import metrics from "./metrics";
 import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
 import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
 import * as logger from "./utils/logger";
@@ -13,7 +16,6 @@ import * as logger from "./utils/logger";
 dotenv.config();
 
 const port = process.env.PORT || 3000;
-const app = express();
 
 expressJSDocSwagger(app)(mainSwagOptions);
 expressJSDocSwagger(app)(adminSwagOptions);
@@ -121,8 +123,9 @@ app.use("/", router);
 //   true,
 //   "America/New_York",
 // );
+//
 
-app.listen(port, () => {
+server.listen(port, () => {
   metrics.increment("app.startup");
   logger.info(`Server is running on port ${port}`);
 });
