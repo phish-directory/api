@@ -221,4 +221,78 @@ router.delete("/user/:id", async (req, res) => {
   }
 });
 
+/**
+ * PATCH /admin/user/role/:id/
+ * @summary Updates a user's role by their ID.
+ * @tags User - User Ops
+ * @security BearerAuth
+ * @param {number} id.path - The ID of the user to update.
+ * @param {string} permission.path - The role to update the user to.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
+ * {
+ *   "message": "User role updated to *ROLE* successfully."
+ * }
+ */
+router.patch("/role/:id/:permission", async (req, res) => {
+  metrics.increment("endpoint.admin.user.role.patch");
+
+  try {
+    const { id, permission } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "User ID is required.",
+      });
+    }
+
+    if (!permission) {
+      return res.status(400).json({
+        message: "Role is required.",
+      });
+    }
+
+    if (
+      permission !== "basic" &&
+      permission !== "trusted" &&
+      permission !== "admin"
+    ) {
+      return res.status(400).json({
+        message: "Invalid role.",
+      });
+    }
+
+    let user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    await prisma.user
+      .update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          permission: permission,
+        },
+      })
+      .then(() => {
+        res.status(200).json({
+          message: `User role updated to ${permission} successfully.`,
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
+});
+
 export default router;
