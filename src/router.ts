@@ -1,13 +1,14 @@
 import * as express from "express";
 import responseTime from "response-time";
 
-import { logRequest } from "./middlewear/logRequest";
+import metrics from "./metrics";
+import { logRequest } from "./middleware/logRequest";
+import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
+import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
-import adminRouter from "./routes/admin/router";
-import metrics from "./metrics";
 
 const router = express.Router();
 
@@ -67,6 +68,7 @@ router.get("/up", logRequest, (req, res) => {
 router.use("/user", userRouter);
 router.use("/misc", miscRouter);
 router.use("/domain", domainRouter);
+router.use("/email", emailRouter);
 router.use("/stripe", stripeRouter);
 router.use("/admin", adminRouter);
 

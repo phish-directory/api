@@ -36,7 +36,7 @@ export async function domainCheck(domain: string) {
   metrics.increment("functions.domainCheck");
 
   let walshyData = await walshy.check(domain, prisma);
-  let ipQualityScoreData = await ipQualityScore.check(domain, prisma);
+  let ipQualityScoreData = await ipQualityScore.domainCheck(domain, prisma);
   let googleSafebrowsingData = await googleSafebrowsing.check(domain, prisma);
   let sinkingYahtsData = await sinkingYahts.check(domain, prisma);
   let virusTotalData = await virusTotal.check(domain, prisma);

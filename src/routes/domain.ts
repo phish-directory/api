@@ -5,8 +5,8 @@ import { domainCheck } from "../functions/domain";
 import { authenticateToken } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
 import metrics from "../metrics";
-import { logRequest } from "../middlewear/logRequest";
-import { stripeMeter } from "../middlewear/stripeMeter";
+import { logRequest } from "../middleware/logRequest";
+import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
 import { Classifications } from "../types/enums";
 
@@ -75,7 +75,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -115,7 +115,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData,
+      phishreportData
     );
 
     if (isPhish) {
