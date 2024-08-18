@@ -79,9 +79,8 @@ app.use("/", router);
 // todo: build domain confirmation system
 // todo: scope for url and domain (both are different!)
 // todo: add regex to domain ( ^(?!http:\/\/|https:\/\/)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$ )
-// todo: implement token refresh system
-// todo: use puppeteer to check if a domain is a phishing site
 // todo: speed things up by returning last cached result if the domain is already scanned (still run scans after)
+// todo: email report ~ https://ipqualityscore.com/api/json/report/8I8oBoRCoJpeVkGax4utD5tDDzVTt78m?email=bad_email@example.com
 
 /* todo: list for implements:
 - https://phish.report/
