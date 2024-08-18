@@ -1,13 +1,13 @@
+import express from "express";
 import moment from "moment";
-import express, { Request, Response } from "express";
 
+import { getPackageVersion, getVersion } from "../../functions/getVersion";
 import { authenticateToken, getUserInfo } from "../../functions/jwt";
 import metrics from "../../metrics";
+import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
-import userRouter from "./routes/user";
 import domainRouter from "./routes/domain";
-import { getVersion, getPackageVersion } from "../../functions/getVersion";
-import { logRequest } from "../../middlewear/logRequest";
+import userRouter from "./routes/user";
 
 const router = express.Router();
 router.use(express.json());
