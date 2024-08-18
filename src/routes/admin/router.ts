@@ -4,7 +4,6 @@ import express, { Request, Response } from "express";
 import { authenticateToken, getUserInfo } from "../../functions/jwt";
 import metrics from "../../metrics";
 import { prisma } from "../../prisma";
-import type { User } from "../../types/enums";
 import userRouter from "./routes/user";
 import domainRouter from "./routes/domain";
 import { getVersion, getPackageVersion } from "../../functions/getVersion";

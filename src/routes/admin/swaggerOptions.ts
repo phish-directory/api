@@ -35,8 +35,11 @@ export const swaggerOptions = {
       },
     },
   },
-  // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
   filesPattern: filePattern, // Glob pattern to find your jsdoc files
+  exposeSwaggerUI: true,
   swaggerUIPath: "/admin/docs", // SwaggerUI will be render in this url.
+  exposeApiDocs: true,
+  apiDocsPath: "/admin/api-docs",
   baseDir: __dirname,
+  swaggerUiOptions: {},
 };
