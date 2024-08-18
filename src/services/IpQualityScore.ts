@@ -12,7 +12,7 @@ export class IpQualityScoreService {
    * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async domainCheck(domain: string, prisma: any) {
     metrics.increment("domain.check.api.ipqualityscore");
 
     const response = await axios.get(
@@ -29,5 +29,32 @@ export class IpQualityScoreService {
     );
 
     return response.data;
+  }
+
+  async emailCheck(email: string, prisma: any) {
+    let response = await axios.get(
+      `https://ipqualityscore.com/api/json/email/${process.env
+        .IPQS_API_KEY!}/${email}`,
+      {
+        headers: {
+          Referer: "https://phish.directory",
+          "User-Agent": "internal-server@phish.directory",
+          "X-Identity": "internal-server@phish.directory",
+        },
+      },
+    );
+
+    let data = response.data;
+
+    let keyData = {
+      valid: data.valid,
+      disposable: data.disposable,
+      dns_valid: data.dns_valid,
+      honeypot: data.honeypot,
+      deliverability: data.deliverability,
+      fraud_score: data.fraud_score,
+    };
+
+    return keyData;
   }
 }
