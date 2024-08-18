@@ -7,8 +7,8 @@ import {
   getUserInfo,
 } from "../functions/jwt";
 import metrics from "../metrics";
-import { logRequest } from "../middlewear/logRequest";
-import { stripeMeter } from "../middlewear/stripeMeter";
+import { logRequest } from "../middleware/logRequest";
+import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
 import { createCustomer, getCustomerUsage } from "../stripe";
 
@@ -158,7 +158,7 @@ router.post("/login", async (req, res) => {
     return res
       .status(403)
       .json(
-        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
       );
   }
 
@@ -374,7 +374,7 @@ router.get(
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);
-  },
+  }
 );
 
 export default router;

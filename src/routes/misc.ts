@@ -1,10 +1,10 @@
 import * as express from "express";
 import moment from "moment";
 
-import metrics from "../metrics";
-import { logRequest } from "../middlewear/logRequest";
-import { prisma } from "../prisma";
 import { getVersion } from "../functions/getVersion";
+import metrics from "../metrics";
+import { logRequest } from "../middleware/logRequest";
+import { prisma } from "../prisma";
 
 const router = express.Router();
 router.use(express.json());
