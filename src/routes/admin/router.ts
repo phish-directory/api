@@ -7,6 +7,7 @@ import { prisma } from "../../prisma";
 import userRouter from "./routes/user";
 import domainRouter from "./routes/domain";
 import { getVersion, getPackageVersion } from "../../functions/getVersion";
+import { logRequest } from "../../middlewear/logRequest";
 
 const router = express.Router();
 router.use(express.json());
@@ -78,7 +79,7 @@ router.use(async (req, res, next) => {
  *   }
  * }
  */
-router.get("/metrics", async (req, res) => {
+router.get("/metrics", logRequest, async (req, res) => {
   metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
@@ -178,7 +179,7 @@ router.get("/metrics", async (req, res) => {
   });
 });
 
-router.use("/domain", domainRouter);
+router.use("/domain", logRequest, domainRouter);
 router.use("/user", userRouter);
 
 export default router;
