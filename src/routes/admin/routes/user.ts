@@ -4,11 +4,34 @@ import express, { Request, Response } from "express";
 import metrics from "../../../metrics";
 import { prisma } from "../../../prisma";
 import { createCustomer } from "../../../stripe";
-import type { User } from "../../../types/enums";
 
 let saltRounds = 10;
 
 const router = express.Router();
+
+/**
+ * User w/ Name
+ * @typedef {object} User
+ * @property {string} name.required - The name of the user
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
+ */
+export type User = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+/**
+ * User login information
+ * @typedef {object} UserLogin
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
+ */
+export type UserLogin = {
+  email: string;
+  password: string;
+};
 
 /**
  * GET /admin/user

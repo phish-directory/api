@@ -41,15 +41,11 @@ export const swaggerOptions = {
       scheme: "bearer",
     },
   },
-  swaggerUiOptions: {
-    swaggerOptions: {
-      // This one removes the modals spec
-      // You can checkout more config info here: https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
-      defaultModelsExpandDepth: -1,
-    },
-  },
-  // filesPattern: ["../routes/*.ts", "../database/models/*.schema.ts"], // Glob pattern to find your jsdoc files
+  swaggerUiOptions: {},
   filesPattern: filePattern, // Glob pattern to find your jsdoc files
+  exposeSwaggerUI: true,
   swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
+  exposeApiDocs: true,
+  apiDocsPath: "/api-docs",
   baseDir: __dirname,
 };
