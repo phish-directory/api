@@ -34,6 +34,10 @@ export const logRequest = async (
     xIdentity = "";
   }
 
+  if (userAgent === " Checkly/1.0 (https://www.checklyhq.com)") {
+    return next();
+  }
+
   let userinfo;
   let usr;
   let method = req.method;
