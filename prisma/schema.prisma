@@ -53,9 +53,10 @@ model User {
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   deletedAt         DateTime?
-  domainsReported   Domain[]
   expressRequests   ExpressRequest[]
   classifications   Classification[]
+  domainsReported   Domain[]
+  emailsReported    Email[]
 }
 
 model Domain {
@@ -70,6 +71,18 @@ model Domain {
   updatedAt       DateTime         @updatedAt
   lastChecked     DateTime?
   RawAPIData      RawAPIData[]
+}
+
+model Email {
+  id          Int          @id @default(autoincrement())
+  uuid        String       @unique @default(uuid())
+  email       String
+  malicious   Boolean      @default(false)
+  reportedBy  User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lastChecked DateTime?
+  RawAPIData  RawAPIData[]
 }
 
 model ExpressRequest {
@@ -111,9 +124,11 @@ model Classification {
 model RawAPIData {
   id        Int      @id @default(autoincrement())
   sourceAPI APIs
-  domain    Domain?  @relation(fields: [domainId], references: [id])
   data      Json
+  domain    Domain?  @relation(fields: [domainId], references: [id])
+  domainId  Int?
+  email     Email?   @relation(fields: [emailId], references: [id])
+  emailId   Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  domainId  Int?
 }

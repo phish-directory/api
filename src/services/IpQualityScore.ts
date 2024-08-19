@@ -74,6 +74,31 @@ export class IpQualityScoreService {
 
       let data = response.data;
 
+      let dbEmail = await prisma.email.findFirst({
+        where: {
+          email: email,
+        },
+      });
+
+      if (!dbEmail) {
+        dbEmail = await prisma.email.create({
+          data: {
+            email: email,
+          },
+        });
+      }
+
+      await prisma.rawAPIData.create({
+        data: {
+          sourceAPI: "IpQualityScore",
+          email: {
+            connect: {
+              id: dbEmail.id,
+            },
+          },
+        },
+      });
+
       let keyData = {
         valid: data.valid,
         disposable: data.disposable,
