@@ -25,16 +25,17 @@ export async function domainCheck(domain: string) {
   const tsStart = Date.now();
   metrics.increment("functions.domainCheck");
 
-  let walshyData = await walshyService.check(domain);
-  let ipQualityScoreData = await ipQualityScoreService.domainCheck(domain);
-  let googleSafebrowsingData = await googleSafebrowsingService.check(domain);
-  let sinkingYahtsData = await sinkingYahtsService.check(domain);
-  let virusTotalData = await virusTotalService.check(domain);
-  let phishermanData = await phishermanService.check(domain);
-  let phishObserverData = await phishObserverService.check(domain);
-  let urlScanData = await urlScanService.check(domain);
-  let securitytrailsData = await securityTrailsService.check(domain);
-  let phishreportData = await phishReportService.check(domain);
+  let walshyData = await walshyService.domain.check(domain);
+  let ipQualityScoreData = await ipQualityScoreService.domain.check(domain);
+  let googleSafebrowsingData =
+    await googleSafebrowsingService.domain.check(domain);
+  let sinkingYahtsData = await sinkingYahtsService.domain.check(domain);
+  let virusTotalData = await virusTotalService.domain.check(domain);
+  let phishermanData = await phishermanService.domain.check(domain);
+  let phishObserverData = await phishObserverService.domain.check(domain);
+  let urlScanData = await urlScanService.domain.check(domain);
+  let securitytrailsData = await securityTrailsService.domain.check(domain);
+  let phishreportData = await phishReportService.domain.check(domain);
 
   let dbDomain = await prisma.domain.findFirst({
     where: {
