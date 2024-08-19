@@ -96,6 +96,7 @@ export class IpQualityScoreService {
               id: dbEmail.id,
             },
           },
+          data: data,
         },
       });
 
