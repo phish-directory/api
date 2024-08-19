@@ -1,5 +1,9 @@
 import axios from "axios";
+
 import metrics from "../metrics";
+import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
+import { APIs } from "../types/enums";
 
 /**
  * A service that provides access to the Google Safebrowsing for checking and reporting domains.
@@ -9,10 +13,9 @@ export class GoogleSafebrowsingService {
    * Asynchronously checks a given domain against the google safebrowsing service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async check(domain: string) {
     metrics.increment("domain.check.api.google_safebrowsing");
 
     const response = await axios.post(
@@ -36,6 +39,21 @@ export class GoogleSafebrowsingService {
       },
     );
 
-    return response.data;
+    const data = response.data;
+    const dbDomain = await getDbDomain(domain);
+
+    await prisma.rawAPIData.create({
+      data: {
+        sourceAPI: "SafeBrowsing",
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: data,
+      },
+    });
+
+    return data;
   }
 }

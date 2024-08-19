@@ -1,5 +1,8 @@
 import axios from "axios";
+
 import metrics from "../metrics";
+import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the SinkingYahts service for checking and reporting domains.
@@ -9,10 +12,9 @@ export class SinkingYahtsService {
    * Asynchronously checks a given domain against the SinkingYahts service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async check(domain: string) {
     metrics.increment("domain.check.api.sinkingyahts");
 
     const response = await axios.get<boolean>(
@@ -27,6 +29,21 @@ export class SinkingYahtsService {
       },
     );
 
-    return response.data;
+    const data = response.data;
+    const dbDomain = await getDbDomain(domain);
+
+    await prisma.rawAPIData.create({
+      data: {
+        sourceAPI: "SinkingYachts",
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: data,
+      },
+    });
+
+    return data;
   }
 }

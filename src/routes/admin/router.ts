@@ -164,16 +164,56 @@ router.get("/metrics", logRequest, async (req, res) => {
         }),
       },
       responses: {
-        googleSafebrowsing: await prisma.googleSafeBrowsingAPIResponse.count(),
-        ipQualityScore: await prisma.ipQualityScoreAPIResponse.count(),
-        phisherman: await prisma.phishermanAPIResponse.count(),
-        phishObserver: await prisma.phishObserverAPIResponse.count(),
-        phishReport: await prisma.phishReportAPIResponse.count(),
-        securityTrails: await prisma.securityTrailsAPIResponse.count(),
-        sinkingYahts: await prisma.sinkingYachtsAPIResponse.count(),
-        urlScan: await prisma.urlScanAPIResponse.count(),
-        virusTotal: await prisma.virusTotalAPIResponse.count(),
-        walshy: await prisma.walshyAPIResponse.count(),
+        googleSafebrowsing: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "SafeBrowsing",
+          },
+        }),
+        ipQualityScore: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "IpQualityScore",
+          },
+        }),
+        phisherman: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "Phisherman",
+          },
+        }),
+        phishObserver: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "PhishObserver",
+          },
+        }),
+        phishReport: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "PhishReport",
+          },
+        }),
+        securityTrails: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "SecurityTrails",
+          },
+        }),
+        sinkingYahts: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "SinkingYachts",
+          },
+        }),
+        urlScan: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "UrlScan",
+          },
+        }),
+        virusTotal: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "VirusTotal",
+          },
+        }),
+        walshy: await prisma.rawAPIData.count({
+          where: {
+            sourceAPI: "Walshy",
+          },
+        }),
       },
     },
   });

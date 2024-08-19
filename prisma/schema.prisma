@@ -27,6 +27,19 @@ enum Classifications {
   other
 }
 
+enum APIs {
+  SafeBrowsing
+  IpQualityScore
+  Phisherman
+  PhishObserver
+  PhishReport
+  SecurityTrails
+  SinkingYachts
+  UrlScan
+  VirusTotal
+  Walshy
+}
+
 model User {
   id                Int              @id @unique @default(autoincrement())
   uuid              String           @unique @default(uuid())
@@ -46,26 +59,17 @@ model User {
 }
 
 model Domain {
-  id                            Int                             @id @unique @default(autoincrement())
-  uuid                          String                          @unique @default(uuid())
-  domain                        String
-  malicious                     Boolean                         @default(false)
-  reportedBy                    User[]
-  captures                      Capture[]
-  classifications               Classification[]
-  createdAt                     DateTime                        @default(now())
-  updatedAt                     DateTime                        @updatedAt
-  lastChecked                   DateTime?
-  WalshyAPIResponse             WalshyAPIResponse[]
-  IpQualityScoreAPIResponse     IpQualityScoreAPIResponse[]
-  GoogleSafeBrowsingAPIResponse GoogleSafeBrowsingAPIResponse[]
-  PhishermanAPIResponse         PhishermanAPIResponse[]
-  SinkingYachtsAPIResponse      SinkingYachtsAPIResponse[]
-  VirusTotalAPIResponse         VirusTotalAPIResponse[]
-  PhishObserverAPIResponse      PhishObserverAPIResponse[]
-  UrlScanAPIResponse            UrlScanAPIResponse[]
-  SecurityTrailsAPIResponse     SecurityTrailsAPIResponse[]
-  PhishReportAPIResponse        PhishReportAPIResponse[]
+  id              Int              @id @unique @default(autoincrement())
+  uuid            String           @unique @default(uuid())
+  domain          String
+  malicious       Boolean          @default(false)
+  reportedBy      User[]
+  captures        Capture[]
+  classifications Classification[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  lastChecked     DateTime?
+  RawAPIData      RawAPIData[]
 }
 
 model ExpressRequest {
@@ -104,100 +108,12 @@ model Classification {
   userId         Int
 }
 
-model GoogleSafeBrowsingAPIResponse {
+model RawAPIData {
   id        Int      @id @default(autoincrement())
-  domainId  Int
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  data      Json? // Store the raw JSON response from GoogleSafeBrowsing
+  sourceAPI APIs
+  domain    Domain?  @relation(fields: [domainId], references: [id])
+  data      Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model IpQualityScoreAPIResponse {
-  id          Int      @id @default(autoincrement())
-  domainId    Int
-  domain      Domain   @relation(fields: [domainId], references: [id])
-  proxy       Boolean
-  countryCode String
-  data        Json // Store the raw JSON response from IpQualityScore
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model PhishermanAPIResponse {
-  id             Int      @id @default(autoincrement())
-  domainId       Int
-  domain         Domain   @relation(fields: [domainId], references: [id])
-  classification String
-  verifiedPhish  Boolean
-  data           Json // Store the raw JSON response from Phisherman
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model SinkingYachtsAPIResponse {
-  id        Int      @id @default(autoincrement())
-  domainId  Int
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  status    Boolean
-  data      Json // Store the raw JSON response from SinkingYachts
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VirusTotalAPIResponse {
-  id         Int      @id @default(autoincrement())
-  domainId   Int
-  domain     Domain   @relation(fields: [domainId], references: [id])
-  malicious  Boolean
-  suspicious Boolean
-  data       Json // Store the raw JSON response from VirusTotal
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model WalshyAPIResponse {
-  id        Int      @id @default(autoincrement())
-  domainId  Int
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  badDomain Boolean
-  data      Json // Store the raw JSON response from Walshy
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PhishObserverAPIResponse {
-  id        Int      @id @default(autoincrement())
-  data      Json // Store the raw JSON response from PhishObserver
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  domainId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UrlScanAPIResponse {
-  id        Int      @id @default(autoincrement())
-  data      Json // Store the raw JSON response from UrlScan
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  domainId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model SecurityTrailsAPIResponse {
-  id        Int      @id @default(autoincrement())
-  data      Json // Store the raw JSON response from UrlScan
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  domainId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PhishReportAPIResponse {
-  id        Int      @id @default(autoincrement())
-  data      Json // Store the raw JSON response from UrlScan
-  domain    Domain   @relation(fields: [domainId], references: [id])
-  domainId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  domainId  Int?
 }

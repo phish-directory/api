@@ -1,5 +1,8 @@
 import axios from "axios";
+
+import { getDbDomain } from "../functions/db/getDbDomain";
 import metrics from "../metrics";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the walshy service for checking and reporting domains.
@@ -9,16 +12,11 @@ export class WalshyService {
    * Asynchronously checks a given domain against the walshy service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
-   * @returns {Promise<{ badDomain: boolean, detection: "discord" | "community" }>} A promise that resolves with the check results.
    */
-  async check(
-    domain: string,
-    prisma: any,
-  ): Promise<{ badDomain: boolean; detection: "discord" | "community" }> {
+  async check(domain: string) {
     metrics.increment("domain.check.api.walshy");
 
-    const responnse = await axios.post<{
+    const response = await axios.post<{
       badDomain: boolean;
       detection: "discord" | "community";
     }>("https://bad-domains.walshy.dev/check", {
@@ -31,7 +29,22 @@ export class WalshyService {
       domain: domain,
     });
 
-    return responnse.data;
+    const data = response.data;
+    const dbDomain = await getDbDomain(domain);
+
+    await prisma.rawAPIData.create({
+      data: {
+        sourceAPI: "Walshy",
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: data,
+      },
+    });
+
+    return data;
   }
 
   // todo: log report counts and data to the database
@@ -39,10 +52,9 @@ export class WalshyService {
    * Asynchronously reports a given domain to the walshy service for further processing or analysis.
    *
    * @param {string} domain - The domain name to be reported.
-   * @param {} prisma - The Prisma client instance to use for database operations.
-   * @returns {Promise<void>} A promise that resolves when the report operation is complete.
+   * @returns A promise that resolves when the report operation is complete.
    */
-  async report(domain: string, prisma: any): Promise<void> {
+  async report(domain: string) {
     metrics.increment("domain.report.api.walshy");
 
     const response = await axios.post(

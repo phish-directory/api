@@ -1,7 +1,7 @@
 import * as express from "express";
 
 import { logRequest } from "../middleware/logRequest";
-import { IpQualityScoreService } from "../services/IpQualityScore";
+import { ipQualityScoreService } from "../services/_index";
 import { prisma } from "../prisma";
 
 const router = express.Router();
@@ -22,8 +22,7 @@ router.get("/check/:email", async (req, res) => {
     return res.status(400).json({ message: "Invalid email provided." });
   }
 
-  const service = new IpQualityScoreService();
-  const result = await service.emailCheck(email, prisma);
+  const result = await ipQualityScoreService.emailCheck(email);
   res.status(200).json(result);
 });
 
