@@ -22,7 +22,7 @@ router.get("/check/:email", async (req, res) => {
     return res.status(400).json({ message: "Invalid email provided." });
   }
 
-  const result = await ipQualityScoreService.emailCheck(email);
+  const result = await ipQualityScoreService.email.check(email);
   res.status(200).json(result);
 });
 
