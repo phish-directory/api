@@ -1,0 +1,21 @@
+import { GoogleSafebrowsingService } from "./GoogleSafebrowsing";
+import { IpQualityScoreService } from "./IpQualityScore";
+import { PhishObserverService } from "./PhishObserver";
+import { PhishReportService } from "./PhishReport";
+import { PhishermanService } from "./Phisherman";
+import { SecurityTrailsService } from "./SecurityTrails";
+import { SinkingYahtsService } from "./SinkingYahts";
+import { UrlScanService } from "./UrlScan";
+import { VirusTotalService } from "./VirusTotal";
+import { WalshyService } from "./Walshy";
+
+export const walshyService = new WalshyService();
+export const ipQualityScoreService = new IpQualityScoreService();
+export const googleSafebrowsingService = new GoogleSafebrowsingService();
+export const sinkingYahtsService = new SinkingYahtsService();
+export const virusTotalService = new VirusTotalService();
+export const phishermanService = new PhishermanService();
+export const phishObserverService = new PhishObserverService();
+export const urlScanService = new UrlScanService();
+export const securityTrailsService = new SecurityTrailsService();
+export const phishReportService = new PhishReportService();

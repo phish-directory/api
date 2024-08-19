@@ -1,5 +1,8 @@
 import axios from "axios";
+
 import metrics from "../metrics";
+import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the VirusTotal service for checking and reporting domains.
@@ -9,10 +12,9 @@ export class VirusTotalService {
    * Asynchronously checks a given domain against the VirusTotal service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async check(domain: string) {
     metrics.increment("domain.check.api.virustotal");
 
     const response = await axios.get(
@@ -27,17 +29,31 @@ export class VirusTotalService {
       },
     );
 
-    return response.data;
+    const data = response.data;
+    const dbDomain = await getDbDomain(domain);
+
+    await prisma.rawAPIData.create({
+      data: {
+        sourceAPI: "VirusTotal",
+        domain: {
+          connect: {
+            id: dbDomain.id,
+          },
+        },
+        data: data,
+      },
+    });
+
+    return data;
   }
 
   /**
    * Asynchronously reports a given domain to the VirusTotal service for further processing or analysis.
    *
    * @param {string} domain - The domain name to be reported.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async report(domain: string, prisma: any) {
+  async report(domain: string) {
     metrics.increment("domain.report.api.virustotal");
 
     const commentData = {

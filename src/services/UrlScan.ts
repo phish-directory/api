@@ -1,4 +1,7 @@
 import axios from "axios";
+
+import { prisma } from "../prisma";
+import { getDbDomain } from "../functions/db/getDbDomain";
 import metrics from "../metrics";
 
 /**
@@ -11,10 +14,9 @@ export class UrlScanService {
    * Asynchronously checks a given domain against the UrlScan service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async check(domain: string) {
     metrics.increment("domain.check.api.urlscan");
 
     const checkSearch = await axios.get(
@@ -77,6 +79,19 @@ export class UrlScanService {
           },
         },
       );
+
+      const dbDomain = await getDbDomain(domain);
+      await prisma.rawAPIData.create({
+        data: {
+          sourceAPI: "UrlScan",
+          domain: {
+            connect: {
+              id: dbDomain.id,
+            },
+          },
+          data: scanResult.data,
+        },
+      });
 
       return scanResult.data;
     }

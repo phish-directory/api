@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
+import puppeteer from "puppeteer";
 
 import { domainCheck } from "../functions/domain";
 import { authenticateToken } from "../functions/jwt";
@@ -9,6 +10,18 @@ import { logRequest } from "../middleware/logRequest";
 import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
 import { Classifications } from "../types/enums";
+import {
+  walshyService,
+  ipQualityScoreService,
+  googleSafebrowsingService,
+  sinkingYahtsService,
+  virusTotalService,
+  phishermanService,
+  phishObserverService,
+  urlScanService,
+  securityTrailsService,
+  phishReportService,
+} from "../services/_index";
 
 const router = express.Router();
 router.use(express.json());
@@ -61,8 +74,8 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
   let domain: string = query.domain! as string;
 
   // check for domain parameter
-  if (!domain) {
-    res.status(400).json("No domain parameter found");
+  if (!domain || domain === "" || domain === undefined || domain === null) {
+    return res.status(400).json("No domain parameter found");
   }
 
   // validate the domain (should be a top level domain
@@ -72,10 +85,10 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
 
   let regex = new RegExp("^(?!http://|https://)[a-zA-Z0-9-]+.[a-zA-Z]{2,}$");
   if (!regex.test(domain)) {
-    res
+    return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
       );
   }
 
@@ -115,7 +128,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData
+      phishreportData,
     );
 
     if (isPhish) {

@@ -1,5 +1,8 @@
 import axios from "axios";
+
 import metrics from "../metrics";
+import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the PhishObserver service for checking and reporting domains.
@@ -9,10 +12,9 @@ export class PhishObserverService {
    * Asynchronously checks a given domain against the PhishObserver service for any known bad domains.
    *
    * @param {string} domain - The domain name to be checked.
-   * @param {} prisma - The Prisma client instance to use for database operations.
    * @returns
    */
-  async check(domain: string, prisma: any) {
+  async check(domain: string) {
     metrics.increment("domain.check.api.phishobserver");
 
     try {
@@ -48,6 +50,20 @@ export class PhishObserverService {
           },
         },
       );
+
+      const dbDomain = await getDbDomain(domain);
+
+      await prisma.rawAPIData.create({
+        data: {
+          sourceAPI: "PhishObserver",
+          domain: {
+            connect: {
+              id: dbDomain.id,
+            },
+          },
+          data: searchResponse.data,
+        },
+      });
 
       return searchResponse.data;
     } catch (error: any) {

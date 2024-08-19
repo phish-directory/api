@@ -34,3 +34,16 @@ export enum Verdict {
   item_scams,
   other,
 }
+
+export enum APIs {
+  SafeBrowsing,
+  IpQualityScore,
+  Phisherman,
+  PhishObserver,
+  PhishReport,
+  SecurityTrails,
+  SinkingYachts,
+  UrlScan,
+  VirusTotal,
+  Walshy,
+}
