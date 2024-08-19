@@ -1,6 +1,5 @@
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
-import puppeteer from "puppeteer";
 
 import { domainCheck } from "../functions/domain";
 import { authenticateToken } from "../functions/jwt";
@@ -10,18 +9,6 @@ import { logRequest } from "../middleware/logRequest";
 import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
 import { Classifications } from "../types/enums";
-import {
-  walshyService,
-  ipQualityScoreService,
-  googleSafebrowsingService,
-  sinkingYahtsService,
-  virusTotalService,
-  phishermanService,
-  phishObserverService,
-  urlScanService,
-  securityTrailsService,
-  phishReportService,
-} from "../services/_index";
 
 const router = express.Router();
 router.use(express.json());
@@ -88,7 +75,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -128,7 +115,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData,
+      phishreportData
     );
 
     if (isPhish) {
@@ -275,7 +262,11 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
     });
 
     if (!databaseDomain) {
-      return res.status(400).json("Domain not found! Please run /check first.");
+      databaseDomain = await prisma.domain.create({
+        data: {
+          domain: domain,
+        },
+      });
     }
 
     await prisma.classification.create({
