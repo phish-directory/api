@@ -9,6 +9,13 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
 
+/**
+ * GET /email/check/:email
+ * @summary Asynchronously checks a given email against services for any known bad emails.
+ * @tags Email - Endpoints for checking email addresses.
+ * @param {string} email.path.required - The email address to be checked.
+ * @return {object} 200 - Success message
+ */
 router.get("/check/:email", async (req, res) => {
   const email = req.params.email;
 

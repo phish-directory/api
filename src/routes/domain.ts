@@ -32,7 +32,7 @@ router.use(logRequest);
 
 We also keep our own database of domains and their status, so we can return the status of the domain quickly if it has been checked before.
 
- * @tags Domain - Endpoints related to domain checking
+ * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
  * @param {string} domain.query.required - Domain to check
  * @return {object} 200 - Success message
@@ -75,7 +75,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
       );
   }
 
@@ -115,7 +115,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData
+      phishreportData,
     );
 
     if (isPhish) {
@@ -187,18 +187,35 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
 });
 
 /**
+ * Classification Type
+ * @typedef {string} ClassificationType
+ * @enum {string}
+ * @property {string} postal - postal
+ * @property {string} banking - banking
+ * @property {string} item_scams - item_scams
+ * @property {string} other - other
+ */
+
+/**
+ * Domain Classification Body
+ * @typedef {object} DomainClassification
+ * @property {string} domain.required - Domain to classify
+ * @property {ClassificationTyoe} classification.required - Classification to assign to the domain - eg: postal, banking, item_scams, other
+ */
+
+/**
  * PUT /domain/classify
  * @summary Classify a domain to specific types (scam, phishing, etc.)
  * @description Classify a domain to specific types (scam, phishing, etc.).
  The classification parameter should be one of the following: "postal", "banking", "item_scams", or "other".
+ (Check the ClassificationType enum for more information) (see swagger ui)
 
  This endpoint requires TRUSTED level access. To check if you have this access run /user/me with your token.
 
  To request trusted level access or a new classification type, contact Jasper via email at jasper@phish.directory or via Slack.
- * @tags Domain - Endpoints related to domain checking
+ * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
- * @body {string} domain - Domain to classify
- * @body {string} classification - Classification to assign to the domain
+ * @param {DomainClassification} request.body.required - Domain Classification Body
  * @return {object} 200 - Success message
  * @return {string} 400 - Error message
  * @example response - 200 - Success message
