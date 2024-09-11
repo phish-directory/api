@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
@@ -52,36 +52,36 @@ export async function domainCheck(domain: string) {
     });
   }
 
-  // Launch the browser and open a new blank page
-  const browser = await puppeteer.launch({ headless: "shell" });
-  const page = await browser.newPage();
+  // // Launch the browser and open a new blank page
+  // const browser = await puppeteer.launch({ headless: "shell" });
+  // const page = await browser.newPage();
 
-  // Navigate the page to a URL.
-  await page.goto(`https://${domain}`, {
-    waitUntil: "networkidle2",
-  });
+  // // Navigate the page to a URL.
+  // await page.goto(`https://${domain}`, {
+  //   waitUntil: "networkidle2",
+  // });
 
-  // Set screen size.
-  await page.setViewport({ width: 1080, height: 1024 });
+  // // Set screen size.
+  // await page.setViewport({ width: 1080, height: 1024 });
 
-  // Capture screenshot to a buffer
-  let pageimgBuffer = await page.screenshot({
-    type: "png",
-    encoding: "binary",
-  });
+  // // Capture screenshot to a buffer
+  // let pageimgBuffer = await page.screenshot({
+  //   type: "png",
+  //   encoding: "binary",
+  // });
 
-  await prisma.capture.create({
-    data: {
-      domain: {
-        connect: {
-          id: dbDomain.id,
-        },
-      },
-      binary: pageimgBuffer,
-    },
-  });
+  // await prisma.capture.create({
+  //   data: {
+  //     domain: {
+  //       connect: {
+  //         id: dbDomain.id,
+  //       },
+  //     },
+  //     binary: pageimgBuffer,
+  //   },
+  // });
 
-  await browser.close();
+  // await browser.close();
   // metrics.timing("functions.timing.domainCheck", Date.now() - tsStart);
 
   return {
