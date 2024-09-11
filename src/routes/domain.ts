@@ -4,7 +4,6 @@ import * as jwt from "jsonwebtoken";
 import { domainCheck } from "../functions/domain";
 import { authenticateToken } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
-import metrics from "../metrics";
 import { logRequest } from "../middleware/logRequest";
 import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
@@ -53,7 +52,7 @@ We also keep our own database of domains and their status, so we can return the 
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  */
 router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
-  metrics.increment("endpoint.domain.check");
+  // metrics.increment("endpoint.domain.check");
 
   // look for the query parameter
   const query = req.query!;
@@ -75,7 +74,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -115,7 +114,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData,
+      phishreportData
     );
 
     if (isPhish) {

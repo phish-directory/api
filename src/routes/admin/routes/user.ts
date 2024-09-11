@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
-import express, { Request, Response } from "express";
+import express from "express";
 
-import metrics from "../../../metrics";
 import { prisma } from "../../../prisma";
 import { createCustomer } from "../../../stripe";
 
@@ -53,7 +52,7 @@ export type UserLogin = {
  * ]
  */
 router.get("/", async (req, res) => {
-  metrics.increment("endpoint.admin.users.get");
+  // metrics.increment("endpoint.admin.users.get");
   try {
     const users = await prisma.user.findMany({
       orderBy: {
@@ -85,7 +84,7 @@ router.get("/", async (req, res) => {
  * }
  */
 router.get("/user/:id", async (req, res) => {
-  metrics.increment("endpoint.admin.user.get");
+  // metrics.increment("endpoint.admin.user.get");
   try {
     const { id } = req.params;
 
@@ -117,7 +116,7 @@ router.get("/user/:id", async (req, res) => {
  * }
  */
 router.patch("/user/:id", async (req, res) => {
-  metrics.increment("endpoint.admin.user.patch");
+  // metrics.increment("endpoint.admin.user.patch");
   try {
     const { id } = req.params;
     const { email, password, permission } = req.body;
@@ -220,7 +219,7 @@ router.post("/user/new", async (req, res) => {
  * }
  */
 router.delete("/user/:id", async (req, res) => {
-  metrics.increment("endpoint.admin.user.delete");
+  // metrics.increment("endpoint.admin.user.delete");
   try {
     const { id } = req.params;
 
@@ -258,7 +257,7 @@ router.delete("/user/:id", async (req, res) => {
  * }
  */
 router.patch("/role/:id/:permission", async (req, res) => {
-  metrics.increment("endpoint.admin.user.role.patch");
+  // metrics.increment("endpoint.admin.user.role.patch");
 
   try {
     const { id, permission } = req.params;

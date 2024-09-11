@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import metrics from "../metrics";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
 
@@ -16,7 +15,7 @@ export class VirusTotalService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.virustotal.domain.check");
+      // metrics.increment("services.virustotal.domain.check");
 
       const response = await axios.get(
         `https://www.virustotal.com/api/v3/domains/${domain}`,
@@ -27,7 +26,7 @@ export class VirusTotalService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       const data = response.data;
@@ -55,7 +54,7 @@ export class VirusTotalService {
      * @returns
      */
     report: async (domain: string) => {
-      metrics.increment("services.virustotal.domain.report");
+      // metrics.increment("services.virustotal.domain.report");
 
       const commentData = {
         data: {
@@ -79,7 +78,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         )
         .then((response) => {
           // console.log(response.data);
@@ -110,7 +109,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         )
         .then((response) => {
           // console.log(response.data);

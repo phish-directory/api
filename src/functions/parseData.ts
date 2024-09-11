@@ -1,5 +1,3 @@
-import metrics from "../metrics";
-
 /**
  * parses the data from the different sources and returns a boolean value
  * @param walshyData - Data from Walshy API
@@ -29,7 +27,7 @@ export async function parseData(
   // return true;
 
   const tsStart = Date.now();
-  metrics.increment("functions.domain.parseData");
+  // metrics.increment("functions.domain.parseData");
 
   let verdict: boolean;
 

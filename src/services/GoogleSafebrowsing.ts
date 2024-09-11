@@ -1,9 +1,7 @@
 import axios from "axios";
 
-import metrics from "../metrics";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
-import { APIs } from "../types/enums";
 
 /**
  * A service that provides access to the Google Safebrowsing for checking and reporting domains.
@@ -17,7 +15,7 @@ export class GoogleSafebrowsingService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.googleSafebrowsing.domain.check");
+      // metrics.increment("services.googleSafebrowsing.domain.check");
 
       const response = await axios.post(
         `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process
@@ -37,7 +35,7 @@ export class GoogleSafebrowsingService {
               },
             ],
           },
-        },
+        }
       );
 
       const data = response.data;

@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import metrics from "../metrics";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
 
@@ -16,7 +15,7 @@ export class SinkingYahtsService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.sinkingyahts.domain.check");
+      // metrics.increment("services.sinkingyahts.domain.check");
 
       const response = await axios.get<boolean>(
         `https://phish.sinking.yachts/v2/check/${domain}`,
@@ -27,7 +26,7 @@ export class SinkingYahtsService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       const data = response.data;

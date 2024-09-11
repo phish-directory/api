@@ -1,7 +1,7 @@
 import * as express from "express";
 import responseTime from "response-time";
 
-import metrics from "./metrics";
+// import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
 import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
@@ -22,9 +22,9 @@ router.use(
     const httpCode = res.statusCode;
     const timingStatKey = `http.response.${stat}`;
     const codeStatKey = `http.response.${stat}.${httpCode}`;
-    metrics.timing(timingStatKey, time);
-    metrics.increment(codeStatKey, 1);
-  }),
+    // metrics.timing(timingStatKey, time);
+    // // metrics.increment(codeStatKey, 1);
+  })
 );
 
 /**
@@ -35,7 +35,7 @@ router.use(
  *  "Redirecting to /docs"
  */
 router.get("/", logRequest, (req, res) => {
-  metrics.increment("http.request.root");
+  // // metrics.increment("http.request.root");
   res.status(301).redirect("/docs");
 });
 
@@ -49,7 +49,7 @@ router.get("/", logRequest, (req, res) => {
  * }
  */
 router.get("/up", logRequest, (req, res) => {
-  metrics.increment("http.request.up");
+  // // metrics.increment("http.request.up");
   res.status(200).json({
     status: "up",
   });
