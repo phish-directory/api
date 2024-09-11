@@ -4,12 +4,11 @@ import expressJSDocSwagger from "express-jsdoc-swagger";
 import helmet from "helmet";
 
 import { app } from "./app";
-import { server } from "./server";
-import { prisma } from "./prisma";
 import router from "./router";
-import metrics from "./metrics";
-import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
+import { server } from "./server";
+// import metrics from "./metrics";
 import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
+import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
 
 dotenv.config();
@@ -46,7 +45,7 @@ app.use(
       preload: true,
     },
     xPoweredBy: false,
-  }),
+  })
 );
 
 // Add metric interceptors for axios
@@ -64,11 +63,11 @@ axios.interceptors.response.use((res: any) => {
   const httpCode = res.status;
   const timingStatKey = `http.request.${stat}`;
   const codeStatKey = `http.request.${stat}.${httpCode}`;
-  metrics.timing(
-    timingStatKey,
-    performance.now() - res.config.metadata.startTs,
-  );
-  metrics.increment(codeStatKey, 1);
+  // metrics.timing(
+  //   timingStatKey,
+  //   performance.now() - res.config.metadata.startTs
+  // );
+  // // metrics.increment(codeStatKey, 1);
 
   return res;
 });
@@ -103,7 +102,7 @@ app.use("/", router);
 //   "* * * * * *",
 //   async function () {
 //     console.log("Thump Thump");
-//     metrics.increment("heartbeat");
+//     // metrics.increment("heartbeat");
 //   },
 //   null,
 //   true,
@@ -115,7 +114,7 @@ app.use("/", router);
 //   "0 * * * * *",
 //   async function () {
 //     console.log("Thump Thump");
-//     metrics.increment("heartbeat");
+//     // metrics.increment("heartbeat");
 //   },
 //   null,
 //   true,
@@ -124,6 +123,6 @@ app.use("/", router);
 //
 
 server.listen(port, () => {
-  metrics.increment("app.startup");
+  // metrics.increment("app.startup");
   logger.info(`Server is running on port ${port}`);
 });

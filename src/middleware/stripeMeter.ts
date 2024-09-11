@@ -14,7 +14,7 @@ export const stripeMeter = async (
 ): Promise<void> => {
   next();
   // if (process.env.NODE_ENV === "production") {
-  //   metrics.increment("stripeMeter.requests");
+  //   // metrics.increment("stripeMeter.requests");
   //   let userInfo = await getUserInfo(prisma, res, req);
 
   //   if (!userInfo) {

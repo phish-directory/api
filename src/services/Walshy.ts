@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
-import metrics from "../metrics";
 import { prisma } from "../prisma";
 
 /**
@@ -16,7 +15,7 @@ export class WalshyService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.walshy.domain.check");
+      // metrics.increment("services.walshy.domain.check");
 
       const response = await axios.post<{
         badDomain: boolean;
@@ -57,7 +56,7 @@ export class WalshyService {
      * @returns
      */
     report: async (domain: string) => {
-      metrics.increment("services.walshy.domain.report");
+      // metrics.increment("services.walshy.domain.report");
 
       const response = await axios.post(
         `https://bad-domains.walshy.dev/report`,
@@ -70,7 +69,7 @@ export class WalshyService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       return response.data;

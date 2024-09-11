@@ -1,8 +1,7 @@
 import axios from "axios";
 
-import metrics from "../metrics";
-import { prisma } from "../prisma";
 import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the Phisherman service for checking and reporting domains.
@@ -16,7 +15,7 @@ export class PhishermanService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.phisherman.domain.check");
+      // metrics.increment("services.phisherman.domain.check");
 
       const response = await axios.get(
         `https://api.phisherman.gg/v2/domains/info/${domain}`,
@@ -28,7 +27,7 @@ export class PhishermanService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       const data = response.data;

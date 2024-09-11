@@ -2,7 +2,6 @@ import * as express from "express";
 import moment from "moment";
 
 import { getVersion } from "../functions/getVersion";
-import metrics from "../metrics";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
 
@@ -29,7 +28,7 @@ router.use(logRequest);
  *
  */
 router.get("/metrics", async (req, res) => {
-  metrics.increment("endpoint.misc.metrics");
+  // metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);

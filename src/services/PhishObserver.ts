@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import metrics from "../metrics";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
 
@@ -16,7 +15,7 @@ export class PhishObserverService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.phishobserver.domain.check");
+      // metrics.increment("services.phishobserver.domain.check");
 
       try {
         let submissionResponse = await axios.post(
@@ -32,7 +31,7 @@ export class PhishObserverService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         );
 
         let subdata = await submissionResponse.data;
@@ -46,7 +45,7 @@ export class PhishObserverService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         );
 
         const dbDomain = await getDbDomain(domain);

@@ -6,7 +6,6 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
-import metrics from "../metrics";
 import { logRequest } from "../middleware/logRequest";
 import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
@@ -61,7 +60,7 @@ export type UserLogin = {
  * "User with that email already exists"
  */
 router.post("/signup", async (req, res) => {
-  metrics.increment("endpoint.user.signup");
+  // metrics.increment("endpoint.user.signup");
 
   const body = req.body;
 
@@ -128,7 +127,7 @@ router.post("/signup", async (req, res) => {
  * "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
  */
 router.post("/login", async (req, res) => {
-  metrics.increment("endpoint.user.login");
+  // metrics.increment("endpoint.user.login");
 
   const body = req.body;
   const { email, password } = body;
@@ -210,7 +209,7 @@ router.post("/login", async (req, res) => {
  * "User not found"
  */
 router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
-  metrics.increment("endpoint.user.me");
+  // metrics.increment("endpoint.user.me");
 
   const userInfo = await getUserInfo(prisma, res, req);
 
@@ -307,7 +306,7 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
  * }
  */
 router.patch("/me", authenticateToken, async (req, res) => {
-  metrics.increment("endpoint.user.me.patch");
+  // metrics.increment("endpoint.user.me.patch");
 
   const userInfo = await getUserInfo(prisma, res, req);
 
@@ -369,7 +368,7 @@ router.get(
   "/stripe/usage",
   authenticateToken,
   async (req: Request, res: Response) => {
-    metrics.increment("endpoint.user.stripe.usage");
+    // metrics.increment("endpoint.user.stripe.usage");
 
     let data = await getCustomerUsage(prisma, req, res);
 

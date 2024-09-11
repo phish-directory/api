@@ -1,8 +1,7 @@
 import axios from "axios";
 
-import { prisma } from "../prisma";
 import { getDbDomain } from "../functions/db/getDbDomain";
-import metrics from "../metrics";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the UrlScan service for checking and reporting domains.
@@ -16,7 +15,7 @@ export class UrlScanService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.urlscan.domain.check");
+      // metrics.increment("services.urlscan.domain.check");
 
       const checkSearch = await axios.get(
         `https://urlscan.io/api/v1/search/?q=domain:${domain}`,
@@ -27,7 +26,7 @@ export class UrlScanService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       // check if the link is not already scanned
@@ -46,7 +45,7 @@ export class UrlScanService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         );
 
         // wait 15 seconds for the scan to finish
@@ -60,7 +59,7 @@ export class UrlScanService {
                 "User-Agent": "internal-server@phish.directory",
                 "X-Identity": "internal-server@phish.directory",
               },
-            },
+            }
           );
 
           if (!scanResult.data) throw new Error("UrlScan API returned no data");
@@ -76,7 +75,7 @@ export class UrlScanService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         );
 
         const dbDomain = await getDbDomain(domain);

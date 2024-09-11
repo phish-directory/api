@@ -3,7 +3,6 @@ import moment from "moment";
 
 import { getPackageVersion, getVersion } from "../../functions/getVersion";
 import { authenticateToken, getUserInfo } from "../../functions/jwt";
-import metrics from "../../metrics";
 import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
 import domainRouter from "./routes/domain";
@@ -80,7 +79,7 @@ router.use(async (req, res, next) => {
  * }
  */
 router.get("/metrics", logRequest, async (req, res) => {
-  metrics.increment("endpoint.misc.metrics");
+  // // metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
   // format the uptime

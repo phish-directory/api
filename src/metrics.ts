@@ -1,15 +1,15 @@
-import "dotenv/config";
-import { StatsD } from "node-statsd";
+// import "dotenv/config";
+// import { StatsD } from "node-statsd";
 
-const environment = process.env.NODE_ENV;
-const graphite = process.env.GRAPHITE_HOST;
+// const environment = process.env.NODE_ENV;
+// const graphite = process.env.GRAPHITE_HOST;
 
-if (graphite === null) throw new Error("Graphite host is not configured");
+// if (graphite === null) throw new Error("Graphite host is not configured");
 
-const metrics = new StatsD({
-  host: graphite,
-  port: 8125,
-  prefix: `${environment}.phishdirectory.api.`,
-});
+// const metrics = new StatsD({
+//   host: graphite,
+//   port: 8125,
+//   prefix: `${environment}.phishdirectory.api.`,
+// });
 
-export default metrics;
+// export default metrics;

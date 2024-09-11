@@ -1,8 +1,7 @@
 import axios from "axios";
 
-import { prisma } from "../prisma";
-import metrics from "../metrics";
 import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the IpQualityScore service for checking and reporting domains.
@@ -16,7 +15,7 @@ export class IpQualityScoreService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.ipqualityscore.domain.check");
+      // metrics.increment("services.ipqualityscore.domain.check");
 
       const response = await axios.get(
         `https://ipqualityscore.com/api/json/url/${process.env
@@ -28,7 +27,7 @@ export class IpQualityScoreService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       const data = response.data;
@@ -58,7 +57,7 @@ export class IpQualityScoreService {
      * @returns
      */
     check: async (email: string) => {
-      metrics.increment("services.ipqualityscore.email.check");
+      // metrics.increment("services.ipqualityscore.email.check");
 
       let response = await axios.get(
         `https://ipqualityscore.com/api/json/email/${process.env
@@ -69,7 +68,7 @@ export class IpQualityScoreService {
             "User-Agent": "internal-server@phish.directory",
             "X-Identity": "internal-server@phish.directory",
           },
-        },
+        }
       );
 
       let data = response.data;

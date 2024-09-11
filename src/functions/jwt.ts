@@ -1,6 +1,6 @@
 import * as jwt from "jsonwebtoken";
 
-import metrics from "../metrics";
+// import metrics from "../metrics";
 import { prisma } from "../prisma";
 
 /**
@@ -11,7 +11,7 @@ import { prisma } from "../prisma";
  * @returns void
  */
 export async function authenticateToken(req: any, res: any, next: any) {
-  metrics.increment("functions.jwt.authenticateToken");
+  // metrics.increment("functions.jwt.authenticateToken");
 
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -28,7 +28,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
       } else {
         return user;
       }
-    },
+    }
   );
 
   let user = await prisma.user.findUnique({
@@ -46,7 +46,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
     return res
       .status(403)
       .json(
-        "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+        "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
       );
   }
 
@@ -61,17 +61,17 @@ export async function authenticateToken(req: any, res: any, next: any) {
  */
 export async function generateAccessToken(user: any) {
   const tsStart = Date.now();
-  metrics.increment("functions.jwt.generateAccessToken");
+  // metrics.increment("functions.jwt.generateAccessToken");
 
   let token = jwt.sign(
     {
       id: user.id,
       uuid: user.uuid,
     },
-    process.env.JWT_SECRET!,
+    process.env.JWT_SECRET!
   );
   const tsEnd = Date.now();
-  metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
+  // metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
   return token;
 }
 
@@ -84,7 +84,7 @@ export async function generateAccessToken(user: any) {
  */
 export async function getUserInfo(prisma: any, res: any, req: any) {
   const tsStart = Date.now();
-  metrics.increment("functions.jwt.getUserInfo");
+  // metrics.increment("functions.jwt.getUserInfo");
 
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -104,18 +104,18 @@ export async function getUserInfo(prisma: any, res: any, req: any) {
   });
 
   const tsEnd = Date.now();
-  metrics.timing("functions.jwt.getUserInfo", tsEnd - tsStart);
+  // metrics.timing("functions.jwt.getUserInfo", tsEnd - tsStart);
 
   return user;
 }
 
 export async function getPermissionLevel(prisma: any, res: any, req: any) {
   const tsStart = Date.now();
-  metrics.increment("functions.jwt.getPermissionLevel");
+  // metrics.increment("functions.jwt.getPermissionLevel");
 
   const info = await getUserInfo(prisma, res, req);
   // console.log(info);
 
   const tsEnd = Date.now();
-  metrics.timing("functions.jwt.getPermissionLevel", tsEnd - tsStart);
+  // metrics.timing("functions.jwt.getPermissionLevel", tsEnd - tsStart);
 }

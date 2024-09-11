@@ -1,8 +1,7 @@
 import axios from "axios";
 
-import metrics from "../metrics";
-import { prisma } from "../prisma";
 import { getDbDomain } from "../functions/db/getDbDomain";
+import { prisma } from "../prisma";
 
 /**
  * A service that provides access to the SecurityTrails service for checking and reporting domains.
@@ -16,7 +15,7 @@ export class SecurityTrailsService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.securitytrails.domain.check");
+      // metrics.increment("services.securitytrails.domain.check");
 
       const options = {
         method: "GET",

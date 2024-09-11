@@ -1,9 +1,3 @@
-import axios from "axios";
-
-import { getDbDomain } from "../functions/db/getDbDomain";
-import metrics from "../metrics";
-import { prisma } from "../prisma";
-
 /**
  * A service that provides access to the TEMPLATE service for checking and reporting domains, emails, etc.
  */
@@ -16,7 +10,7 @@ export class TEMPLATEService {
      * @returns
      */
     check: async (domain: string) => {
-      metrics.increment("services.template.domain.check");
+      // metrics.increment("services.template.domain.check");
       // Implement the check logic here
     },
 
@@ -27,7 +21,7 @@ export class TEMPLATEService {
      * @returns
      */
     report: async (domain: string) => {
-      metrics.increment("services.template.domain.report");
+      // metrics.increment("services.template.domain.report");
       // Implement the report logic here
     },
   };
