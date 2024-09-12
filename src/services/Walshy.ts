@@ -27,7 +27,7 @@ export class WalshyService {
           "User-Agent": "internal-server@phish.directory",
           "X-Identity": "internal-server@phish.directory",
         },
-        domain: domain,
+        domain: `${domain}`,
       });
 
       const data = response.data;
