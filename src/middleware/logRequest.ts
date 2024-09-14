@@ -33,7 +33,7 @@ export const logRequest = async (
     xIdentity = "";
   }
 
-  if (userAgent === " Checkly/1.0 (https://www.checklyhq.com)") {
+  if (userAgent.startsWith("Checkly/")) {
     return next();
   }
 
