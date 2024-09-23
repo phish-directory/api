@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
 
@@ -12,7 +11,7 @@ export class SecurityTrailsService {
      * Asynchronously checks a given domain against the SecurityTrails service for any known bad domains.
      *
      * @param {string} domain - The domain name to be checked.
-     * @returns
+     * @returns {Promise<any>} - The API response or a fallback if a rate limit error occurs.
      */
     check: async (domain: string) => {
       // metrics.increment("services.securitytrails.domain.check");
@@ -26,23 +25,39 @@ export class SecurityTrailsService {
         },
       };
 
-      const response = await axios.request(options);
-      const data = response.data;
-      const dbDomain = await getDbDomain(domain);
+      try {
+        const response = await axios.request(options);
+        const data = response.data;
+        const dbDomain = await getDbDomain(domain);
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "SecurityTrails",
-          domain: {
-            connect: {
-              id: dbDomain.id,
+        await prisma.rawAPIData.create({
+          data: {
+            sourceAPI: "SecurityTrails",
+            domain: {
+              connect: {
+                id: dbDomain.id,
+              },
             },
+            data: data,
           },
-          data: data,
-        },
-      });
+        });
 
-      return data;
+        return data;
+      } catch (error: any) {
+        if (error.response?.status === 429) {
+          console.warn(
+            `Rate limit exceeded for domain: ${domain}. Returning empty result.`
+          );
+          // Handle 429 error (Too Many Requests) by returning a fallback response.
+          return {
+            error: "Rate limit exceeded",
+            retryAfter: error.response.headers["retry-after"] || "unknown",
+          };
+        }
+
+        // Re-throw other errors to avoid silently ignoring critical issues.
+        throw error;
+      }
     },
   };
 }
