@@ -3,7 +3,7 @@ services:
     container_name: api-docker
     build:
       context: .
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.dev
     env_file:
       - .env
     ports:
