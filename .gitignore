@@ -6,7 +6,6 @@ dist/
 ignore/
 prisma/data
 .env
-.env.*
 ! .env.example
 .vscode
 node_modules

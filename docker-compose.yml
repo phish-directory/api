@@ -1,31 +1,36 @@
-# docker-compose.yml
-
-# THIS IS BROKEN RN
-
-version: "3.9"
 services:
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: jasper
-      POSTGRES_PASSWORD: jasper
-    ports:
-      - '5432:5432'
-    volumes:
-      - db:/var/lib/postgresql/data
-
   api:
+    container_name: api-docker
     build:
       context: .
-    environment:
-      DB_SCHEMA: postgres
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_HOST: postgres
-    depends_on:
-      - postgres
+      dockerfile: Dockerfile.prod
+    env_file:
+      - .env
     ports:
-      - '3000:3000'
+      - ${API_PORT}:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+
+  postgres:
+    container_name: prisma-postgres
+    image: postgres:alpine
+    restart: always
+    env_file:
+     - .env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - ${POSTGRES_PATH}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  db:
+  postgres-data:
+    external: false
