@@ -1,0 +1,32 @@
+# Stage 1: Builder Stage
+FROM node:22-alpine3.20 AS builder
+WORKDIR /usr/src/app
+
+RUN corepack enable && corepack prepare pnpm@9.5.0 --activate
+
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+
+RUN apk add --no-cache make gcc g++ python3 && \
+    if [ -f pnpm-lock.yaml ]; then \
+    pnpm install --frozen-lockfile --ignore-scripts; \
+    else \
+    echo "pnpm-lock.yaml not found" && exit 1; \
+    fi && \
+    npm rebuild bcrypt --build-from-source && \
+    apk del make gcc g++ python3
+
+COPY . .
+
+RUN DATABASE_URL=$DATABASE_URL pnpm run build
+
+# Stage 2: Production Stage
+FROM node:22-alpine3.20 AS production 
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules/ ./node_modules
+
+EXPOSE 3000
+
+CMD [ "node", "dist/index.js" ]
