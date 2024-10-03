@@ -1,0 +1,27 @@
+# Stage 1: Installer Stage
+FROM node:22-alpine3.20 AS installer
+
+WORKDIR /usr/src/app
+
+RUN corepack enable && corepack prepare pnpm@9.5.0 --activate
+COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
+
+RUN apk add --no-cache make gcc g++ python3 && \
+    if [ -f pnpm-lock.yaml ]; then \
+    pnpm install --frozen-lockfile --ignore-scripts; \
+    else \
+    echo "pnpm-lock.yaml not found" && exit 1; \
+    fi && \
+    npm rebuild bcrypt --build-from-source && \
+    apk del make gcc g++ python3
+
+COPY . .
+
+# Stage 2: Development Stage
+FROM node:22-alpine3.20 AS development
+
+WORKDIR /usr/src/app
+RUN corepack enable && corepack prepare pnpm@9.5.0 --activate
+COPY --from=installer /usr/src/app/ ./
+CMD ["pnpm", "run", "dev:docker"]

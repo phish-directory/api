@@ -12,6 +12,7 @@
   ],
   "packageManager": "pnpm@9.5.0",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "start": "node dist/index.js",
     "postinstall": "npx prisma generate && tsc",
     "watch-node": "nodemon dist/index.js",
@@ -22,7 +23,9 @@
     "heroku-prebuild": "echo This runs before Heroku installs dependencies.",
     "heroku-postbuild": "echo This runs after Heroku installs dependencies, but before Heroku prunes and caches dependencies.",
     "heroku-cleanup": "echo This runs after Heroku prunes and caches dependencies.",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prisma:docker": "npx prisma generate && npx prisma migrate dev",
+    "dev:docker": "pnpm prisma:docker && pnpm dev"
   },
   "keywords": [],
   "author": "Jasper Mayone <me@jaspermayone.com>",
@@ -42,7 +45,8 @@
     "puppeteer": "^22.15.0",
     "request-ip": "^3.3.0",
     "response-time": "^2.3.2",
-    "stripe": "^16.8.0"
+    "stripe": "^16.8.0",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
