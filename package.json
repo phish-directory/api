@@ -10,22 +10,13 @@
       "url": "https://jaspermayone.com"
     }
   ],
-  "packageManager": "pnpm@9.5.0",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "start": "node dist/index.js",
-    "postinstall": "npx prisma generate && tsc",
     "watch-node": "nodemon dist/index.js",
     "watch-ts": "tsc -w",
     "dev": "nodemon --quiet --watch './**/*.ts' --exec 'ts-node' src/index.ts",
     "build": "npx prisma generate && tsc",
-    "compile": "npx prisma generate && tsc",
-    "heroku-prebuild": "echo This runs before Heroku installs dependencies.",
-    "heroku-postbuild": "echo This runs after Heroku installs dependencies, but before Heroku prunes and caches dependencies.",
-    "heroku-cleanup": "echo This runs after Heroku prunes and caches dependencies.",
-    "prepare": "husky",
-    "prisma:docker": "npx prisma generate && npx prisma migrate dev",
-    "dev:docker": "pnpm prisma:docker && pnpm dev"
+    "compile": "npx prisma generate && tsc"
   },
   "keywords": [],
   "author": "Jasper Mayone <me@jaspermayone.com>",
@@ -56,14 +47,12 @@
     "@types/node-statsd": "^0.1.6",
     "@types/request-ip": "^0.0.41",
     "@types/response-time": "^2.3.8",
-    "husky": "^9.1.4",
     "nodemon": "^3.1.4",
     "prisma": "^5.18.0",
     "typescript": "^5.5.4"
   },
   "engines": {
     "node": "22.x",
-    "npm": "10.8.2",
-    "pnpm": "9.5.0"
+    "npm": "10.8.2"
   }
 }
