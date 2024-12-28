@@ -18,7 +18,6 @@ import {
 /**
  * Check the domain against all the services
  * @param domain - Domain to check
- * @param dbDomain - Domain from the database
  * @returns void
  */
 export async function domainCheck(domain: string) {
@@ -27,9 +26,8 @@ export async function domainCheck(domain: string) {
 
   let walshyData = await walshyService.domain.check(domain);
   let ipQualityScoreData = await ipQualityScoreService.domain.check(domain);
-  let googleSafebrowsingData = await googleSafebrowsingService.domain.check(
-    domain
-  );
+  let googleSafebrowsingData =
+    await googleSafebrowsingService.domain.check(domain);
   let sinkingYahtsData = await sinkingYahtsService.domain.check(domain);
   let virusTotalData = await virusTotalService.domain.check(domain);
   let phishermanData = await phishermanService.domain.check(domain);
@@ -95,5 +93,20 @@ export async function domainCheck(domain: string) {
     urlScanData,
     securitytrailsData,
     phishreportData,
+  };
+}
+
+/**
+* Report the domain to all services that support reporting
+@param domain
+@returns void
+*/
+export async function domainReport(domain: string) {
+  let virustotaldata = await virusTotalService.domain.report(domain);
+  let walshydata = await walshyService.domain.report(domain);
+
+  return {
+    virustotaldata,
+    walshydata,
   };
 }
