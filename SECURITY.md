@@ -2,4 +2,4 @@
 
 ## Reporting a Vulnerability
 
-To report a vulnerability, please email security@phish.directory
+To report a vulnerability, please email <security@phish.directory>
