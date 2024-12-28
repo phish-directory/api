@@ -1,55 +1,57 @@
-import axios from "axios";
-
+import axios, { AxiosError } from "axios";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+
+interface PhishObserverError {
+  error: string;
+  details?: string;
+}
+
+interface SubmissionResponse {
+  id: string;
+  [key: string]: any;
+}
 
 /**
  * A service that provides access to the PhishObserver service for checking and reporting domains.
  */
 export class PhishObserverService {
+  private readonly baseUrl = "https://phish.observer/api";
+  private readonly headers = {
+    Authorization: `Bearer ${process.env.PHISH_OBSERVER_API_KEY!}`,
+    Referer: "https://phish.directory",
+    "User-Agent": "internal-server@phish.directory",
+    "X-Identity": "internal-server@phish.directory",
+  };
+
   domain = {
     /**
      * Asynchronously checks a given domain against the PhishObserver service for any known bad domains.
      *
      * @param {string} domain - The domain name to be checked.
-     * @returns
+     * @returns {Promise<any>} The search response data or an error object
      */
     check: async (domain: string) => {
       // metrics.increment("services.phishobserver.domain.check");
-
       try {
-        let submissionResponse = await axios.post(
-          `https://phish.observer/api/submit`,
+        // Submit the domain for checking
+        const submissionResponse = await axios.post<SubmissionResponse>(
+          `${this.baseUrl}/submit`,
           {
             url: `https://${domain}`,
             tags: ["phish.directory"],
           },
-          {
-            headers: {
-              Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
-          }
+          { headers: this.headers },
         );
 
-        let subdata = await submissionResponse.data;
-
-        let searchResponse: any = await axios.get(
-          `https://phish.observer/api/submission/${subdata.id}`,
-          {
-            headers: {
-              Authorization: "Bearer " + process.env.PHISH_OBSERVER_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
-          }
+        // Get the submission details
+        const searchResponse = await axios.get(
+          `${this.baseUrl}/submission/${submissionResponse.data.id}`,
+          { headers: this.headers },
         );
 
+        // Store the response in the database
         const dbDomain = await getDbDomain(domain);
-
         await prisma.rawAPIData.create({
           data: {
             sourceAPI: "PhishObserver",
@@ -63,18 +65,57 @@ export class PhishObserverService {
         });
 
         return searchResponse.data;
-      } catch (error: any) {
-        if (
-          error.response &&
-          error.response.status === 400 &&
-          error.response.data.error === "Blocked domain"
-        ) {
-          return {
-            error: "Blocked domain",
-          };
-        } else {
-          throw error;
+      } catch (error) {
+        if (error instanceof AxiosError && error.response) {
+          const { status, data } = error.response;
+
+          // Handle known error cases
+          if (status === 400) {
+            const errorResponse: PhishObserverError = {
+              error: data.error || "Bad Request",
+              details: data.message || data.details,
+            };
+
+            if (data.error === "Blocked domain") {
+              return errorResponse;
+            }
+
+            // Handle rate limiting
+            if (data.error === "Too Many Requests") {
+              return {
+                error: "Rate limited",
+                details: "Too many requests to PhishObserver API",
+              };
+            }
+
+            return errorResponse;
+          }
+
+          // Handle authentication errors
+          if (status === 401) {
+            return {
+              error: "Authentication failed",
+              details: "Invalid or expired API key",
+            };
+          }
+
+          // Handle server errors
+          if (status >= 500) {
+            return {
+              error: "Server error",
+              details: "PhishObserver service is currently unavailable",
+            };
+          }
         }
+
+        // Handle network errors or other unexpected issues
+        return {
+          error: "Unknown error",
+          details:
+            error instanceof Error
+              ? error.message
+              : "An unexpected error occurred",
+        };
       }
     },
   };
