@@ -57,6 +57,8 @@ model User {
   classifications   Classification[]
   domainsReported   Domain[]
   emailsReported    Email[]
+  reportedDomains    DomainReport[] @relation("reporter")
+  reviewedDomains    DomainReport[] @relation("reviewer")
 }
 
 model Domain {
@@ -71,6 +73,7 @@ model Domain {
   updatedAt       DateTime         @updatedAt
   lastChecked     DateTime?
   RawAPIData      RawAPIData[]
+  reports    DomainReport[]
 }
 
 model Email {
@@ -131,4 +134,25 @@ model RawAPIData {
   emailId   Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DomainReport {
+  id          Int      @id @default(autoincrement())
+  domain      Domain   @relation(fields: [domainId], references: [id])
+  domainId    Int
+  reporter    User     @relation("reporter", fields: [reporterId], references: [id])
+  reporterId  Int
+  reviewer    User?    @relation("reviewer", fields: [reviewerId], references: [id])
+  reviewerId  Int?
+  status      ReportStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reviewedAt  DateTime?
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
