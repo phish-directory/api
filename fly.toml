@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for phishdirectory-api on 2024-10-29T00:30:08-04:00
+# fly.toml app configuration file generated for phishdirectory-api on 2024-12-29T09:48:24-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -8,14 +8,9 @@ primary_region = 'yul'
 
 [build]
 
-[deploy]
-release_command = 'npx prisma migrate dev'
-
 [http_service]
 internal_port = 3000
 force_https = true
-auto_stop_machines = 'stop'
-auto_start_machines = true
 min_machines_running = 0
 processes = ['app']
 
