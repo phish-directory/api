@@ -18,3 +18,7 @@ processes = ['app']
 memory = '1gb'
 cpu_kind = 'shared'
 cpus = 1
+
+[env]
+HOST = "0.0.0.0"
+PORT = "3000"
