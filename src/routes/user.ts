@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import express, { Request, Response } from "express";
+import { AccountType, Permissions } from "../types/enums";
 
 import {
   authenticateToken,
@@ -24,6 +25,8 @@ let saltRounds = 10;
  * @property {string} name.required - The name of the user
  * @property {string} email.required - The email of the user
  * @property {string} password.required - The password of the user
+ * @property {AccountType} accountType - Account type (user, bot, admin) - enum:AccountType
+ * @property {Permissions} permission - Permission level (basic, trusted, admin) - enum:Permissions
  */
 export type User = {
   name: string;
@@ -44,20 +47,25 @@ export type UserLogin = {
 
 /**
  * POST /user/signup
- * @summary Sign up a user for the API
+ * @summary Create a new user account
  * @tags User - User Management / Info and Authentication endpoints
- * @param {User} request.body.required - User information
- * @return {object} 200 - Success message
- * @return {object} 400 - Error message
- * @example response - 200 - Success message
+ * @param {User} request.body.required - User signup information
+ * @return {object} 200 - Success response with UUID
+ * @return {object} 400 - Validation error
+ * @produces application/json
+ * @example request - Example signup request
+ * {
+ *   "name": "John Doe",
+ *   "email": "john.doe@example.com",
+ *   "password": "securepassword123",
+ *   "accountType": "user",
+ *   "permission": "basic"
+ * }
+ * @example response - 200 - Success response
  * {
  *   "message": "User created successfully, please login.",
- *   "uuid": "uuid"
+ *   "uuid": "123e4567-e89b-12d3-a456-426614174000"
  * }
- * @example response - 400 - Error message
- * "Invalid arguments. Please provide name, email, and password"
- * @example response - 400 - Error message
- * "User with that email already exists"
  */
 router.post("/signup", async (req, res) => {
   // metrics.increment("endpoint.user.signup");
@@ -115,22 +123,23 @@ router.post("/signup", async (req, res) => {
 
 /**
  * POST /user/login
- * @summary Log in a user to the API
+ * @summary Authenticate user and get JWT token
  * @tags User - User Management / Info and Authentication endpoints
- * @param {UserLogin} request.body.required - User information
- * @return {object} 200 - Success message
- * @return {object} 400 - Error message
- * @example response - 200 - Success message
+ * @param {UserLogin} request.body.required - User login credentials
+ * @return {object} 200 - JWT token and user UUID
+ * @return {object} 400 - Invalid credentials
+ * @return {object} 403 - Account deleted
+ * @produces application/json
+ * @example request - Login request
  * {
- *   "token": "token",
- *   "uuid": "uuid"
+ *   "email": "john.doe@example.com",
+ *   "password": "securepassword123"
  * }
- * @example response - 400 - Error message
- * "Missing email or password"
- * @example response - 400 - Error message
- * "Invalid email or password"
- * @example response - 403 - Error message
- * "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
+ * @example response - 200 - Successful login
+ * {
+ *   "token": "eyJhbGciOiJIUzI1NiIs...",
+ *   "uuid": "123e4567-e89b-12d3-a456-426614174000"
+ * }
  */
 router.post("/login", async (req, res) => {
   // metrics.increment("endpoint.user.login");
@@ -177,17 +186,19 @@ router.post("/login", async (req, res) => {
 
 /**
  * GET /user/me
- * @summary Gets your user details
+ * @summary Get authenticated user profile and metrics
  * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
- * @return {object} 200 - User details and metrics
- * @return {string} 400 - Error message
- * @example response - 200 - Success message
+ * @return {object} 200 - User profile with usage metrics
+ * @return {object} 400 - User not found
+ * @produces application/json
+ * @example response - 200 - Profile response
  * {
  *   "name": "John Doe",
  *   "email": "john.doe@example.com",
  *   "uuid": "123e4567-e89b-12d3-a456-426614174000",
  *   "permission": "basic",
+ *   "accountType": "user",
  *   "metrics": {
  *     "requests": {
  *       "count": 3,
@@ -201,18 +212,12 @@ router.post("/login", async (req, res) => {
  *         {
  *           "url": "/user/me",
  *           "count": 2
- *         },
- *         {
- *           "url": "/up",
- *           "count": 1
  *         }
  *       ]
  *     }
  *   },
  *   "accountCreated": "2024-08-14T02:11:02.626Z"
  * }
- * @example response - 400 - Error message
- * "User not found"
  */
 router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
   // metrics.increment("endpoint.user.me");
@@ -292,24 +297,27 @@ router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
 
 /**
  * PATCH /user/me
- * @summary Update user details
- * @description update your own user details (name, email, password) - requires a valid JWT token.
- Ask an admin if you don't have access to your account / a valid token.
-
- Not all feilds are mandatory! Only send what needs to be updated!
-
- If you want to update your password, you must send the current password as well.
- To update your email, you must email the support team at team@phish.directory.
+ * @summary Update authenticated user profile
+ * @description Update user details (name, password). Email updates require contacting support.
+ * Only include fields that need updating. Password updates require current password verification.
  * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
- * @param {User} request.body.required - User information
- * @return {object} 200 - Success message
- * @return {object} 400 - Error message
- * @example request - User information
+ * @param {object} request.body - Fields to update
+ * @param {string} [request.body.name] - New display name
+ * @param {string} [request.body.password] - New password (requires verification)
+ * @return {string} 200 - Update success message
+ * @return {string} 400 - Update error message
+ * @produces application/json
+ * @example request - Name update
  * {
- *   "name": "John Doe",
- *   "password": ""
+ *   "name": "John Smith"
  * }
+ * @example request - Password update
+ * {
+ *   "password": "newSecurePassword123"
+ * }
+ * @example response - 200 - Success message
+ * "User updated successfully"
  */
 router.patch("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me.patch");
@@ -358,17 +366,13 @@ router.patch("/me", authenticateToken, async (req, res) => {
 
 /**
  * GET /user/stripe/usage
- * @summary Gets your Stripe usage details
+ * @summary Get Stripe usage metrics
  * @tags User - User Management / Info and Authentication endpoints
  * @security BearerAuth
- * @return {object} 200 - Usage details
- * @return {object} 400 - Error message
- * @example response - 200 - Success message
- * {
- *   "data": "data"
- * }
- * @example response - 400 - Error message
- * "User not found"
+ * @return {object} 200 - Usage statistics
+ * @return {object} 400 - Usage retrieval error
+ * @produces application/json
+ * @description Retrieves detailed usage metrics for the authenticated user's Stripe account
  */
 router.get(
   "/stripe/usage",

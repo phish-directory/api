@@ -1,6 +1,5 @@
 import * as express from "express";
 import moment from "moment";
-
 import { getVersion } from "../functions/getVersion";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
@@ -12,24 +11,29 @@ router.use(logRequest);
 
 /**
  * GET /misc/metrics
- * @summary Returns basic metrics / information about the API for users.
- * @description Basic information about the API, such as status, environment, uptime, date started, version, and domain count.
- * @tags Miscalleanous - Endpoints that don't fit into any other category.
- * @return {object} 200 - Success message
- * @example response - 200 - Success message
+ * @summary Get API system metrics and status
+ * @description Returns operational metrics and system information including:
+ * - Current API status
+ * - Environment (production/development)
+ * - System uptime
+ * - Service start timestamp
+ * - API version
+ * - Total number of tracked domains
+ * @tags Miscellaneous - System information and metrics
+ * @return {object} 200 - System metrics response
+ * @produces application/json
+ * @example response - 200 - Example metrics response
  * {
- *  "status": "up",
- * "environment": "production",
- * "uptime": "00:00:00",
- * "dateStarted": "01-01-21 0:0:0 AM +00:00",
- * "version": "1.0.0",
- * "domains": 0
+ *   "status": "up",
+ *   "environment": "production",
+ *   "uptime": "48:12:33",
+ *   "dateStarted": "01-09-24 9:45:27 AM +00:00",
+ *   "version": "2.0.0",
+ *   "domains": 1234
  * }
- *
  */
 router.get("/metrics", async (req, res) => {
   // metrics.increment("endpoint.misc.metrics");
-
   let uptime = process.uptime();
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);

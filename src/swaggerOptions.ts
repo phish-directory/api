@@ -1,18 +1,42 @@
 import { getVersion } from "./functions/getVersion";
 
 let filePattern;
-
 if (process.env.NODE_ENV === "production") {
-  filePattern = ["./router.js", "./routes/*.js"];
+  filePattern = ["./router.js", "./routes/*.js", "./types/enums.ts"];
 } else {
-  filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
+  filePattern = [
+    "./router.{ts,js}",
+    "./routes/*.{ts,js}",
+    "./types/enums.{ts,js}",
+  ];
 }
 
 let version = getVersion();
 
 /**
- * Swagger Options, used to configure the swagger-ui-express package
+ * @openapi
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *       description: JWT token for authentication
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: Error message
+ *         code:
+ *           type: integer
+ *           description: Error code
+ *
+ * security:
+ *   - BearerAuth: []
  */
+
 export const swaggerOptions = {
   openapi: "3.0.0",
   info: {
@@ -20,32 +44,49 @@ export const swaggerOptions = {
     version: `${version}`,
     description:
       "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
-    termsOfService: "",
     contact: {
       name: "phish.directory",
       url: "phish.directory",
       email: "team@phish.directory",
     },
   },
-  basePath: "/",
-  tags: [],
-  securityDefinitions: {
-    BearerAuth: {
-      type: "http",
-      scheme: "bearer",
+  servers: [
+    {
+      url: "https://api.phish.directory",
+      description: "Production server",
     },
-  },
-  security: {
-    BearerAuth: {
-      type: "http",
-      scheme: "bearer",
+    {
+      url: "http://localhost:3000",
+      description: "Development server",
     },
-  },
-  swaggerUiOptions: {},
-  filesPattern: filePattern, // Glob pattern to find your jsdoc files
-  exposeSwaggerUI: true,
-  swaggerUIPath: "/docs", // SwaggerUI will be render in this url.
-  exposeApiDocs: true,
-  apiDocsPath: "/api-docs",
+  ],
+  tags: [
+    { name: "Domain", description: "Domain-related operations" },
+    { name: "Email", description: "Email-related operations" },
+    { name: "User", description: "User management operations" },
+    { name: "Stripe", description: "Payment-related operations" },
+  ],
+  filesPattern: filePattern,
   baseDir: __dirname,
+  exposeSwaggerUI: true,
+  exposeApiDocs: true,
+  swaggerUIPath: "/docs",
+  apiDocsPath: "/api-docs",
+  definition: {
+    openapi: "3.0.0",
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
+  },
 };
