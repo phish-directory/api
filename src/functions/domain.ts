@@ -1,4 +1,4 @@
-// import puppeteer from "puppeteer";
+import { chromium } from "@playwright/test"; // Change the import to destructure chromium
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
@@ -50,36 +50,54 @@ export async function domainCheck(domain: string) {
     });
   }
 
-  // // Launch the browser and open a new blank page
-  // const browser = await puppeteer.launch({ headless: "shell" });
-  // const page = await browser.newPage();
+  let browser;
 
-  // // Navigate the page to a URL.
-  // await page.goto(`https://${domain}`, {
-  //   waitUntil: "networkidle2",
-  // });
+  if (process.env.NODE_ENV === "development") {
+    browser = await chromium.launch();
+  } else {
+    browser = await chromium.launch({
+      executablePath: "/usr/bin/chromium-browser",
+      args: [
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+      ],
+      chromiumSandbox: false,
+    });
+  }
 
-  // // Set screen size.
-  // await page.setViewport({ width: 1080, height: 1024 });
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
-  // // Capture screenshot to a buffer
-  // let pageimgBuffer = await page.screenshot({
-  //   type: "png",
-  //   encoding: "binary",
-  // });
+  // Navigate to the domain
+  await page.goto(`https://${domain}`, {
+    // waitUntil: "networkidle",
+  });
 
-  // await prisma.capture.create({
-  //   data: {
-  //     domain: {
-  //       connect: {
-  //         id: dbDomain.id,
-  //       },
-  //     },
-  //     binary: pageimgBuffer,
-  //   },
-  // });
+  const pageimgBuffer = await page.screenshot({
+    type: "png",
+  });
 
-  // await browser.close();
+  console.log("\n");
+  console.log(pageimgBuffer);
+  console.log("\n");
+
+  // Save to database
+  await prisma.capture.create({
+    data: {
+      domain: {
+        connect: {
+          id: dbDomain.id,
+        },
+      },
+      binary: pageimgBuffer,
+    },
+  });
+
+  // Clean up
+  await context.close();
+  await browser.close();
+
   // metrics.timing("functions.timing.domainCheck", Date.now() - tsStart);
 
   return {

@@ -9,6 +9,7 @@ import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
+import { prisma } from "./prisma";
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.use(
     const codeStatKey = `http.response.${stat}.${httpCode}`;
     // metrics.timing(timingStatKey, time);
     // // metrics.increment(codeStatKey, 1);
-  })
+  }),
 );
 
 /**
@@ -48,11 +49,41 @@ router.get("/", logRequest, (req, res) => {
  * "status": "up"
  * }
  */
-router.get("/up", logRequest, (req, res) => {
-  // // metrics.increment("http.request.up");
-  res.status(200).json({
-    status: "up",
-  });
+router.get("/up", logRequest, async (req, res) => {
+  try {
+    // Record start time for ping calculation
+    const startTime = Date.now();
+
+    // Check database connectivity with a simple query
+    await prisma.$queryRaw`SELECT 1`;
+
+    // Calculate ping time
+    const pingTime = Date.now() - startTime;
+
+    // Return success response with database status
+    res.status(200).json({
+      status: "up",
+      database: {
+        connected: true,
+        ping: pingTime,
+        lastError: null,
+      },
+    });
+  } catch (error) {
+    // Return response with database error details
+    res.status(200).json({
+      status: "up",
+      database: {
+        connected: false,
+        ping: null,
+        lastError: {
+          // @ts-expect-error
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  }
 });
 
 /**

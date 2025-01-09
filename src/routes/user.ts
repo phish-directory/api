@@ -89,7 +89,13 @@ router.post("/signup", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   let customer = await createCustomer(email, name);
-  let stripeCustomerId = customer.id;
+  let stripeCustomerId;
+
+  if (customer) {
+    stripeCustomerId = customer.id;
+  } else {
+    stripeCustomerId = "devenv";
+  }
 
   // Create the user
   const newUser = await prisma.user.create({
@@ -157,7 +163,7 @@ router.post("/login", async (req, res) => {
     return res
       .status(403)
       .json(
-        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
+        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
       );
   }
 
@@ -373,7 +379,7 @@ router.get(
     let data = await getCustomerUsage(prisma, req, res);
 
     res.status(200).json(data);
-  }
+  },
 );
 
 export default router;

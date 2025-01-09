@@ -13,7 +13,7 @@ import * as logger from "./utils/logger";
 
 dotenv.config();
 
-const port = process.env.PORT || 3000;
+const port: number = Number(process.env.PORT) || 3000;
 
 expressJSDocSwagger(app)(mainSwagOptions);
 expressJSDocSwagger(app)(adminSwagOptions);
@@ -45,7 +45,7 @@ app.use(
       preload: true,
     },
     xPoweredBy: false,
-  })
+  }),
 );
 
 // Add metric interceptors for axios
@@ -122,7 +122,6 @@ app.use("/", router);
 // );
 //
 
-server.listen(port, () => {
-  // metrics.increment("app.startup");
+server.listen("0.0.0.0", port, () => {
   logger.info(`Server is running on port ${port}`);
 });
