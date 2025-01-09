@@ -122,6 +122,6 @@ app.use("/", router);
 // );
 //
 
-server.listen("0.0.0.0", port, () => {
+server.listen(port, "0.0.0.0", () => {
   logger.info(`Server is running on port ${port}`);
 });
