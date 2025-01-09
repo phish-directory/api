@@ -1,12 +1,12 @@
 import express from "express";
 import moment from "moment";
-
 import { getPackageVersion, getVersion } from "../../functions/getVersion";
 import { authenticateToken, getUserInfo } from "../../functions/jwt";
 import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
+import { APIs } from "../../types/enums";
 
 const router = express.Router();
 router.use(express.json());
@@ -29,53 +29,63 @@ router.use(async (req, res, next) => {
 
 /**
  * GET /admin/metrics
- * @summary Returns ADVANCED metrics / information about the API for administrators.
- * @description Get the status, environment, uptime, date started, versions, and counts of various metrics.
- * @tags Misc - Miscellaneous endpoints
+ * @summary Get comprehensive system metrics
+ * @description Provides detailed system information and metrics for administrators including:
+ * - System status and environment details
+ * - Runtime information (uptime, start time)
+ * - Version information for API and all dependencies
+ * - Usage statistics across different time periods
+ * - API integration response counts
  * @security BearerAuth
- * @return {object} 200 - Success message
- * @example response - 200 - Success message
+ * @return {object} 200 - Detailed metrics response
+ * @return {object} 403 - Permission denied
+ * @produces application/json
+ * @example response - 200 - Complete metrics response
  * {
  *   "status": "up",
  *   "environment": "production",
- *   "uptime": "00:00:00",
- *   "dateStarted": "01-01-21 00:00:00 AM +00:00",
+ *   "uptime": "48:12:33",
+ *   "dateStarted": "01-09-24 9:45:27 AM +00:00",
  *   "versions": {
- *     "api": "1.0.0",
- *     "node": "v14.17.0",
+ *     "api": "2.0.0",
+ *     "node": "v18.17.0",
  *     "packages": {
- *       "express": "4.17.1",
- *       "prisma": "2.28.0",
- *       "axios": "0.21.1",
- *       "cron": "1.8.2",
- *       "helmet": "4.6.0",
- *       "jsonwebtoken": "8.5.1"
+ *       "express": "4.18.2",
+ *       "prisma": "5.4.2",
+ *       "axios": "1.5.0",
+ *       "cron": "2.4.3",
+ *       "helmet": "7.0.0",
+ *       "jsonwebtoken": "9.0.2"
  *     }
  *   },
  *   "counts": {
- *     "domains": 0,
- *     "users": 0,
+ *     "domains": 1234,
+ *     "users": 567,
  *     "requests": {
- *       "lifetime": 0,
- *       "today": 0,
- *       "24 hours": 0,
- *       "week": 0,
- *       "month": 0,
- *       "year": 0
+ *       "lifetime": 50000,
+ *       "today": 1500,
+ *       "24 hours": 1800,
+ *       "week": 12000,
+ *       "month": 45000,
+ *       "year": 500000
  *     },
  *     "responses": {
- *       "googleSafebrowsing": 0,
- *       "ipQualityScore": 0,
- *       "phisherman": 0,
- *       "phishObserver": 0,
- *       "phishReport": 0,
- *       "securityTrails": 0,
- *       "sinkingYahts": 0,
- *       "urlScan": 0,
- *       "virusTotal": 0,
- *       "walshy": 0
+ *       "googleSafebrowsing": 45000,
+ *       "ipQualityScore": 42000,
+ *       "phisherman": 38000,
+ *       "phishObserver": 35000,
+ *       "phishReport": 30000,
+ *       "securityTrails": 25000,
+ *       "sinkingYahts": 20000,
+ *       "urlScan": 15000,
+ *       "virusTotal": 10000,
+ *       "walshy": 5000
  *     }
  *   }
+ * }
+ * @example response - 403 - Permission denied
+ * {
+ *   "error": "You do not have permission to access this endpoint"
  * }
  */
 router.get("/metrics", logRequest, async (req, res) => {
@@ -165,7 +175,7 @@ router.get("/metrics", logRequest, async (req, res) => {
       responses: {
         googleSafebrowsing: await prisma.rawAPIData.count({
           where: {
-            sourceAPI: "SafeBrowsing",
+            sourceAPI: "SafeBrowsing", // Changed from APIs.SafeBrowsing
           },
         }),
         ipQualityScore: await prisma.rawAPIData.count({
@@ -218,6 +228,17 @@ router.get("/metrics", logRequest, async (req, res) => {
   });
 });
 
+/**
+ * Admin Router Configuration
+ * @summary Administrative route handler with authentication and permission checks
+ * @description All routes under /admin require:
+ * 1. Valid JWT authentication token
+ * 2. Admin-level permissions
+ * Sub-routes include:
+ * - /admin/metrics: System metrics and statistics
+ * - /admin/domain: Domain management
+ * - /admin/user: User management
+ */
 router.use("/domain", logRequest, domainRouter);
 router.use("/user", userRouter);
 

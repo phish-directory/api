@@ -1,6 +1,5 @@
 import * as express from "express";
 import responseTime from "response-time";
-
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
 import adminRouter from "./routes/admin/router";
@@ -19,7 +18,6 @@ router.use(
       .toLowerCase()
       .replace(/[:.]/g, "")
       .replace(/\//g, "_");
-
     const httpCode = res.statusCode;
     const timingStatKey = `http.response.${stat}`;
     const codeStatKey = `http.response.${stat}.${httpCode}`;
@@ -31,6 +29,7 @@ router.use(
 /**
  * GET /
  * @summary Redirect to docs
+ * @tags System
  * @return {string} 301 - Redirect to /docs
  * @example response - 301 - Redirect to /docs
  *  "Redirecting to /docs"
@@ -43,7 +42,9 @@ router.get("/", logRequest, (req, res) => {
 /**
  * GET /up
  * @summary Check if the API and database are up
+ * @tags System
  * @return {object} 200 - Status response
+ * @produces application/json
  * @example response - 200 - Success with database connection
  * {
  *   "status": "up",
@@ -101,13 +102,24 @@ router.get("/up", logRequest, async (req, res) => {
 });
 
 /**
+ * @swagger
+ * tags:
+ *   - name: System
+ *     description: System-level endpoints for health checks and documentation
+ */
+
+/**
  * GET /docs
- * @summary Swagger UI for API documentation.
+ * @summary API Documentation
+ * @tags System
+ * @description Swagger UI documentation interface for the main API
  */
 
 /**
  * GET /admin/docs
- * @summary Swagger UI for admin API documentation.
+ * @summary Admin API Documentation
+ * @tags System
+ * @description Swagger UI documentation interface for admin-only endpoints
  */
 
 router.use("/user", userRouter);
