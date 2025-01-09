@@ -26,12 +26,14 @@ if (process.env.NODE_ENV === "production") {
 async function createCustomer(email: string, name: string) {
   // metrics.increment("stripe.createCustomer");
 
-  const customer = await stripe.customers.create({
-    email: email,
-    name: name,
-  });
+  if (process.env.NODE_ENV !== "development") {
+    const customer = await stripe.customers.create({
+      email: email,
+      name: name,
+    });
 
-  return customer;
+    return customer;
+  }
 }
 
 async function getCustomerUsage(prisma: any, req: any, res: any) {
@@ -50,7 +52,7 @@ async function getCustomerUsage(prisma: any, req: any, res: any) {
       customer: cusId,
       start_time: beginning,
       end_time: now,
-    }
+    },
   );
 
   return usageRecords;

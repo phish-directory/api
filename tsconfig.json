@@ -7,9 +7,7 @@
     "skipLibCheck": true,
     "rootDir": "src",
     "outDir": "dist",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
+    "typeRoots": ["node_modules/@types"],
     "esModuleInterop": true,
     "noImplicitAny": false
   },
@@ -20,6 +18,6 @@
     ".vscode",
     ".husky",
     ".git",
-    "Sources"
+    "playwright.config.ts"
   ]
 }

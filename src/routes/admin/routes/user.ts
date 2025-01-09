@@ -188,7 +188,13 @@ router.post("/user/new", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   let customer = await createCustomer(email, name);
-  let stripeCustomerId = customer.id;
+  let stripeCustomerId;
+
+  if (customer) {
+    stripeCustomerId = customer.id;
+  } else {
+    stripeCustomerId = "devenv";
+  }
 
   // Create the user
   const newUser = await prisma.user.create({
