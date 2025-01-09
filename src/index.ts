@@ -122,6 +122,10 @@ app.use("/", router);
 // );
 //
 
-server.listen(port, "0.0.0.0", () => {
-  logger.info(`Server is running on port ${port}`);
-});
+server
+  .listen(Number(port), "0.0.0.0", () => {
+    logger.info(`Server is running on port ${port}`);
+  })
+  .on("error", (err) => {
+    logger.error(`Failed to start server: ${err.message}`);
+  });

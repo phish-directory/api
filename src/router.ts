@@ -42,30 +42,44 @@ router.get("/", logRequest, (req, res) => {
 
 /**
  * GET /up
- * @summary Check if the API is up
- * @return {object} 200 - Success message
- * @example response - 200 - Success message
+ * @summary Check if the API and database are up
+ * @return {object} 200 - Status response
+ * @example response - 200 - Success with database connection
  * {
- * "status": "up"
+ *   "status": "up",
+ *   "database": {
+ *     "connected": true,
+ *     "ping": "42ms",
+ *     "lastError": null
+ *   }
+ * }
+ * @example response - 200 - Success with database error
+ * {
+ *   "status": "up",
+ *   "database": {
+ *     "connected": false,
+ *     "ping": null,
+ *     "lastError": {
+ *       "message": "Connection refused",
+ *       "timestamp": "2025-01-09T12:00:00Z"
+ *     }
+ *   }
  * }
  */
 router.get("/up", logRequest, async (req, res) => {
   try {
     // Record start time for ping calculation
     const startTime = Date.now();
-
     // Check database connectivity with a simple query
     await prisma.$queryRaw`SELECT 1`;
-
     // Calculate ping time
     const pingTime = Date.now() - startTime;
-
     // Return success response with database status
     res.status(200).json({
       status: "up",
       database: {
         connected: true,
-        ping: pingTime,
+        ping: `${pingTime}ms`,
         lastError: null,
       },
     });
