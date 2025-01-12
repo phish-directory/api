@@ -1,18 +1,19 @@
 import bcrypt from "bcrypt";
 import express from "express";
+
 import { prisma } from "../../../prisma";
 import { createCustomer } from "../../../stripe";
-import { Permissions } from "../../../types/enums";
 
 let saltRounds = 10;
+
 const router = express.Router();
 
 /**
- * User Creation Data
+ * User w/ Name
  * @typedef {object} User
- * @property {string} name.required - User's display name - eg: John Doe
- * @property {string} email.required - User's email address - eg: john@example.com
- * @property {string} password.required - User's password (will be hashed)
+ * @property {string} name.required - The name of the user
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
  */
 export type User = {
   name: string;
@@ -21,132 +22,305 @@ export type User = {
 };
 
 /**
- * User Update Data
- * @typedef {object} UserUpdate
- * @property {string} [email] - User's email address
- * @property {string} [password] - User's new password
- * @property {Permissions} [permission] - User's permission level - enum:Permissions
+ * User login information
+ * @typedef {object} UserLogin
+ * @property {string} email.required - The email of the user
+ * @property {string} password.required - The password of the user
  */
+export type UserLogin = {
+  email: string;
+  password: string;
+};
 
 /**
  * GET /admin/user
- * @summary List all system users
- * @description Retrieves a list of all users in the system, including their roles and status
- * @tags Admin Users - User management operations
+ * @summary Returns a list of all users.
+ * @tags User - User Ops
  * @security BearerAuth
- * @return {array<object>} 200 - List of users
- * @return {object} 500 - Server error
- * @produces application/json
- * @example response - 200 - Success response
+ * @return {object} 200 - An array of user objects.
+ * @example response - 200 - An array of user objects.
  * [
  *   {
  *     "id": 1,
- *     "name": "John Doe",
- *     "email": "john@example.com",
- *     "permission": "basic",
- *     "createdAt": "2024-01-09T12:00:00.000Z",
- *     "updatedAt": "2024-01-09T12:00:00.000Z",
+ *     "email": "
+ *     "role": "user",
+ *     "createdAt": "2021-08-01T00:00:00.000Z",
+ *     "updatedAt": "2021-08-01T00:00:00.000Z",
  *     "deleted": false,
  *     "deletedAt": null
  *   }
  * ]
  */
 router.get("/", async (req, res) => {
-  // Implementation stays the same
+  // metrics.increment("endpoint.admin.users.get");
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred while fetching users." });
+  }
 });
 
 /**
  * GET /admin/user/:id
- * @summary Get user details
- * @description Retrieve detailed information about a specific user
- * @tags Admin Users - User management operations
+ * @summary Returns a user by their ID.
+ * @tags User - User Ops
  * @security BearerAuth
- * @param {number} id.path.required - User ID - eg: 1
- * @return {object} 200 - User details
- * @return {object} 404 - User not found
- * @return {object} 500 - Server error
- * @produces application/json
+ * @param {number} id.path - The ID of the user to retrieve.
+ * @return {object} 200 - A user object.
+ * @example response - 200 - A user object.
+ * {
+ *   "id": 1,
+ *   "email": "",
+ *   "role": "user",
+ *   "createdAt": "2021-08-01T00:00:00.000Z",
+ *   "updatedAt": "2021-08-01T00:00:00.000Z",
+ *   "deleted": false,
+ *   "deletedAt": null
+ * }
  */
 router.get("/user/:id", async (req, res) => {
-  // Implementation stays the same
+  // metrics.increment("endpoint.admin.user.get");
+  try {
+    const { id } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
 });
 
 /**
  * PATCH /admin/user/:id
- * @summary Update user details
- * @description Update a user's information including email, password, and permissions
- * @tags Admin Users - User management operations
+ * @summary Updates a user by their ID.
+ * @tags User - User Ops
  * @security BearerAuth
- * @param {number} id.path.required - User ID - eg: 1
- * @param {UserUpdate} request.body.required - User update data
- * @return {object} 200 - Update confirmation
- * @return {object} 400 - Invalid data
- * @return {object} 404 - User not found
- * @return {object} 500 - Server error
- * @produces application/json
- * @example request - Update permission
+ * @param {number} id.path - The ID of the user to update.
+ * @param {object} user.body.required - The user object to update.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
  * {
- *   "permission": "trusted"
+ *   "message": "User updated successfully."
  * }
  */
 router.patch("/user/:id", async (req, res) => {
-  // Implementation stays the same
+  // metrics.increment("endpoint.admin.user.patch");
+  try {
+    const { id } = req.params;
+    const { email, password, permission } = req.body;
+
+    // Build the data object dynamically
+    const updateData = {};
+    // @ts-expect-error
+    if (email !== undefined) updateData.email = email;
+    // @ts-expect-error
+    if (password !== undefined) updateData.password = password;
+    // @ts-expect-error
+    if (permission !== undefined) updateData.permission = permission;
+
+    // Update user
+    await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: updateData,
+    });
+
+    res.status(200).json({
+      message: "User updated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
 });
 
 /**
  * POST /admin/user/new
- * @summary Create new user
- * @description Create a new user account with basic permissions
- * @tags Admin Users - User management operations
+ * @summary Creates a new user.
+ * @tags User - User Ops
  * @security BearerAuth
- * @param {User} request.body.required - New user data
- * @return {object} 200 - User created
- * @return {object} 400 - Invalid data
- * @return {object} 500 - Server error
- * @produces application/json
- * @example request - New user data
+ * @param {User} user.body.required - The user object to create.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
  * {
- *   "name": "John Doe",
- *   "email": "john@example.com",
- *   "password": "securepassword123"
+ *   "message": "User created successfully."
  * }
  */
 router.post("/user/new", async (req, res) => {
-  // Implementation stays the same
+  const body = req.body;
+
+  const { name, email, password } = body;
+
+  if (!name || !email || !password) {
+    res
+      .status(400)
+      .json("Invalid arguments. Please provide name, email, and password");
+    return;
+  }
+
+  // Check if the user already exists
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  if (user) {
+    res.status(400).json("User with that email already exists");
+    return;
+  }
+
+  const salt = bcrypt.genSaltSync(saltRounds);
+  let passHash = await bcrypt.hash(password, salt);
+
+  let customer = await createCustomer(email, name);
+  let stripeCustomerId;
+
+  if (customer) {
+    stripeCustomerId = customer.id;
+  } else {
+    stripeCustomerId = "devenv";
+  }
+
+  // Create the user
+  const newUser = await prisma.user.create({
+    data: {
+      name: name,
+      email: email,
+      password: passHash,
+      stripeCustomerId: stripeCustomerId,
+    },
+  });
+
+  res.status(200).json({
+    message: "User created successfully, please login.",
+    uuid: newUser.uuid,
+  });
 });
 
 /**
  * DELETE /admin/user/:id
- * @summary Soft delete user
- * @description Marks a user as deleted without removing their data
- * @tags Admin Users - User management operations
+ * @summary Deletes a user by their ID.
+ * @tags User - User Ops
  * @security BearerAuth
- * @param {number} id.path.required - User ID to delete - eg: 1
- * @return {object} 200 - Deletion confirmation
- * @return {object} 404 - User not found
- * @return {object} 500 - Server error
- * @produces application/json
+ * @param {number} id.path - The ID of the user to delete.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
+ * {
+ *   "message": "User deleted successfully."
+ * }
  */
 router.delete("/user/:id", async (req, res) => {
-  // Implementation stays the same
+  // metrics.increment("endpoint.admin.user.delete");
+  try {
+    const { id } = req.params;
+
+    await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        deletedAt: new Date(),
+        deleted: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "User deleted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
 });
 
 /**
- * PATCH /admin/user/role/:id/:permission
- * @summary Update user permission level
- * @description Change a user's permission level (basic, trusted, admin)
- * @tags Admin Users - User management operations
+ * PATCH /admin/user/role/:id/
+ * @summary Updates a user's role by their ID.
+ * @tags User - User Ops
  * @security BearerAuth
- * @param {number} id.path.required - User ID - eg: 1
- * @param {Permissions} permission.path.required - New permission level - enum:Permissions
- * @return {object} 200 - Permission update confirmation
- * @return {object} 400 - Invalid permission
- * @return {object} 404 - User not found
- * @return {object} 500 - Server error
- * @produces application/json
+ * @param {number} id.path - The ID of the user to update.
+ * @param {string} permission.path - The role to update the user to.
+ * @return {object} 200 - Success message
+ * @example response - 200 - Success message
+ * {
+ *   "message": "User role updated to *ROLE* successfully."
+ * }
  */
 router.patch("/role/:id/:permission", async (req, res) => {
-  // Implementation stays the same
+  // metrics.increment("endpoint.admin.user.role.patch");
+
+  try {
+    const { id, permission } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "User ID is required.",
+      });
+    }
+
+    if (!permission) {
+      return res.status(400).json({
+        message: "Role is required.",
+      });
+    }
+
+    if (
+      permission !== "basic" &&
+      permission !== "trusted" &&
+      permission !== "admin"
+    ) {
+      return res.status(400).json({
+        message: "Invalid role.",
+      });
+    }
+
+    let user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    await prisma.user
+      .update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          permission: permission,
+        },
+      })
+      .then(() => {
+        res.status(200).json({
+          message: `User role updated to ${permission} successfully.`,
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
 });
 
 export default router;
