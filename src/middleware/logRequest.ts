@@ -5,6 +5,8 @@ import { getUserInfo } from "../functions/jwt";
 import { prisma } from "../prisma";
 import { log } from "../utils/logger";
 
+let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
+
 /**
  * Middleware to log requests to the console
  * @param req - Express Request Object
@@ -15,7 +17,7 @@ import { log } from "../utils/logger";
 export const logRequest = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   // metrics.increment("api.requests");
 
@@ -33,7 +35,7 @@ export const logRequest = async (
     xIdentity = "";
   }
 
-  if (userAgent.startsWith("Checkly/")) {
+  if (monitoringAgents.some((agent) => userAgent.startsWith(agent))) {
     return next();
   }
 
