@@ -58,6 +58,35 @@ router.get("/check/:email", async (req, res) => {
 
   const result = await ipQualityScoreService.email.check(email);
   res.status(200).json(result);
+
+  /* TODO: Add OTX
+
+
+  await axios.patch(
+    "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
+    {
+      indicators: {
+        add: [
+          {
+            indicator: `${email}`,
+            type: "email",
+          },
+        ],
+      },
+    },
+    {
+      headers: {
+        Referer: "https://phish.directory",
+        "User-Agent": "internal-server@phish.directory",
+        "X-Identity": "internal-server@phish.directory",
+        "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
+      },
+    },
+  );
+
+
+
+  */
 });
 
 export default router;

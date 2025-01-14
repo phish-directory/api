@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
+import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { domainCheck, domainReport } from "../functions/domain";
@@ -75,7 +76,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
       );
   }
 
@@ -115,7 +116,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData
+      phishreportData,
     );
 
     if (isPhish) {
@@ -128,6 +129,28 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
           lastChecked: new Date(),
         },
       });
+
+      await axios.patch(
+        "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
+        {
+          indicators: {
+            add: [
+              {
+                indicator: `${domain}`,
+                type: "domain",
+              },
+            ],
+          },
+        },
+        {
+          headers: {
+            Referer: "https://phish.directory",
+            "User-Agent": "internal-server@phish.directory",
+            "X-Identity": "internal-server@phish.directory",
+            "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
+          },
+        },
+      );
 
       return res.status(200).json({
         domain: domain,
@@ -163,6 +186,28 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
     domainCheck(domain);
 
     if (dbDomain.malicious) {
+      await axios.patch(
+        "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
+        {
+          indicators: {
+            add: [
+              {
+                indicator: `${domain}`,
+                type: "domain",
+              },
+            ],
+          },
+        },
+        {
+          headers: {
+            Referer: "https://phish.directory",
+            "User-Agent": "internal-server@phish.directory",
+            "X-Identity": "internal-server@phish.directory",
+            "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
+          },
+        },
+      );
+
       return res.status(200).json({
         domain: domain,
         phishing: true,

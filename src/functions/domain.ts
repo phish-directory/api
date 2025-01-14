@@ -1,4 +1,5 @@
 import { chromium } from "@playwright/test"; // Change the import to destructure chromium
+import axios from "axios";
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
@@ -122,6 +123,28 @@ export async function domainCheck(domain: string) {
 export async function domainReport(domain: string) {
   let virustotaldata = await virusTotalService.domain.report(domain);
   let walshydata = await walshyService.domain.report(domain);
+
+  await axios.patch(
+    "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
+    {
+      indicators: {
+        add: [
+          {
+            indicator: `${domain}`,
+            type: "domain",
+          },
+        ],
+      },
+    },
+    {
+      headers: {
+        Referer: "https://phish.directory",
+        "User-Agent": "internal-server@phish.directory",
+        "X-Identity": "internal-server@phish.directory",
+        "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
+      },
+    },
+  );
 
   return {
     virustotaldata,

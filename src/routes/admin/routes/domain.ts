@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import axios from "axios";
 
 import { domainReport } from "../../../functions/domain";
 import { getUserInfo } from "../../../functions/jwt";
@@ -112,7 +113,7 @@ router.post(
   "/reports/:id/review",
   async (
     req: Request<{ id: string }, {}, ReportReviewRequest>,
-    res: Response
+    res: Response,
   ) => {
     try {
       const { id } = req.params;
@@ -161,6 +162,28 @@ router.post(
               data: { malicious: true },
             });
 
+            await axios.patch(
+              "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
+              {
+                indicators: {
+                  add: [
+                    {
+                      indicator: `${report.domain.domain}`,
+                      type: "domain",
+                    },
+                  ],
+                },
+              },
+              {
+                headers: {
+                  Referer: "https://phish.directory",
+                  "User-Agent": "internal-server@phish.directory",
+                  "X-Identity": "internal-server@phish.directory",
+                  "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
+                },
+              },
+            );
+
             // Run domainReport function
             await domainReport(report.domain.domain);
           }
@@ -182,7 +205,7 @@ router.post(
         .status(500)
         .json({ error: "An error occurred while reviewing the report." });
     }
-  }
+  },
 );
 
 export default router;
