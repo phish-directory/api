@@ -138,6 +138,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
               {
                 indicator: `${domain}`,
                 type: "domain",
+                role: "phishing",
               },
             ],
           },
@@ -194,6 +195,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
               {
                 indicator: `${domain}`,
                 type: "domain",
+                role: "phishing",
               },
             ],
           },

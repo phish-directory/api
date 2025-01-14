@@ -70,6 +70,7 @@ router.get("/check/:email", async (req, res) => {
           {
             indicator: `${email}`,
             type: "email",
+            role: "phishing",
           },
         ],
       },

@@ -170,6 +170,7 @@ router.post(
                     {
                       indicator: `${report.domain.domain}`,
                       type: "domain",
+                      role: "phishing",
                     },
                   ],
                 },
