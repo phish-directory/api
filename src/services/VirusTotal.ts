@@ -15,36 +15,42 @@ export class VirusTotalService {
      * @returns
      */
     check: async (domain: string) => {
-      // metrics.increment("services.virustotal.domain.check");
-
-      const response = await axios.get(
-        `https://www.virustotal.com/api/v3/domains/${domain}`,
-        {
-          headers: {
-            "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
-        }
-      );
-
-      const data = response.data;
-      const dbDomain = await getDbDomain(domain);
-
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "VirusTotal",
-          domain: {
-            connect: {
-              id: dbDomain.id,
+      try {
+        // metrics.increment("services.virustotal.domain.check");
+        const response = await axios.get(
+          `https://www.virustotal.com/api/v3/domains/${domain}`,
+          {
+            headers: {
+              "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
+              Referer: "https://phish.directory",
+              "User-Agent": "internal-server@phish.directory",
+              "X-Identity": "internal-server@phish.directory",
             },
           },
-          data: data,
-        },
-      });
+        );
 
-      return data;
+        const data = response.data;
+        const dbDomain = await getDbDomain(domain);
+
+        await prisma.rawAPIData.create({
+          data: {
+            sourceAPI: "VirusTotal",
+            domain: {
+              connect: {
+                id: dbDomain.id,
+              },
+            },
+            data: data,
+          },
+        });
+
+        return data;
+      } catch (error) {
+        // Log the error but don't throw
+        // FIXME: this is terrible practice, handle ratelimits better after issue addressed.
+        // console.error(`VirusTotal API error for domain ${domain}:`, error);
+        return null;
+      }
     },
 
     /**
@@ -78,7 +84,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          }
+          },
         )
         .then((response) => {
           // console.log(response.data);
@@ -109,7 +115,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          }
+          },
         )
         .then((response) => {
           // console.log(response.data);
