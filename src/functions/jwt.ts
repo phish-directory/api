@@ -1,4 +1,4 @@
-import * as jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
@@ -11,47 +11,39 @@ import { prisma } from "../prisma";
  * @returns void
  */
 export async function authenticateToken(req: any, res: any, next: any) {
-  // metrics.increment("functions.jwt.authenticateToken");
-
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) return res.sendStatus(401);
 
-  let jwUser = jwt.verify(
-    token,
-    process.env.JWT_SECRET! as string,
-    (err: any, user: any) => {
-      if (err) {
-        console.log(err);
-        return res.sendStatus(403);
-      } else {
-        return user;
-      }
+  try {
+    // Verify token synchronously without callback
+    const jwUser = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+
+    let user = await prisma.user.findUnique({
+      where: {
+        id: jwUser.id,
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json("User not found");
     }
-  );
 
-  let user = await prisma.user.findUnique({
-    where: {
-      // @ts-expect-error
-      id: jwUser.id,
-    },
-  });
+    if (user.deleted === true) {
+      return res
+        .status(403)
+        .json(
+          "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+        );
+    }
 
-  if (!user) {
-    return res.status(400).json("User not found");
+    req.user = user;
+    next();
+  } catch (err) {
+    console.log(err);
+    return res.sendStatus(403);
   }
-
-  if (user.deleted === true) {
-    return res
-      .status(403)
-      .json(
-        "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
-      );
-  }
-
-  req.user = user;
-  next();
 }
 
 /**
@@ -68,7 +60,7 @@ export async function generateAccessToken(user: any) {
       id: user.id,
       uuid: user.uuid,
     },
-    process.env.JWT_SECRET!
+    process.env.JWT_SECRET!,
   );
   const tsEnd = Date.now();
   // metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
@@ -84,18 +76,26 @@ export async function generateAccessToken(user: any) {
  */
 export async function getUserInfo(prisma: any, res: any, req: any) {
   const tsStart = Date.now();
-  // metrics.increment("functions.jwt.getUserInfo");
 
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-
   if (token == null) return res.sendStatus(401);
 
-  // decode the token
-  let decoded = jwt.decode(token);
-  // @ts-expect-error
-  let id = decoded!.id;
-  id = id as string;
+  // Add interface for JWT payload
+  interface JwtPayload {
+    id: string;
+    uuid: string;
+    iat?: number;
+  }
+
+  // Properly type the decoded token
+  let decoded = jwt.decode(token) as JwtPayload;
+  if (!decoded) {
+    return res.sendStatus(403);
+  }
+
+  let id = decoded.id;
+  // No need for explicit cast since id is already typed as string
 
   let user = await prisma.user.findUnique({
     where: {
@@ -104,8 +104,6 @@ export async function getUserInfo(prisma: any, res: any, req: any) {
   });
 
   const tsEnd = Date.now();
-  // metrics.timing("functions.jwt.getUserInfo", tsEnd - tsStart);
-
   return user;
 }
 
