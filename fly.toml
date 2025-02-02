@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for phish-directory on 2025-02-02T18:01:53-05:00
+# fly.toml app configuration file generated for phish-directory on 2025-02-02T18:09:41-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,7 +9,7 @@ primary_region = 'ewr'
 [build]
 
 [deploy]
-  release_command = 'npx prisma migrate deploy'
+  release_command = 'bunx prisma migrate deploy'
 
 [http_service]
   internal_port = 3000
