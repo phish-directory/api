@@ -2,7 +2,6 @@
   "name": "phish.directory",
   "version": "2.1.0",
   "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
-  "main": "src/index.ts",
   "maintainers": [
     {
       "name": "Jasper Mayone",
@@ -11,12 +10,10 @@
     }
   ],
   "scripts": {
-    "start": "node dist/index.js",
-    "watch-node": "nodemon dist/index.js",
-    "watch-ts": "tsc -w",
-    "dev": "nodemon --quiet --watch './**/*.ts' --exec 'ts-node' src/index.ts",
-    "build": "npx prisma generate && tsc",
-    "compile": "npx prisma generate && tsc"
+    "start": "bun run dist/index.js",
+    "dev": "bun run --dev src/index.ts",
+    "build": "bunx prisma generate && tsc",
+    "compile": "bunx prisma generate && tsc"
   },
   "keywords": [],
   "author": "Jasper Mayone <me@jaspermayone.com>",
@@ -41,6 +38,7 @@
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "bun-types": "latest",
     "@flydotio/dockerfile": "^0.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
@@ -53,8 +51,5 @@
     "prisma": "^6.2.1",
     "typescript": "^5.7.2"
   },
-  "engines": {
-    "node": "22.x",
-    "npm": "10.8.2"
-  }
+  "type": "module"
 }
