@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import express, { Request, Response } from "express";
+import express from "express";
 import { AccountType, Permissions } from "../types/enums";
 
 import {
@@ -8,9 +8,7 @@ import {
   getUserInfo,
 } from "../functions/jwt";
 import { logRequest } from "../middleware/logRequest";
-import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
-import { createCustomer, getCustomerUsage } from "../stripe";
 
 const router = express.Router();
 router.use(express.json());
@@ -96,14 +94,7 @@ router.post("/signup", async (req, res) => {
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
 
-  let customer = await createCustomer(email, name);
-  let stripeCustomerId;
 
-  if (customer) {
-    stripeCustomerId = customer.id;
-  } else {
-    stripeCustomerId = "devenv";
-  }
 
   // Create the user
   const newUser = await prisma.user.create({
@@ -111,7 +102,6 @@ router.post("/signup", async (req, res) => {
       name: name,
       email: email,
       password: passHash,
-      stripeCustomerId: stripeCustomerId,
     },
   });
 
@@ -219,7 +209,7 @@ router.post("/login", async (req, res) => {
  *   "accountCreated": "2024-08-14T02:11:02.626Z"
  * }
  */
-router.get("/me", authenticateToken, stripeMeter, async (req, res) => {
+router.get("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me");
 
   const userInfo = await getUserInfo(prisma, res, req);
@@ -363,27 +353,5 @@ router.patch("/me", authenticateToken, async (req, res) => {
 
   res.status(200).json("User updated successfully");
 });
-
-/**
- * GET /user/stripe/usage
- * @summary Get Stripe usage metrics
- * @tags User - User Management / Info and Authentication endpoints
- * @security BearerAuth
- * @return {object} 200 - Usage statistics
- * @return {object} 400 - Usage retrieval error
- * @produces application/json
- * @description Retrieves detailed usage metrics for the authenticated user's Stripe account
- */
-router.get(
-  "/stripe/usage",
-  authenticateToken,
-  async (req: Request, res: Response) => {
-    // metrics.increment("endpoint.user.stripe.usage");
-
-    let data = await getCustomerUsage(prisma, req, res);
-
-    res.status(200).json(data);
-  },
-);
 
 export default router;

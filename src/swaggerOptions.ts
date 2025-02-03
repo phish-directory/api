@@ -64,7 +64,6 @@ export const swaggerOptions = {
     { name: "Domain", description: "Domain-related operations" },
     { name: "Email", description: "Email-related operations" },
     { name: "User", description: "User management operations" },
-    { name: "Stripe", description: "Payment-related operations" },
   ],
   filesPattern: filePattern,
   baseDir: __dirname,
