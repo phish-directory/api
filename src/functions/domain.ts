@@ -1,4 +1,3 @@
-import { chromium } from "@playwright/test"; // Change the import to destructure chromium
 import axios from "axios";
 
 // import metrics from "../metrics";
@@ -6,7 +5,6 @@ import { prisma } from "../prisma";
 import {
   googleSafebrowsingService,
   ipQualityScoreService,
-  phishermanService,
   phishObserverService,
   phishReportService,
   securityTrailsService,
@@ -27,11 +25,11 @@ export async function domainCheck(domain: string) {
 
   let walshyData = await walshyService.domain.check(domain);
   let ipQualityScoreData = await ipQualityScoreService.domain.check(domain);
-  let googleSafebrowsingData =
-    await googleSafebrowsingService.domain.check(domain);
+  let googleSafebrowsingData = await googleSafebrowsingService.domain.check(
+    domain
+  );
   let sinkingYahtsData = await sinkingYahtsService.domain.check(domain);
   let virusTotalData = await virusTotalService.domain.check(domain);
-  let phishermanData = await phishermanService.domain.check(domain);
   let phishObserverData = await phishObserverService.domain.check(domain);
   let urlScanData = await urlScanService.domain.check(domain);
   let securitytrailsData = await securityTrailsService.domain.check(domain);
@@ -107,7 +105,6 @@ export async function domainCheck(domain: string) {
     googleSafebrowsingData,
     sinkingYahtsData,
     virusTotalData,
-    phishermanData,
     phishObserverData,
     urlScanData,
     securitytrailsData,
@@ -143,7 +140,7 @@ export async function domainReport(domain: string) {
         "X-Identity": "internal-server@phish.directory",
         "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
       },
-    },
+    }
   );
 
   return {

@@ -6,7 +6,6 @@ import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
-import { APIs } from "../../types/enums";
 
 const router = express.Router();
 router.use(express.json());
@@ -72,7 +71,6 @@ router.use(async (req, res, next) => {
  *     "responses": {
  *       "googleSafebrowsing": 45000,
  *       "ipQualityScore": 42000,
- *       "phisherman": 38000,
  *       "phishObserver": 35000,
  *       "phishReport": 30000,
  *       "securityTrails": 25000,
@@ -181,11 +179,6 @@ router.get("/metrics", logRequest, async (req, res) => {
         ipQualityScore: await prisma.rawAPIData.count({
           where: {
             sourceAPI: "IpQualityScore",
-          },
-        }),
-        phisherman: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "Phisherman",
           },
         }),
         phishObserver: await prisma.rawAPIData.count({

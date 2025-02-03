@@ -30,7 +30,6 @@ enum Classifications {
 enum APIs {
   SafeBrowsing
   IpQualityScore
-  Phisherman
   PhishObserver
   PhishReport
   SecurityTrails
