@@ -75,7 +75,7 @@ router.get("/check", authenticateToken, async (req, res) => {
     return res
       .status(400)
       .json(
-        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com",
+        "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
       );
   }
 
@@ -99,7 +99,6 @@ router.get("/check", authenticateToken, async (req, res) => {
     let googleSafebrowsingData = data.googleSafebrowsingData;
     let sinkingYahtsData = data.sinkingYahtsData;
     let virusTotalData = data.virusTotalData;
-    let phishermanData = data.phishermanData;
     let phishObserverData = data.phishObserverData;
     let urlScanData = data.urlScanData;
     let securitytrailsData = data.securitytrailsData;
@@ -111,11 +110,10 @@ router.get("/check", authenticateToken, async (req, res) => {
       googleSafebrowsingData,
       sinkingYahtsData,
       virusTotalData,
-      phishermanData,
       phishObserverData,
       urlScanData,
       securitytrailsData,
-      phishreportData,
+      phishreportData
     );
 
     if (isPhish) {
@@ -149,7 +147,7 @@ router.get("/check", authenticateToken, async (req, res) => {
             "X-Identity": "internal-server@phish.directory",
             "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
           },
-        },
+        }
       );
 
       return res.status(200).json({
@@ -206,7 +204,7 @@ router.get("/check", authenticateToken, async (req, res) => {
             "X-Identity": "internal-server@phish.directory",
             "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
           },
-        },
+        }
       );
 
       return res.status(200).json({

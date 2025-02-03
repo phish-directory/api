@@ -5,7 +5,6 @@
  * @param googleSafebrowsingData - Data from Google Safebrowsing API
  * @param sinkingYahtsData - Data from Sinking Yahts API
  * @param virusTotalData - Data from VirusTotal API
- * @param phishermanData - Data from Phisherman API
  * @param phishObserverData - Data from PhishObserver API
  * @param urlScanData - Data from URLScan API
  * @param securitytrailsData - Data from SecurityTrails API
@@ -18,7 +17,6 @@ export async function parseData(
   googleSafebrowsingData: any,
   sinkingYahtsData: any,
   virusTotalData: any,
-  phishermanData: any,
   phishObserverData: any,
   urlScanData: any,
   securitytrailsData: any,
@@ -41,8 +39,6 @@ export async function parseData(
     ipQualityScoreData.phishing ||
     ipQualityScoreData.malware
   ) {
-    verdict = true;
-  } else if (phishermanData.verifiedPhish) {
     verdict = true;
   } else if (sinkingYahtsData) {
     verdict = true;

@@ -5,7 +5,7 @@ CREATE TYPE "Permissions" AS ENUM ('basic', 'trusted', 'admin');
 CREATE TYPE "Classifications" AS ENUM ('postal', 'banking', 'item_scams', 'other');
 
 -- CreateEnum
-CREATE TYPE "APIs" AS ENUM ('SafeBrowsing', 'IpQualityScore', 'Phisherman', 'PhishObserver', 'PhishReport', 'SecurityTrails', 'SinkingYachts', 'UrlScan', 'VirusTotal', 'Walshy');
+CREATE TYPE "APIs" AS ENUM ('SafeBrowsing', 'IpQualityScore', 'PhishObserver', 'PhishReport', 'SecurityTrails', 'SinkingYachts', 'UrlScan', 'VirusTotal', 'Walshy');
 
 -- CreateEnum
 CREATE TYPE "AbuseContactType" AS ENUM ('HostingService', 'LinkShortener', 'Registrar', 'Other');

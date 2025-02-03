@@ -66,7 +66,6 @@ export enum Verdict {
  * @enum {number}
  * @property {number} SafeBrowsing - Google Safe Browsing API
  * @property {number} IpQualityScore - IP Quality Score API for threat detection
- * @property {number} Phisherman - Phisherman API for phishing detection
  * @property {number} PhishObserver - PhishObserver API for phishing analysis
  * @property {number} PhishReport - PhishReport API for reporting and analyzing phishing attempts
  * @property {number} SecurityTrails - SecurityTrails API for security intelligence
@@ -78,7 +77,6 @@ export enum Verdict {
 export enum APIs {
   SafeBrowsing,
   IpQualityScore,
-  Phisherman,
   PhishObserver,
   PhishReport,
   SecurityTrails,
