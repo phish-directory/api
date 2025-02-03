@@ -47,7 +47,6 @@ model User {
   email             String           @unique
   password          String
   permission        Permissions      @default(basic)
-  stripeCustomerId  String?          @unique
   subscriptionItems String[]         @default([])
   deleted           Boolean          @default(false)
   createdAt         DateTime         @default(now())

@@ -46,24 +46,6 @@ export enum Classifications {
 
 /**
  * @swagger
- * @description Defines time periods for metering in Stripe integration
- * @enum {number}
- * @property {number} hour - Hourly metering
- * @property {number} day - Daily metering
- * @property {number} month - Monthly metering
- * @property {number} year - Yearly metering
- * @property {number} alltime - All-time cumulative metering
- */
-export enum Metertime {
-  hour,
-  day,
-  month,
-  year,
-  alltime,
-}
-
-/**
- * @swagger
  * @description Represents the final classification verdict for suspicious activities
  * @enum {number}
  * @property {number} postal - Confirmed postal/shipping scam

@@ -2,13 +2,12 @@ import * as express from "express";
 import responseTime from "response-time";
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
+import { prisma } from "./prisma";
 import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
 import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
-import stripeRouter from "./routes/stripe";
 import userRouter from "./routes/user";
-import { prisma } from "./prisma";
 
 const router = express.Router();
 
@@ -126,7 +125,6 @@ router.use("/user", userRouter);
 router.use("/misc", miscRouter);
 router.use("/domain", domainRouter);
 router.use("/email", emailRouter);
-router.use("/stripe", stripeRouter);
 router.use("/admin", adminRouter);
 
 export default router;

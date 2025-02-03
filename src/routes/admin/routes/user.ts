@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import express from "express";
 
 import { prisma } from "../../../prisma";
-import { createCustomer } from "../../../stripe";
 
 let saltRounds = 10;
 
@@ -187,22 +186,12 @@ router.post("/user/new", async (req, res) => {
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
 
-  let customer = await createCustomer(email, name);
-  let stripeCustomerId;
-
-  if (customer) {
-    stripeCustomerId = customer.id;
-  } else {
-    stripeCustomerId = "devenv";
-  }
-
   // Create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
       email: email,
       password: passHash,
-      stripeCustomerId: stripeCustomerId,
     },
   });
 

@@ -1,13 +1,12 @@
+import axios from "axios";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
-import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { domainCheck, domainReport } from "../functions/domain";
 import { authenticateToken, getUserInfo } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
 import { logRequest } from "../middleware/logRequest";
-import { stripeMeter } from "../middleware/stripeMeter";
 import { prisma } from "../prisma";
 import { Classifications } from "../types/enums";
 
@@ -53,7 +52,7 @@ We also keep our own database of domains and their status, so we can return the 
  * @example response - 400 - Error: Invalid domain parameter
  * "Invalid domain parameter, should be a top level domain. Ex: google.com, amazon.com"
  */
-router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
+router.get("/check", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.domain.check");
 
   // look for the query parameter
@@ -268,7 +267,7 @@ router.get("/check", authenticateToken, stripeMeter, async (req, res) => {
  * @example response - 200 - Success message
  * "Domain classified successfully"
  */
-router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
+router.put("/classify", authenticateToken, async (req, res) => {
   const data = req.body;
   const domain = data.domain;
   const classification = data.classification;
@@ -371,7 +370,7 @@ router.put("/classify", authenticateToken, stripeMeter, async (req, res) => {
  *   "notes": "This site is attempting to steal banking credentials"
  * }
  */
-router.post("/report", authenticateToken, stripeMeter, async (req, res) => {
+router.post("/report", authenticateToken, async (req, res) => {
   const { domain, notes } = req.body;
   const user = await getUserInfo(prisma, res, req);
 
