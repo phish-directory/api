@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the Google Safebrowsing for checking and reporting domains.
@@ -17,6 +18,8 @@ export class GoogleSafebrowsingService {
     check: async (domain: string) => {
       // metrics.increment("services.googleSafebrowsing.domain.check");
 
+      const sanitizedDomain = await sanitizeDomain(domain);
+
       const response = await axios.post(
         `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process
           .env.GOOGLE_API_KEY!}`,
@@ -31,7 +34,7 @@ export class GoogleSafebrowsingService {
             threatEntryTypes: ["URL"],
             threatEntries: [
               {
-                url: domain,
+                url: sanitizedDomain,
               },
             ],
           },
@@ -39,7 +42,7 @@ export class GoogleSafebrowsingService {
       );
 
       const data = response.data;
-      const dbDomain = await getDbDomain(domain);
+      const dbDomain = await getDbDomain(sanitizedDomain);
 
       await prisma.rawAPIData.create({
         data: {
