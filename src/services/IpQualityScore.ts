@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the IpQualityScore service for checking and reporting domains.
@@ -17,9 +18,11 @@ export class IpQualityScoreService {
     check: async (domain: string) => {
       // metrics.increment("services.ipqualityscore.domain.check");
 
+      const sanitizedDomain = await sanitizeDomain(domain);
+
       const response = await axios.get(
         `https://ipqualityscore.com/api/json/url/${process.env
-          .IPQS_API_KEY!}/${domain}`,
+          .IPQS_API_KEY!}/${sanitizedDomain}`,
         {
           // todo: extract headers to a seperate place to avoid duplication
           headers: {
@@ -31,7 +34,7 @@ export class IpQualityScoreService {
       );
 
       const data = response.data;
-      const dbDomain = await getDbDomain(domain);
+      const dbDomain = await getDbDomain(sanitizedDomain);
 
       await prisma.rawAPIData.create({
         data: {

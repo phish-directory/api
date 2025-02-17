@@ -33,7 +33,8 @@
     "node-statsd": "^0.1.1",
     "request-ip": "^3.3.0",
     "response-time": "^2.3.3",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "express-rate-limit": "^7.5.0"
   },
   "devDependencies": {
     "bun-types": "latest",

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the SecurityTrails service for checking and reporting domains.
@@ -16,9 +17,11 @@ export class SecurityTrailsService {
     check: async (domain: string) => {
       // metrics.increment("services.securitytrails.domain.check");
 
+      const sanitizedDomain = await sanitizeDomain(domain);
+
       const options = {
         method: "GET",
-        url: `https://api.securitytrails.com/v1/domain/${domain}`,
+        url: `https://api.securitytrails.com/v1/domain/${sanitizedDomain}`,
         headers: {
           accept: "application/json",
           APIKEY: process.env.SECURITYTRAILS_API_KEY!,
@@ -28,7 +31,7 @@ export class SecurityTrailsService {
       try {
         const response = await axios.request(options);
         const data = response.data;
-        const dbDomain = await getDbDomain(domain);
+        const dbDomain = await getDbDomain(sanitizedDomain);
 
         await prisma.rawAPIData.create({
           data: {
@@ -46,7 +49,7 @@ export class SecurityTrailsService {
       } catch (error: any) {
         if (error.response?.status === 429) {
           console.warn(
-            `Rate limit exceeded for domain: ${domain}. Returning empty result.`
+            `Rate limit exceeded for domain: ${sanitizedDomain}. Returning empty result.`
           );
           // Handle 429 error (Too Many Requests) by returning a fallback response.
           return {

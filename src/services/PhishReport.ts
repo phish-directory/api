@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the PhishReport service for checking and reporting domains.
@@ -17,8 +18,10 @@ export class PhishReportService {
     check: async (domain: string) => {
       // metrics.increment("services.phishreport.domain.check");
 
+      const sanitizedDomain = await sanitizeDomain(domain);
+
       let response = await axios.get(
-        `https://phish.report/api/v0/hosting?url=${domain}`,
+        `https://phish.report/api/v0/hosting?url=${sanitizedDomain}`,
         {
           headers: {
             Referer: "https://phish.directory",
@@ -29,7 +32,7 @@ export class PhishReportService {
       );
 
       let data = response.data;
-      let dbDomain = await getDbDomain(domain);
+      let dbDomain = await getDbDomain(sanitizedDomain);
 
       await prisma.rawAPIData.create({
         data: {
@@ -53,6 +56,9 @@ export class PhishReportService {
     //  * @returns
     //  */
     // report: async (domain: string) => {
+
+    // const sanitizedDomain = await sanitizeDomain(domain);
+
     //   // metrics.increment("services.phishreport.domain.report");
 
     //   // todo: implement this
