@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the SinkingYahts service for checking and reporting domains.
@@ -16,9 +17,10 @@ export class SinkingYahtsService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.sinkingyahts.domain.check");
+      const sanitizedDomain = await sanitizeDomain(domain);
 
       const response = await axios.get<boolean>(
-        `https://phish.sinking.yachts/v2/check/${domain}`,
+        `https://phish.sinking.yachts/v2/check/${sanitizedDomain}`,
         {
           headers: {
             accept: "application/json",
@@ -30,7 +32,7 @@ export class SinkingYahtsService {
       );
 
       const data = response.data;
-      const dbDomain = await getDbDomain(domain);
+      const dbDomain = await getDbDomain(sanitizedDomain);
 
       await prisma.rawAPIData.create({
         data: {

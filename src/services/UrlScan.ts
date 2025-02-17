@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the UrlScan service for checking and reporting domains.
@@ -16,9 +17,10 @@ export class UrlScanService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.urlscan.domain.check");
+      const sanitizedDomain = await sanitizeDomain(domain);
 
       const checkSearch = await axios.get(
-        `https://urlscan.io/api/v1/search/?q=domain:${domain}`,
+        `https://urlscan.io/api/v1/search/?q=domain:${sanitizedDomain}`,
         {
           headers: {
             "API-Key": process.env.URLSCAN_API_KEY!,
@@ -78,7 +80,7 @@ export class UrlScanService {
           }
         );
 
-        const dbDomain = await getDbDomain(domain);
+        const dbDomain = await getDbDomain(sanitizedDomain);
         await prisma.rawAPIData.create({
           data: {
             sourceAPI: "UrlScan",

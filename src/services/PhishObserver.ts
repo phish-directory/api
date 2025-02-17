@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 interface PhishObserverError {
   error: string;
@@ -33,25 +34,28 @@ export class PhishObserverService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.phishobserver.domain.check");
+
+      const sanitizedDomain = await sanitizeDomain(domain);
+
       try {
         // Submit the domain for checking
         const submissionResponse = await axios.post<SubmissionResponse>(
           `${this.baseUrl}/submit`,
           {
-            url: `https://${domain}`,
+            url: `https://${sanitizedDomain}`,
             tags: ["phish.directory"],
           },
-          { headers: this.headers },
+          { headers: this.headers }
         );
 
         // Get the submission details
         const searchResponse = await axios.get(
           `${this.baseUrl}/submission/${submissionResponse.data.id}`,
-          { headers: this.headers },
+          { headers: this.headers }
         );
 
         // Store the response in the database
-        const dbDomain = await getDbDomain(domain);
+        const dbDomain = await getDbDomain(sanitizedDomain);
         await prisma.rawAPIData.create({
           data: {
             sourceAPI: "PhishObserver",

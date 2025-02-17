@@ -1,16 +1,19 @@
 import { prisma } from "../../prisma";
+import { sanitizeDomain } from "../../utils/sanitizeDomain";
 
 export async function getDbDomain(domain: string) {
+  let sanitizedDomain = sanitizeDomain(domain);
+
   const dbDomain = await prisma.domain.findFirst({
     where: {
-      domain: domain,
+      domain: sanitizedDomain,
     },
   });
 
   if (!dbDomain) {
     return await prisma.domain.create({
       data: {
-        domain: domain,
+        domain: sanitizedDomain,
       },
     });
   }

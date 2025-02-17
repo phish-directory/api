@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the VirusTotal service for checking and reporting domains.
@@ -17,8 +18,10 @@ export class VirusTotalService {
     check: async (domain: string) => {
       try {
         // metrics.increment("services.virustotal.domain.check");
+        const sanitizedDomain = await sanitizeDomain(domain);
+
         const response = await axios.get(
-          `https://www.virustotal.com/api/v3/domains/${domain}`,
+          `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}`,
           {
             headers: {
               "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
@@ -26,11 +29,11 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         );
 
         const data = response.data;
-        const dbDomain = await getDbDomain(domain);
+        const dbDomain = await getDbDomain(sanitizedDomain);
 
         await prisma.rawAPIData.create({
           data: {
@@ -61,6 +64,7 @@ export class VirusTotalService {
      */
     report: async (domain: string) => {
       // metrics.increment("services.virustotal.domain.report");
+      const sanitizedDomain = await sanitizeDomain(domain);
 
       const commentData = {
         data: {
@@ -73,7 +77,7 @@ export class VirusTotalService {
 
       axios
         .post(
-          `https://www.virustotal.com/api/v3/domains/${domain}/comments`,
+          `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}/comments`,
           commentData,
           {
             headers: {
@@ -84,7 +88,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         )
         .then((response) => {
           // console.log(response.data);
@@ -104,7 +108,7 @@ export class VirusTotalService {
 
       axios
         .post(
-          `https://www.virustotal.com/api/v3/domains/${domain}/comments`,
+          `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}/comments`,
           voteData,
           {
             headers: {
@@ -115,7 +119,7 @@ export class VirusTotalService {
               "User-Agent": "internal-server@phish.directory",
               "X-Identity": "internal-server@phish.directory",
             },
-          },
+          }
         )
         .then((response) => {
           // console.log(response.data);
