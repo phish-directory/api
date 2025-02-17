@@ -1,4 +1,3 @@
-import rateLimit from "express-rate-limit";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
@@ -16,15 +15,6 @@ export async function authenticateToken(req: any, res: any, next: any) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) return res.sendStatus(401);
-
-  // add rate limiting
-  const limiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minute
-    max: 5, // limit each IP to 5 requests per windowMs
-    message: "Too many requests, please try again later.",
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
 
   try {
     // Verify token synchronously without callback

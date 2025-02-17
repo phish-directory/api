@@ -1,8 +1,8 @@
 import * as express from "express";
-import rateLimit from "express-rate-limit";
 import responseTime from "response-time";
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
+import defaultRateLimiter from "./middleware/rateLimit";
 import { prisma } from "./prisma";
 import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
@@ -55,23 +55,7 @@ router.use(
   })
 );
 
-// Global rate limiter
-const globalRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per window
-  message: "Too many requests from this IP, please try again later",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Stricter rate limit for health check endpoint
-const healthCheckLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 requests per minute
-  message: "Too many health check requests",
-});
-
-router.use(globalRateLimiter);
+router.use(defaultRateLimiter);
 
 /**
  * GET /
