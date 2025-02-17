@@ -6,12 +6,11 @@ import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
-import rateLimit from "express-rate-limit";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
-
+router.use(authenticateToken);
 
 // middleware to check if the user is an admin
 router.use(async (req, res, next) => {

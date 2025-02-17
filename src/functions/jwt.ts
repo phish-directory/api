@@ -1,3 +1,4 @@
+import rateLimit from "express-rate-limit";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
@@ -15,6 +16,15 @@ export async function authenticateToken(req: any, res: any, next: any) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) return res.sendStatus(401);
+
+  // add rate limiting
+  const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: "Too many requests, please try again later.",
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
 
   try {
     // Verify token synchronously without callback
@@ -34,7 +44,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
       return res
         .status(403)
         .json(
-          "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+          "Your user has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
         );
     }
 
@@ -60,7 +70,7 @@ export async function generateAccessToken(user: any) {
       id: user.id,
       uuid: user.uuid,
     },
-    process.env.JWT_SECRET!,
+    process.env.JWT_SECRET!
   );
   const tsEnd = Date.now();
   // metrics.timing("functions.jwt.generateAccessToken", tsEnd - tsStart);
