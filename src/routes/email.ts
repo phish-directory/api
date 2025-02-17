@@ -1,12 +1,23 @@
 import * as express from "express";
 import { logRequest } from "../middleware/logRequest";
 import { ipQualityScoreService } from "../services/_index";
-import { prisma } from "../prisma";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
+
+const validateEmail = (email: string): boolean => {
+  // First check the length to prevent long inputs
+  const MAX_EMAIL_LENGTH = 254; // RFC 5321
+  if (typeof email !== "string" || email.length > MAX_EMAIL_LENGTH) {
+    return false;
+  }
+
+  // Simple regex with reasonable constraints
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
 
 /**
  * GET /email/check/:email
@@ -50,10 +61,11 @@ router.get("/check/:email", async (req, res) => {
     return res.status(400).json({ message: "No email provided." });
   }
 
-  // validate email with regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Invalid email provided." });
+  if (!validateEmail(email)) {
+    return res.status(400).json({
+      message: "Invalid email provided.",
+      code: "INVALID_EMAIL",
+    });
   }
 
   const result = await ipQualityScoreService.email.check(email);
