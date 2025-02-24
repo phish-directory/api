@@ -2,7 +2,7 @@ import * as express from "express";
 import responseTime from "response-time";
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
-import defaultRateLimiter from "./middleware/rateLimit";
+// import defaultRateLimiter from "./middleware/rateLimit";
 import { prisma } from "./prisma";
 import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
@@ -55,7 +55,7 @@ router.use(
   })
 );
 
-router.use(defaultRateLimiter);
+// router.use(defaultRateLimiter);
 
 /**
  * GET /
