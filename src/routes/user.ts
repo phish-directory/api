@@ -56,8 +56,6 @@ export type UserLogin = {
  *   "name": "John Doe",
  *   "email": "john.doe@example.com",
  *   "password": "securepassword123",
- *   "accountType": "user",
- *   "permission": "basic"
  * }
  * @example response - 200 - Success response
  * {
@@ -93,8 +91,6 @@ router.post("/signup", async (req, res) => {
 
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
-
-
 
   // Create the user
   const newUser = await prisma.user.create({
@@ -162,7 +158,7 @@ router.post("/login", async (req, res) => {
     return res
       .status(403)
       .json(
-        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account.",
+        "User has been deleted. Please contact support if you believe this is an error or need to reactivate your account."
       );
   }
 
