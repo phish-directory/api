@@ -20,7 +20,7 @@ const validateEmail = (email: string): boolean => {
 };
 
 /**
- * GET /email/check/:email
+ * GET /email/check
  * @summary Check email address reputation and validity
  * @description Asynchronously validates an email address and checks it against known malicious email databases.
  * Performs the following checks:
@@ -30,7 +30,7 @@ const validateEmail = (email: string): boolean => {
  * - Fraud score assessment
  * - Recent abuse detection
  * @tags Email - Email validation and reputation checking
- * @param {string} email.path.required - Email address to check - eg: test@example.com
+ * @param {string} email.query.required - Email address to check - eg: test@example.com
  * @return {object} 200 - Email check results
  * @return {object} 400 - Invalid email error
  * @produces application/json
@@ -55,8 +55,8 @@ const validateEmail = (email: string): boolean => {
  *   "message": "No email provided."
  * }
  */
-router.get("/check/:email", async (req, res) => {
-  const email = req.params.email;
+router.get("/check", async (req, res) => {
+  const email = req.query.email as string;
   if (!email) {
     return res.status(400).json({ message: "No email provided." });
   }
