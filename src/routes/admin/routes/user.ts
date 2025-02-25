@@ -36,17 +36,19 @@ export type UserLogin = {
  * @summary Returns a list of all users.
  * @tags User - User Ops
  * @security BearerAuth
- * @return {object} 200 - An array of user objects.
+ * @return {array<object>} 200 - An array of user objects.
  * @example response - 200 - An array of user objects.
  * [
  *   {
  *     "id": 1,
- *     "email": "
- *     "role": "user",
+ *     "name": "John Doe",
+ *     "email": "john@example.com",
+ *     "role": "basic",
  *     "createdAt": "2021-08-01T00:00:00.000Z",
  *     "updatedAt": "2021-08-01T00:00:00.000Z",
  *     "deleted": false,
- *     "deletedAt": null
+ *     "deletedAt": null,
+ *     "uuid": "123e4567-e89b-12d3-a456-426614174000"
  *   }
  * ]
  */
@@ -74,28 +76,44 @@ router.get("/", async (req, res) => {
  * @example response - 200 - A user object.
  * {
  *   "id": 1,
- *   "email": "",
- *   "role": "user",
+ *   "name": "John Doe",
+ *   "email": "john@example.com",
+ *   "role": "basic",
  *   "createdAt": "2021-08-01T00:00:00.000Z",
  *   "updatedAt": "2021-08-01T00:00:00.000Z",
  *   "deleted": false,
- *   "deletedAt": null
+ *   "deletedAt": null,
+ *   "uuid": "123e4567-e89b-12d3-a456-426614174000"
  * }
  */
 router.get("/user/:id", async (req, res) => {
   // metrics.increment("endpoint.admin.user.get");
+
   try {
+    // Process the user request
     const { id } = req.params;
 
+    // Validate ID
+    const userId = parseInt(id);
+    if (isNaN(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "Invalid user ID. Must be a positive integer.",
+      });
+    }
+
     const user = await prisma.user.findUnique({
-      where: {
-        id: parseInt(id),
-      },
+      where: { id: userId },
     });
 
-    res.status(200).json(user);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
   } catch (error) {
-    res.status(500).json({
+    console.log(error);
+
+    return res.status(500).json({
       message: "An error occurred.",
     });
   }
@@ -107,8 +125,16 @@ router.get("/user/:id", async (req, res) => {
  * @tags User - User Ops
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to update.
- * @param {object} user.body.required - The user object to update.
+ * @param {object} request.body - User fields to update
+ * @param {string} [request.body.email] - Updated email
+ * @param {string} [request.body.password] - Updated password
+ * @param {string} [request.body.role] - Updated role
  * @return {object} 200 - Success message
+ * @example request - Example request
+ * {
+ *   "email": "newemail@example.com",
+ *   "role": "trusted"
+ * }
  * @example response - 200 - Success message
  * {
  *   "message": "User updated successfully."
@@ -152,11 +178,18 @@ router.patch("/user/:id", async (req, res) => {
  * @summary Creates a new user.
  * @tags User - User Ops
  * @security BearerAuth
- * @param {User} user.body.required - The user object to create.
- * @return {object} 200 - Success message
- * @example response - 200 - Success message
+ * @param {User} request.body - User information
+ * @return {object} 200 - Success response
+ * @example request - Example request
  * {
- *   "message": "User created successfully."
+ *   "name": "John Doe",
+ *   "email": "john@example.com",
+ *   "password": "securePassword123"
+ * }
+ * @example response - 200 - success response
+ * {
+ *   "message": "User created successfully, please login.",
+ *   "uuid": "123e4567-e89b-12d3-a456-426614174000"
  * }
  */
 router.post("/user/new", async (req, res) => {
@@ -239,23 +272,24 @@ router.delete("/user/:id", async (req, res) => {
 });
 
 /**
- * PATCH /admin/user/role/:id/
+ * PATCH /admin/user/:id/:role/
  * @summary Updates a user's role by their ID.
  * @tags User - User Ops
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to update.
- * @param {string} permission.path - The role to update the user to.
+ * @param {string} role.path - The role to update the user to.
  * @return {object} 200 - Success message
  * @example response - 200 - Success message
  * {
  *   "message": "User role updated to *ROLE* successfully."
  * }
  */
-router.patch("/role/:id/:permission", async (req, res) => {
+router.patch("/role/:id/:role", async (req, res) => {
   // metrics.increment("endpoint.admin.user.role.patch");
 
   try {
-    const { id, permission } = req.params;
+    const { id, role } = req.params;
+    const permission = role;
 
     if (!id) {
       return res.status(400).json({
