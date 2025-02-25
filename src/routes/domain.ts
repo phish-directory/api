@@ -256,7 +256,7 @@ router.get("/check", authenticateToken, async (req, res) => {
 
  This endpoint requires TRUSTED level access. To check if you have this access run /user/me with your token.
 
- To request trusted level access or a new classification type, contact Jasper via email at jasper@phish.directory or via Slack.
+ To request trusted level access or a new classification type, contact Jasper via email at jasper.mayone@phish.directory or via Slack.
  * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
  * @param {DomainClassification} request.body.required - Domain Classification Body
