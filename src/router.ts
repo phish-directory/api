@@ -9,6 +9,7 @@ import domainRouter from "./routes/domain";
 import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
+import * as logger from "./utils/logger";
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.use(
       .replace(/\//g, "_");
 
     // Log response time metrics
-    console.log(`Response time for ${method} /${path}: ${time}ms`);
+    logger.debug(`Response time for ${method} /${path}: ${time}ms`);
 
     // Metrics integration (commented out but structured)
     // metrics.timing(`http.response.${stat}`, time);

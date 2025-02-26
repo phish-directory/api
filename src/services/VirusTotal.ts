@@ -79,9 +79,6 @@ export class VirusTotalService {
             headers: headersWithVirusTotal,
           }
         )
-        .then((response) => {
-          // console.log(response.data);
-        })
         .catch((error) => {
           console.error(error);
         });
@@ -110,9 +107,6 @@ export class VirusTotalService {
             },
           }
         )
-        .then((response) => {
-          // console.log(response.data);
-        })
         .catch((error) => {
           console.error(error);
         });

@@ -377,7 +377,6 @@ router.put("/classify", authenticateToken, async (req, res) => {
 
     return res.status(200).json("Domain classified successfully");
   } else {
-    console.log(user.permission);
     return res.status(403).json("Unauthorized");
   }
 });

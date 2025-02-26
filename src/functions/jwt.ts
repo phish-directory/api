@@ -2,6 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
+import * as logger from "../utils/logger";
 
 /**
  * Function to authenticate the token
@@ -41,7 +42,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
     req.user = user;
     next();
   } catch (err) {
-    console.log(err);
+    logger.error(`${err}`);
     return res.sendStatus(403);
   }
 }
@@ -79,7 +80,7 @@ export async function getUserInfo(req: any) {
   // FIXME:
   // for some reson, even when we have headers, we still get a error, so this is the temp solution
   if (!req.headers) {
-    return console.log("No headers found, but not actually an error");
+    return logger.debug("No headers found, but not actually an error");
   }
 
   const authHeader = req.headers.authorization;

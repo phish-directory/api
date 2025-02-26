@@ -3,6 +3,7 @@ import express from "express";
 
 import { ExtendedData } from "@prisma/client";
 import { prisma } from "../../../prisma";
+import * as logger from "../../../utils/logger";
 
 let saltRounds = 10;
 
@@ -112,7 +113,7 @@ router.get("/user/:id", async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error as string);
 
     return res.status(500).json({
       message: "An error occurred.",

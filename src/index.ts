@@ -78,7 +78,7 @@ app.use("/", router);
 // new CronJob(
 //   "0 * * * * *",
 //   async function () {
-//     console.log("Thump Thump");
+//     logger.log("Thump Thump");
 //     // metrics.increment("heartbeat");
 //   },
 //   null,
