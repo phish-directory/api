@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { headers } from "../utils/headers";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -24,12 +25,7 @@ export class IpQualityScoreService {
         `https://ipqualityscore.com/api/json/url/${process.env
           .IPQS_API_KEY!}/${sanitizedDomain}`,
         {
-          // todo: extract headers to a seperate place to avoid duplication
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers: headers,
         }
       );
 
@@ -66,11 +62,7 @@ export class IpQualityScoreService {
         `https://ipqualityscore.com/api/json/email/${process.env
           .IPQS_API_KEY!}/${email}`,
         {
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers: headers,
         }
       );
 

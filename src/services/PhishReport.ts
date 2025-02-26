@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { headers } from "../utils/headers";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -23,11 +24,7 @@ export class PhishReportService {
       let response = await axios.get(
         `https://phish.report/api/v0/hosting?url=${sanitizedDomain}`,
         {
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers: headers,
         }
       );
 
@@ -61,7 +58,6 @@ export class PhishReportService {
 
     // metrics.increment("services.phishreport.domain.report");
 
-    // todo: implement this
     // https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post
     // },
   };

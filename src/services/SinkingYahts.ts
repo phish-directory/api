@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { headersWithSinkingYahts } from "../utils/headers";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -22,12 +23,7 @@ export class SinkingYahtsService {
       const response = await axios.get<boolean>(
         `https://phish.sinking.yachts/v2/check/${sanitizedDomain}`,
         {
-          headers: {
-            accept: "application/json",
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers: headersWithSinkingYahts,
         }
       );
 

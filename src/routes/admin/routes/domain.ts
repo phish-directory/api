@@ -4,6 +4,7 @@ import express, { Request, Response } from "express";
 import { domainReport } from "../../../functions/domain";
 import { getUserInfo } from "../../../functions/jwt";
 import { prisma } from "../../../prisma";
+import { headersWithOTX } from "../../../utils/headers";
 
 /*
 GET domain - Get all domains
@@ -176,12 +177,7 @@ router.post(
                 },
               },
               {
-                headers: {
-                  Referer: "https://phish.directory",
-                  "User-Agent": "internal-server@phish.directory",
-                  "X-Identity": "internal-server@phish.directory",
-                  "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-                },
+                headers: headersWithOTX,
               }
             );
 

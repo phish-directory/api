@@ -13,6 +13,7 @@ import {
   virusTotalService,
   walshyService,
 } from "../services/_index";
+import { headersWithOTX } from "../utils/headers";
 
 /**
  * Check the domain against all the services
@@ -86,12 +87,7 @@ export async function domainReport(domain: string) {
       },
     },
     {
-      headers: {
-        Referer: "https://phish.directory",
-        "User-Agent": "internal-server@phish.directory",
-        "X-Identity": "internal-server@phish.directory",
-        "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-      },
+      headers: headersWithOTX,
     }
   );
 

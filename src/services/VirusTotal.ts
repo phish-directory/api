@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { headersWithVirusTotal } from "../utils/headers";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -23,12 +24,7 @@ export class VirusTotalService {
         const response = await axios.get(
           `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}`,
           {
-            headers: {
-              "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
+            headers: headersWithVirusTotal,
           }
         );
 
@@ -80,14 +76,7 @@ export class VirusTotalService {
           `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}/comments`,
           commentData,
           {
-            headers: {
-              accept: "application/json",
-              "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
-              "content-type": "application/json",
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
+            headers: headersWithVirusTotal,
           }
         )
         .then((response) => {
@@ -127,8 +116,6 @@ export class VirusTotalService {
         .catch((error) => {
           console.error(error);
         });
-
-      // todo: implement this
     },
   };
 }

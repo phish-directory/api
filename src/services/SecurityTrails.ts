@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { prisma } from "../prisma";
+import { headersWithSecurityTrails } from "../utils/headers";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -22,10 +23,7 @@ export class SecurityTrailsService {
       const options = {
         method: "GET",
         url: `https://api.securitytrails.com/v1/domain/${sanitizedDomain}`,
-        headers: {
-          accept: "application/json",
-          APIKEY: process.env.SECURITYTRAILS_API_KEY!,
-        },
+        headers: headersWithSecurityTrails,
       };
 
       try {

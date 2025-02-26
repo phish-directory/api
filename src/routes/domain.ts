@@ -10,6 +10,7 @@ import { parseData } from "../functions/parseData";
 import { userNeedsExtendedData } from "../functions/userNeedsExtendedData";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
+import { headersWithOTX } from "../utils/headers";
 
 const router = express.Router();
 router.use(express.json());
@@ -144,12 +145,7 @@ router.get("/check", authenticateToken, async (req, res) => {
           },
         },
         {
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-            "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-          },
+          headers: headersWithOTX,
         }
       );
 
@@ -227,12 +223,7 @@ router.get("/check", authenticateToken, async (req, res) => {
           },
         },
         {
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-            "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-          },
+          headers: headersWithOTX,
         }
       );
 
