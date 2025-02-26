@@ -353,7 +353,7 @@ router.patch("/role/:id/:role", async (req, res) => {
  * @tags User - User Ops
  * @security BearerAuth
  * @param {number} id.path - The ID of the user to update.
- * @param {ExtendedData} useExtended.path - The useExtended data to update the user to. (off, on, or forced)
+ * @param {object} useExtended.path - The useExtended data to update the user to. (off, on, or forced)
  */
 router.patch("/useExtended/:id/:useExtended", async (req, res) => {
   // metrics.increment("endpoint.admin.user.useExtended.patch");

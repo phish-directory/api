@@ -299,7 +299,7 @@ router.get("/check", authenticateToken, async (req, res) => {
  * Domain Classification Body
  * @typedef {object} DomainClassification
  * @property {string} domain.required - Domain to classify
- * @property {ClassificationTyoe} classification.required - Classification to assign to the domain - eg: postal, banking, item_scams, other
+ * @property {object} classification.required - Classification to assign to the domain - eg: postal, banking, item_scams, other
  */
 
 /**
@@ -314,7 +314,7 @@ router.get("/check", authenticateToken, async (req, res) => {
  To request trusted level access or a new classification type, contact Jasper via email at jasper.mayone@phish.directory or via Slack.
  * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
- * @param {DomainClassification} request.body.required - Domain Classification Body
+ * @param {object} request.body.required - Domain Classification Body
  * @return {object} 200 - Success message
  * @return {string} 400 - Error message
  * @example response - 200 - Success message
@@ -414,7 +414,7 @@ router.put("/classify", authenticateToken, async (req, res) => {
  * @description Reports a domain as potentially malicious. Submissions will be reviewed by a trusted user before being marked and submitted into our database.
  * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
- * @param {DomainReport} request.body.required - Domain report details
+ * @param {object} request.body.required - Domain report details
  * @return {object} 200 - Success message
  * @return {string} 400 - Error message
  * @example request - Domain report

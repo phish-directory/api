@@ -23,7 +23,7 @@ let saltRounds = 10;
  * @property {string} name.required - The name of the user
  * @property {string} email.required - The email of the user
  * @property {string} password.required - The password of the user
- * @property {Permissions} permission - Permission level (basic, trusted, admin)
+ * @property {string} permission - Permission level (basic, trusted, admin)
  */
 export type User = {
   name: string;
@@ -110,7 +110,7 @@ router.post("/signup", async (req, res) => {
  * POST /user/login
  * @summary Authenticate user and get JWT token
  * @tags User - User Management / Info and Authentication endpoints
- * @param {UserLogin} request.body.required - User login credentials
+ * @param {object} request.body.required - User login credentials
  * @return {object} 200 - JWT token and user UUID
  * @return {object} 400 - Invalid credentials
  * @return {object} 403 - Account deleted
