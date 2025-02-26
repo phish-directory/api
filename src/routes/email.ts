@@ -1,23 +1,12 @@
 import * as express from "express";
 import { logRequest } from "../middleware/logRequest";
 import { ipQualityScoreService } from "../services/_index";
+import { validateEmail } from "../utils/validateEmail";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
-
-const validateEmail = (email: string): boolean => {
-  // First check the length to prevent long inputs
-  const MAX_EMAIL_LENGTH = 254; // RFC 5321
-  if (typeof email !== "string" || email.length > MAX_EMAIL_LENGTH) {
-    return false;
-  }
-
-  // Simple regex with reasonable constraints
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(email);
-};
 
 /**
  * GET /email/check
@@ -70,36 +59,6 @@ router.get("/check", async (req, res) => {
 
   const result = await ipQualityScoreService.email.check(email);
   res.status(200).json(result);
-
-  /* TODO: Add OTX
-
-
-  await axios.patch(
-    "https://otx.alienvault.com/api/v1/pulses/6785dccb041b628fde283705",
-    {
-      indicators: {
-        add: [
-          {
-            indicator: `${email}`,
-            type: "email",
-            role: "phishing",
-          },
-        ],
-      },
-    },
-    {
-      headers: {
-        Referer: "https://phish.directory",
-        "User-Agent": "internal-server@phish.directory",
-        "X-Identity": "internal-server@phish.directory",
-        "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-      },
-    },
-  );
-
-
-
-  */
 });
 
 export default router;

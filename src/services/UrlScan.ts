@@ -1,7 +1,8 @@
 import axios from "axios";
 
-import { getDbDomain } from "../functions/db/getDbDomain";
+import { headersWithUrlScan } from "../defs/headers";
 import { prisma } from "../prisma";
+import { getDbDomain } from "../utils/db/getDbDomain";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -22,12 +23,7 @@ export class UrlScanService {
       const checkSearch = await axios.get(
         `https://urlscan.io/api/v1/search/?q=domain:${sanitizedDomain}`,
         {
-          headers: {
-            "API-Key": process.env.URLSCAN_API_KEY!,
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers: headersWithUrlScan,
         }
       );
 
@@ -41,12 +37,7 @@ export class UrlScanService {
             tags: ["https://phish.directory", "api.phish.directory"],
           },
           {
-            headers: {
-              "API-Key": process.env.URLSCAN_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
+            headers: headersWithUrlScan,
           }
         );
 
@@ -55,12 +46,7 @@ export class UrlScanService {
           const scanResult = await axios.get(
             `https://urlscan.io/api/v1/result/${scan.data.uuid}/`,
             {
-              headers: {
-                "API-Key": process.env.URLSCAN_API_KEY!,
-                Referer: "https://phish.directory",
-                "User-Agent": "internal-server@phish.directory",
-                "X-Identity": "internal-server@phish.directory",
-              },
+              headers: headersWithUrlScan,
             }
           );
 
@@ -71,12 +57,7 @@ export class UrlScanService {
         const scanResult = await axios.get(
           `https://urlscan.io/api/v1/result/${checkSearch.data.results[0].task.uuid}/`,
           {
-            headers: {
-              "API-Key": process.env.URLSCAN_API_KEY!,
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
+            headers: headersWithUrlScan,
           }
         );
 

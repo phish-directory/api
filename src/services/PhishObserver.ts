@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
-import { getDbDomain } from "../functions/db/getDbDomain";
+import { headersWithPhishObserver } from "../defs/headers";
 import { prisma } from "../prisma";
+import { getDbDomain } from "../utils/db/getDbDomain";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 interface PhishObserverError {
@@ -18,12 +19,6 @@ interface SubmissionResponse {
  */
 export class PhishObserverService {
   private readonly baseUrl = "https://phish.observer/api";
-  private readonly headers = {
-    Authorization: `Bearer ${process.env.PHISH_OBSERVER_API_KEY!}`,
-    Referer: "https://phish.directory",
-    "User-Agent": "internal-server@phish.directory",
-    "X-Identity": "internal-server@phish.directory",
-  };
 
   domain = {
     /**
@@ -35,7 +30,7 @@ export class PhishObserverService {
     check: async (domain: string) => {
       // metrics.increment("services.phishobserver.domain.check");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       try {
         // Submit the domain for checking
@@ -45,13 +40,13 @@ export class PhishObserverService {
             url: `https://${sanitizedDomain}`,
             tags: ["phish.directory"],
           },
-          { headers: this.headers }
+          { headers: headersWithPhishObserver }
         );
 
         // Get the submission details
         const searchResponse = await axios.get(
           `${this.baseUrl}/submission/${submissionResponse.data.id}`,
-          { headers: this.headers }
+          { headers: headersWithPhishObserver }
         );
 
         // Store the response in the database

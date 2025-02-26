@@ -1,14 +1,14 @@
 import bcrypt from "bcrypt";
 import express from "express";
-import { AccountType, Permissions } from "../types/enums";
 
+import { logRequest } from "../middleware/logRequest";
+import { prisma } from "../prisma";
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
-} from "../functions/jwt";
-import { logRequest } from "../middleware/logRequest";
-import { prisma } from "../prisma";
+} from "../utils/jwt";
+import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 
 const router = express.Router();
 router.use(express.json());
@@ -16,32 +16,6 @@ router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
 
 let saltRounds = 10;
-
-/**
- * User w/ Name
- * @typedef {object} User
- * @property {string} name.required - The name of the user
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- * @property {AccountType} accountType - Account type (user, bot, admin) - enum:AccountType
- * @property {Permissions} permission - Permission level (basic, trusted, admin) - enum:Permissions
- */
-export type User = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-/**
- * User login information
- * @typedef {object} UserLogin
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-export type UserLogin = {
-  email: string;
-  password: string;
-};
 
 /**
  * POST /user/signup
@@ -111,7 +85,7 @@ router.post("/signup", async (req, res) => {
  * POST /user/login
  * @summary Authenticate user and get JWT token
  * @tags User - User Management / Info and Authentication endpoints
- * @param {UserLogin} request.body.required - User login credentials
+ * @param {object} request.body.required - User login credentials
  * @return {object} 200 - JWT token and user UUID
  * @return {object} 400 - Invalid credentials
  * @return {object} 403 - Account deleted
@@ -129,6 +103,8 @@ router.post("/signup", async (req, res) => {
  */
 router.post("/login", async (req, res) => {
   // metrics.increment("endpoint.user.login");
+
+  let useExteded = await userNeedsExtendedData(req);
 
   const body = req.body;
   const { email, password } = body;
@@ -164,10 +140,20 @@ router.post("/login", async (req, res) => {
 
   let token = await generateAccessToken(user);
 
-  res.status(200).json({
-    token: token,
-    uuid: user.uuid,
-  });
+  let jsonresponsebody = {};
+
+  if (useExteded) {
+    jsonresponsebody = {
+      token: token,
+      uuid: user.uuid,
+    };
+  } else {
+    jsonresponsebody = {
+      token: token,
+    };
+  }
+
+  res.status(200).json(jsonresponsebody);
 });
 
 /**
@@ -208,7 +194,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me");
 
-  const userInfo = await getUserInfo(prisma, res, req);
+  const userInfo = await getUserInfo(req);
 
   if (!userInfo) {
     return res.status(400).json("User not found");
@@ -270,6 +256,7 @@ router.get("/me", authenticateToken, async (req, res) => {
     email: userInfo.email,
     uuid: userInfo.uuid,
     permission: userInfo.permission,
+    extendedData: userInfo.useExtendedData,
     metrics: {
       requests: {
         count: count,
@@ -308,7 +295,7 @@ router.get("/me", authenticateToken, async (req, res) => {
 router.patch("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me.patch");
 
-  const userInfo = await getUserInfo(prisma, res, req);
+  const userInfo = await getUserInfo(req);
 
   if (!userInfo) {
     return res.status(400).json("User not found");

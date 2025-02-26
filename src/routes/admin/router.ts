@@ -1,9 +1,9 @@
 import express from "express";
 import moment from "moment";
-import { getPackageVersion, getVersion } from "../../functions/getVersion";
-import { authenticateToken, getUserInfo } from "../../functions/jwt";
 import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
+import { getPackageVersion, getVersion } from "../../utils/getVersion";
+import { authenticateToken, getUserInfo } from "../../utils/jwt";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
 
@@ -14,7 +14,14 @@ router.use(authenticateToken);
 
 // middleware to check if the user is an admin
 router.use(async (req, res, next) => {
-  let user = await getUserInfo(prisma, res, req);
+  let user = await getUserInfo(req);
+
+  if (!user) {
+    res.status(401).json({
+      error: "Unauthorized",
+    });
+    return;
+  }
 
   if (user.permission !== "admin") {
     res.status(403).json({
@@ -87,14 +94,11 @@ router.use(async (req, res, next) => {
  * }
  */
 router.get("/metrics", logRequest, async (req, res) => {
-  // // metrics.increment("endpoint.misc.metrics");
+  // metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
-  // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
-
   let dateStarted = new Date(Date.now() - uptime * 1000);
-  // format the date started with moment
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
 
   let domainCount = await prisma.domain.count();
@@ -173,7 +177,7 @@ router.get("/metrics", logRequest, async (req, res) => {
       responses: {
         googleSafebrowsing: await prisma.rawAPIData.count({
           where: {
-            sourceAPI: "SafeBrowsing", // Changed from APIs.SafeBrowsing
+            sourceAPI: "SafeBrowsing",
           },
         }),
         ipQualityScore: await prisma.rawAPIData.count({

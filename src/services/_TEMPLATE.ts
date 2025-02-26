@@ -25,6 +25,4 @@ export class TEMPLATEService {
       // Implement the report logic here
     },
   };
-
-  // You can add more entities like IP addresses, usernames, etc., in a similar fashion.
 }

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import requestIp from "request-ip";
 
-import { getUserInfo } from "../functions/jwt";
 import { prisma } from "../prisma";
+import { getUserInfo } from "../utils/jwt";
 import { log } from "../utils/logger";
 
 let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
@@ -17,7 +17,7 @@ let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
 export const logRequest = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   // metrics.increment("api.requests");
 
@@ -52,7 +52,7 @@ export const logRequest = async (
     const token = authHeader && authHeader.split(" ")[1];
 
     if (token !== null && token !== undefined) {
-      userinfo = await getUserInfo(prisma, res, req);
+      userinfo = await getUserInfo(req);
       if (userinfo) {
         usr = userinfo.uuid;
       }
@@ -65,20 +65,14 @@ export const logRequest = async (
   let bdytmp = { ...body };
 
   if (url === "/user/signup") {
-    // Redact password in the cloned body object
     if (bdytmp.password) {
       bdytmp.password = "REDACTED BY API FOR PRIVACY";
     }
   }
 
   if (url === "/user/login") {
-    // Redact password in the cloned body object
     if (bdytmp.password) {
       bdytmp.password = "REDACTED BY API FOR PRIVACY";
-      // bdytmp.password =
-      //   bdytmp.password.slice(0, 4) +
-      //   "*".repeat(bdytmp.password.length - 8) +
-      //   bdytmp.password.slice(-4);
     }
   }
 
