@@ -39,6 +39,12 @@ enum APIs {
   Walshy
 }
 
+enum ExtendedData {
+  off
+  on
+  forced
+}
+
 model User {
   id                Int              @id @unique @default(autoincrement())
   uuid              String           @unique @default(uuid())
@@ -46,6 +52,7 @@ model User {
   email             String           @unique
   password          String
   permission        Permissions      @default(basic)
+  useExtendedData   ExtendedData     @default(off)
   subscriptionItems String[]         @default([])
   deleted           Boolean          @default(false)
   createdAt         DateTime         @default(now())
