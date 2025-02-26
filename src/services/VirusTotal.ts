@@ -97,14 +97,7 @@ export class VirusTotalService {
           `https://www.virustotal.com/api/v3/domains/${sanitizedDomain}/comments`,
           voteData,
           {
-            headers: {
-              accept: "application/json",
-              "x-apikey": process.env.VIRUS_TOTAL_API_KEY!,
-              "content-type": "application/json",
-              Referer: "https://phish.directory",
-              "User-Agent": "internal-server@phish.directory",
-              "X-Identity": "internal-server@phish.directory",
-            },
+            headers: headersWithVirusTotal,
           }
         )
         .catch((error) => {

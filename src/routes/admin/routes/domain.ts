@@ -1,6 +1,7 @@
 import axios from "axios";
 import express, { Request, Response } from "express";
 
+import { getDbDomain } from "../../../functions/db/getDbDomain";
 import { domainReport } from "../../../functions/domain";
 import { getUserInfo } from "../../../functions/jwt";
 import { prisma } from "../../../prisma";
@@ -50,23 +51,19 @@ router.get("/", async (req: Request, res: Response) => {
  */
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    let { id } = req.params;
 
     if (!id) {
-      return res.status(400).json("Domain ID is required");
+      return res.status(400).json("Missing parameter: id");
     }
 
-    const domain = await prisma.domain.findUnique({
-      where: {
-        id: parseInt(id),
-      },
-    });
+    let dbDomain = getDbDomain(id);
 
-    if (!domain) {
+    if (!dbDomain) {
       return res.status(400).json("Domain not found");
     }
 
-    res.status(200).json(domain);
+    res.status(200).json(dbDomain);
   } catch (error) {
     res
       .status(500)

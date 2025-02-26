@@ -18,31 +18,6 @@ router.use(logRequest);
 let saltRounds = 10;
 
 /**
- * User w/ Name
- * @typedef {object} User
- * @property {string} name.required - The name of the user
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- * @property {string} permission - Permission level (basic, trusted, admin)
- */
-export type User = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-/**
- * User login information
- * @typedef {object} UserLogin
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-export type UserLogin = {
-  email: string;
-  password: string;
-};
-
-/**
  * POST /user/signup
  * @summary Create a new user account
  * @tags User - User Management / Info and Authentication endpoints
