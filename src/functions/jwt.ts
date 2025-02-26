@@ -69,21 +69,26 @@ export async function generateAccessToken(user: any) {
 
 /**
  * Function to get the user info
- * @param prisma - Prisma Client
  * @param res - Express Response Object
  * @param req - Express Request Object
  * @returns user
  */
-export async function getUserInfo(prisma: any, res: any, req: any) {
+export async function getUserInfo(req: any) {
   const tsStart = Date.now();
 
-  const authHeader = req.headers["authorization"];
+  // FIXME:
+  // for some reson, even when we have headers, we still get a error, so this is the temp solution
+  if (!req.headers) {
+    return console.log("No headers found, but not actually an error");
+  }
+
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.sendStatus(401);
+  if (token == null) return console.error("No token provided");
 
   // Add interface for JWT payload
   interface JwtPayload {
-    id: string;
+    id: number;
     uuid: string;
     iat?: number;
   }
@@ -91,7 +96,7 @@ export async function getUserInfo(prisma: any, res: any, req: any) {
   // Properly type the decoded token
   let decoded = jwt.decode(token) as JwtPayload;
   if (!decoded) {
-    return res.sendStatus(403);
+    return console.error("Error decoding token");
   }
 
   let id = decoded.id;
@@ -107,11 +112,11 @@ export async function getUserInfo(prisma: any, res: any, req: any) {
   return user;
 }
 
-export async function getPermissionLevel(prisma: any, res: any, req: any) {
+export async function getPermissionLevel(req: any) {
   const tsStart = Date.now();
   // metrics.increment("functions.jwt.getPermissionLevel");
 
-  const info = await getUserInfo(prisma, res, req);
+  const info = await getUserInfo(req);
   // console.log(info);
 
   const tsEnd = Date.now();

@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import express from "express";
-import { AccountType, Permissions } from "../types/enums";
 
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
 } from "../functions/jwt";
+import { userNeedsExtendedData } from "../functions/userNeedsExtendedData";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
 
@@ -23,8 +23,7 @@ let saltRounds = 10;
  * @property {string} name.required - The name of the user
  * @property {string} email.required - The email of the user
  * @property {string} password.required - The password of the user
- * @property {AccountType} accountType - Account type (user, bot, admin) - enum:AccountType
- * @property {Permissions} permission - Permission level (basic, trusted, admin) - enum:Permissions
+ * @property {Permissions} permission - Permission level (basic, trusted, admin)
  */
 export type User = {
   name: string;
@@ -130,6 +129,8 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   // metrics.increment("endpoint.user.login");
 
+  let useExteded = await userNeedsExtendedData(req);
+
   const body = req.body;
   const { email, password } = body;
 
@@ -164,10 +165,20 @@ router.post("/login", async (req, res) => {
 
   let token = await generateAccessToken(user);
 
-  res.status(200).json({
-    token: token,
-    uuid: user.uuid,
-  });
+  let jsonresponsebody = {};
+
+  if (useExteded) {
+    jsonresponsebody = {
+      token: token,
+      uuid: user.uuid,
+    };
+  } else {
+    jsonresponsebody = {
+      token: token,
+    };
+  }
+
+  res.status(200).json(jsonresponsebody);
 });
 
 /**
@@ -208,7 +219,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me");
 
-  const userInfo = await getUserInfo(prisma, res, req);
+  const userInfo = await getUserInfo(req);
 
   if (!userInfo) {
     return res.status(400).json("User not found");
@@ -270,6 +281,7 @@ router.get("/me", authenticateToken, async (req, res) => {
     email: userInfo.email,
     uuid: userInfo.uuid,
     permission: userInfo.permission,
+    extendedData: userInfo.useExtendedData,
     metrics: {
       requests: {
         count: count,
@@ -308,7 +320,7 @@ router.get("/me", authenticateToken, async (req, res) => {
 router.patch("/me", authenticateToken, async (req, res) => {
   // metrics.increment("endpoint.user.me.patch");
 
-  const userInfo = await getUserInfo(prisma, res, req);
+  const userInfo = await getUserInfo(req);
 
   if (!userInfo) {
     return res.status(400).json("User not found");

@@ -6,6 +6,7 @@ import { getDbDomain } from "../functions/db/getDbDomain";
 import { domainCheck, domainReport } from "../functions/domain";
 import { authenticateToken, getUserInfo } from "../functions/jwt";
 import { parseData } from "../functions/parseData";
+import { userNeedsExtendedData } from "../functions/userNeedsExtendedData";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
 import { Classifications } from "../types/enums";
@@ -35,6 +36,7 @@ We also keep our own database of domains and their status, so we can return the 
  * @tags Domain - Endpoints for checking / reporting domains.
  * @security BearerAuth
  * @param {string} domain.query.required - Domain to check
+ * @param {boolean} extendData.query.optional - Optionally, request extra information about the domain (MAY HAVE LONGER RESPONSE TIME). You need special permissions to access this.
  * @return {object} 200 - Success message
  * @return {string} 400 - Error message
  * @example response - 200 - Success message
@@ -59,6 +61,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   const query = req.query!;
 
   let domain: string = query.domain! as string;
+  let extendData = await userNeedsExtendedData(req);
 
   // check for domain parameter
   if (!domain || domain === "" || domain === undefined || domain === null) {
@@ -150,7 +153,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         }
       );
 
-      return res.status(200).json({
+      let response = {
         domain: domain,
         phishing: true,
         times: {
@@ -158,7 +161,20 @@ router.get("/check", authenticateToken, async (req, res) => {
           updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
-      });
+      };
+
+      if (extendData) {
+        let rawAPIData = await prisma.rawAPIData.findMany({
+          where: {
+            domainId: dbDomain.id,
+          },
+        });
+
+        // push the raw data to the response
+        response["rawData"] = rawAPIData;
+      }
+
+      return res.status(200).json(response);
     } else {
       await prisma.domain.update({
         where: {
@@ -170,7 +186,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         },
       });
 
-      return res.status(200).json({
+      let response = {
         domain: domain,
         phishing: false,
         times: {
@@ -178,7 +194,20 @@ router.get("/check", authenticateToken, async (req, res) => {
           updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
-      });
+      };
+
+      if (extendData) {
+        let rawAPIData = await prisma.rawAPIData.findMany({
+          where: {
+            domainId: dbDomain.id,
+          },
+        });
+
+        // push the raw data to the response
+        response["rawData"] = rawAPIData;
+      }
+
+      return res.status(200).json(response);
     }
   } else {
     domainCheck(domain);
@@ -207,7 +236,7 @@ router.get("/check", authenticateToken, async (req, res) => {
         }
       );
 
-      return res.status(200).json({
+      let response = {
         domain: domain,
         phishing: true,
         times: {
@@ -215,9 +244,22 @@ router.get("/check", authenticateToken, async (req, res) => {
           updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
-      });
+      };
+
+      if (extendData) {
+        let rawAPIData = await prisma.rawAPIData.findMany({
+          where: {
+            domainId: dbDomain.id,
+          },
+        });
+
+        // push the raw data to the response
+        response["rawData"] = rawAPIData;
+      }
+
+      return res.status(200).json(response);
     } else {
-      return res.status(200).json({
+      let response = {
         domain: domain,
         phishing: false,
         times: {
@@ -225,7 +267,20 @@ router.get("/check", authenticateToken, async (req, res) => {
           updatedAt: dbDomain.updatedAt,
           lastChecked: dbDomain.lastChecked,
         },
-      });
+      };
+
+      if (extendData) {
+        let rawAPIData = await prisma.rawAPIData.findMany({
+          where: {
+            domainId: dbDomain.id,
+          },
+        });
+
+        // push the raw data to the response
+        response["rawData"] = rawAPIData;
+      }
+
+      return res.status(200).json(response);
     }
   }
 });
@@ -370,7 +425,7 @@ router.put("/classify", authenticateToken, async (req, res) => {
  */
 router.post("/report", authenticateToken, async (req, res) => {
   const { domain, notes } = req.body;
-  const user = await getUserInfo(prisma, res, req);
+  const user = await getUserInfo(req);
 
   if (!domain) {
     return res.status(400).json("No domain parameter found");
@@ -383,20 +438,20 @@ router.post("/report", authenticateToken, async (req, res) => {
   const report = await prisma.domainReport.create({
     data: {
       domain: { connect: { id: dbDomain.id } },
-      reporter: { connect: { id: user.id } },
+      reporter: { connect: { id: user!.id } },
       notes,
     },
   });
 
   // If user is trusted/admin, automatically approve and mark domain as malicious
-  if (user.permission === "trusted" || user.permission === "admin") {
+  if (user!.permission === "trusted" || user!.permission === "admin") {
     await prisma.$transaction([
       prisma.domainReport.update({
         where: { id: report.id },
         data: {
           status: "APPROVED",
           reviewedAt: new Date(),
-          reviewer: { connect: { id: user.id } },
+          reviewer: { connect: { id: user!.id } },
         },
       }),
       prisma.domain.update({

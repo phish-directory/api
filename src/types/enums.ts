@@ -1,13 +1,3 @@
-//types/enums.ts
-
-/**
- * @swagger
- * @description Represents different types of accounts in the system
- * @enum {number}
- * @property {number} user - Regular user account
- * @property {number} bot - Automated bot account
- * @property {number} admin - Administrator account with elevated privileges
- */
 export enum AccountType {
   user,
   bot,

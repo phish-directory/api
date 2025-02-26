@@ -12,22 +12,6 @@ import userRouter from "./routes/user";
 
 const router = express.Router();
 
-/* Enhanced response time monitoring
-Old code:
-router.use(
-  responseTime((req: any, res: any, time: any) => {
-    const stat = (req.method + "/" + req.url?.split("/")[1])
-      .toLowerCase()
-      .replace(/[:.]/g, "")
-      .replace(/\//g, "_");
-    const httpCode = res.statusCode;
-    const timingStatKey = `http.response.${stat}`;
-    const codeStatKey = `http.response.${stat}.${httpCode}`;
-    // metrics.timing(timingStatKey, time);
-    // // metrics.increment(codeStatKey, 1);
-  }),
-);
-*/
 router.use(
   responseTime((req: express.Request, res: express.Response, time: number) => {
     const path = req.url?.split("/")[1] || "root";

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import express from "express";
 
+import { ExtendedData } from "@prisma/client";
 import { prisma } from "../../../prisma";
 
 let saltRounds = 10;
@@ -337,6 +338,77 @@ router.patch("/role/:id/:role", async (req, res) => {
       .then(() => {
         res.status(200).json({
           message: `User role updated to ${permission} successfully.`,
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred.",
+    });
+  }
+});
+
+/**
+ * PATCH /admin/user/:id/:useExtended/
+ * @summary Updates a user's useExteded data enum
+ * @tags User - User Ops
+ * @security BearerAuth
+ * @param {number} id.path - The ID of the user to update.
+ * @param {ExtendedData} useExtended.path - The useExtended data to update the user to. (off, on, or forced)
+ */
+router.patch("/useExtended/:id/:useExtended", async (req, res) => {
+  // metrics.increment("endpoint.admin.user.useExtended.patch");
+
+  try {
+    let { id, useExtended } = req.params;
+
+    // change the useExtended data to the ExtendedData enum
+
+    switch (useExtended) {
+      case "off":
+        useExtended = ExtendedData.off;
+        break;
+      case "on":
+        useExtended = ExtendedData.on;
+        break;
+      case "forced":
+        useExtended = ExtendedData.forced;
+        break;
+      default:
+        return res.status(400).json({
+          message: "Invalid useExtended data.",
+        });
+    }
+
+    if (!id) {
+      return res.status(400).json({
+        message: "User ID is required.",
+      });
+    }
+
+    let user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    await prisma.user
+      .update({
+        where: {
+          id: parseInt(id),
+        },
+        data: {
+          useExtendedData: useExtended,
+        },
+      })
+      .then(() => {
+        res.status(200).json({
+          message: `User useExtended data updated to ${useExtended} successfully.`,
         });
       });
   } catch (error) {
