@@ -1,9 +1,11 @@
-import express, { Request, Response } from "express";
 import axios from "axios";
+import express, { Request, Response } from "express";
 
-import { domainReport } from "../../../functions/domain";
-import { getUserInfo } from "../../../functions/jwt";
+import { headersWithOTX } from "../../../defs/headers";
 import { prisma } from "../../../prisma";
+import { getDbDomain } from "../../../utils/db/getDbDomain";
+import { domainReport } from "../../../utils/domain/domainReport";
+import { getUserInfo } from "../../../utils/jwt";
 
 /*
 GET domain - Get all domains
@@ -49,23 +51,19 @@ router.get("/", async (req: Request, res: Response) => {
  */
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    let { id } = req.params;
 
     if (!id) {
-      return res.status(400).json("Domain ID is required");
+      return res.status(400).json("Missing parameter: id");
     }
 
-    const domain = await prisma.domain.findUnique({
-      where: {
-        id: parseInt(id),
-      },
-    });
+    let dbDomain = getDbDomain(id);
 
-    if (!domain) {
+    if (!dbDomain) {
       return res.status(400).json("Domain not found");
     }
 
-    res.status(200).json(domain);
+    res.status(200).json(dbDomain);
   } catch (error) {
     res
       .status(500)
@@ -113,7 +111,7 @@ router.post(
   "/reports/:id/review",
   async (
     req: Request<{ id: string }, {}, ReportReviewRequest>,
-    res: Response,
+    res: Response
   ) => {
     try {
       const { id } = req.params;
@@ -129,7 +127,7 @@ router.post(
         return res.status(400).json({ error: "Invalid report ID" });
       }
 
-      const user = await getUserInfo(prisma, res, req);
+      const user = await getUserInfo(req);
       if (!user) {
         return res.status(401).json({ error: "Unauthorized" });
       }
@@ -176,13 +174,8 @@ router.post(
                 },
               },
               {
-                headers: {
-                  Referer: "https://phish.directory",
-                  "User-Agent": "internal-server@phish.directory",
-                  "X-Identity": "internal-server@phish.directory",
-                  "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
-                },
-              },
+                headers: headersWithOTX,
+              }
             );
 
             // Run domainReport function
@@ -206,7 +199,7 @@ router.post(
         .status(500)
         .json({ error: "An error occurred while reviewing the report." });
     }
-  },
+  }
 );
 
 export default router;

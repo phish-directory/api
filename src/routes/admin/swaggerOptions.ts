@@ -1,12 +1,4 @@
-import { describe } from "node:test";
-import { getVersion } from "../../functions/getVersion";
-import {
-  AccountType,
-  Permissions,
-  Classifications,
-  Verdict,
-  APIs,
-} from "../../types/enums";
+import { getVersion } from "../../utils/getVersion";
 
 let filePattern;
 if (process.env.NODE_ENV === "production") {
@@ -48,33 +40,6 @@ export const swaggerOptions = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-      },
-    },
-    schemas: {
-      AccountType: {
-        type: "string",
-        enum: Object.keys(AccountType).filter((key) => isNaN(Number(key))),
-        description: "Types of user accounts in the system",
-      },
-      Permissions: {
-        type: "string",
-        enum: Object.keys(Permissions).filter((key) => isNaN(Number(key))),
-        description: "User permission levels",
-      },
-      Classifications: {
-        type: "string",
-        enum: Object.keys(Classifications).filter((key) => isNaN(Number(key))),
-        description: "Types of phishing/scam classifications",
-      },
-      Verdict: {
-        type: "string",
-        enum: Object.keys(Verdict).filter((key) => isNaN(Number(key))),
-        description: "Final verdict classifications for domains",
-      },
-      APIs: {
-        type: "string",
-        enum: Object.keys(APIs).filter((key) => isNaN(Number(key))),
-        description: "Available security and threat detection APIs",
       },
     },
   },

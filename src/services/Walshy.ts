@@ -1,7 +1,8 @@
 import axios from "axios";
 
-import { getDbDomain } from "../functions/db/getDbDomain";
+import { headers } from "../defs/headers";
 import { prisma } from "../prisma";
+import { getDbDomain } from "../utils/db/getDbDomain";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -23,12 +24,7 @@ export class WalshyService {
         badDomain: boolean;
         detection: "discord" | "community";
       }>("https://bad-domains.walshy.dev/check", {
-        // todo: extract headers to a seperate place to avoid duplication
-        headers: {
-          Referer: "https://phish.directory",
-          "User-Agent": "internal-server@phish.directory",
-          "X-Identity": "internal-server@phish.directory",
-        },
+        headers,
         domain: `${sanitizedDomain}`,
       });
 
@@ -50,7 +46,6 @@ export class WalshyService {
       return data;
     },
 
-    // todo: log report counts and data to the database
     /**
      * Asynchronously reports a given domain to the Walshy service for further processing or analysis.
      *
@@ -68,11 +63,7 @@ export class WalshyService {
           domain: sanitizedDomain,
         },
         {
-          headers: {
-            Referer: "https://phish.directory",
-            "User-Agent": "internal-server@phish.directory",
-            "X-Identity": "internal-server@phish.directory",
-          },
+          headers,
         }
       );
 

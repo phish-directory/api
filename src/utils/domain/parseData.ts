@@ -54,6 +54,4 @@ export async function parseData(
   }
 
   return verdict;
-
-  // todo: add correct phishobserver check
 }

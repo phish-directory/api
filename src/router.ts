@@ -9,25 +9,10 @@ import domainRouter from "./routes/domain";
 import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
+import * as logger from "./utils/logger";
 
 const router = express.Router();
 
-/* Enhanced response time monitoring
-Old code:
-router.use(
-  responseTime((req: any, res: any, time: any) => {
-    const stat = (req.method + "/" + req.url?.split("/")[1])
-      .toLowerCase()
-      .replace(/[:.]/g, "")
-      .replace(/\//g, "_");
-    const httpCode = res.statusCode;
-    const timingStatKey = `http.response.${stat}`;
-    const codeStatKey = `http.response.${stat}.${httpCode}`;
-    // metrics.timing(timingStatKey, time);
-    // // metrics.increment(codeStatKey, 1);
-  }),
-);
-*/
 router.use(
   responseTime((req: express.Request, res: express.Response, time: number) => {
     const path = req.url?.split("/")[1] || "root";
@@ -40,7 +25,7 @@ router.use(
       .replace(/\//g, "_");
 
     // Log response time metrics
-    console.log(`Response time for ${method} /${path}: ${time}ms`);
+    logger.debug(`Response time for ${method} /${path}: ${time}ms`);
 
     // Metrics integration (commented out but structured)
     // metrics.timing(`http.response.${stat}`, time);
@@ -54,8 +39,6 @@ router.use(
     }
   })
 );
-
-// router.use(defaultRateLimiter);
 
 /**
  * GET /
@@ -118,7 +101,7 @@ router.get("/up", logRequest, async (req, res) => {
       uptime: process.uptime(),
       memory: process.memoryUsage(),
     });
-  } catch (error) {
+  } catch (error: any) {
     // Return response with database error details
     res.status(200).json({
       status: "up",
@@ -126,7 +109,6 @@ router.get("/up", logRequest, async (req, res) => {
         connected: false,
         ping: null,
         lastError: {
-          // @ts-expect-error
           message: error.message,
           timestamp: new Date().toISOString(),
         },
