@@ -49,12 +49,21 @@ export const logRequest = async (
 
   if (req.headers.authorization) {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (token !== null && token !== undefined) {
-      userinfo = await getUserInfo(req);
-      if (userinfo) {
-        usr = userinfo.uuid;
+    // Check if it's a Bearer token with proper JWT format
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      // Basic validation that it looks like a JWT (has two dots)
+      if (token && token.split(".").length === 3) {
+        try {
+          userinfo = await getUserInfo(req);
+          // Only set usr if userinfo exists AND has a valid uuid
+          if (userinfo && userinfo.uuid) {
+            usr = userinfo.uuid;
+          }
+        } catch (error) {
+          // Just log error but continue processing request without setting user values
+          console.error("Error validating JWT:", error);
+        }
       }
     }
   }

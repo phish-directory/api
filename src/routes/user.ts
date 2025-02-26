@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import express from "express";
 
 import { logRequest } from "../middleware/logRequest";
@@ -8,14 +7,11 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../utils/jwt";
-import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 router.use(logRequest);
-
-let saltRounds = 10;
 
 /**
  * POST /user/signup
@@ -63,15 +59,14 @@ router.post("/signup", async (req, res) => {
     return;
   }
 
-  const salt = bcrypt.genSaltSync(saltRounds);
-  let passHash = await bcrypt.hash(password, salt);
+  let passHash = Bun.hash(password);
 
   // Create the user
   const newUser = await prisma.user.create({
     data: {
       name: name,
       email: email,
-      password: passHash,
+      password: `${passHash}`,
     },
   });
 
@@ -104,8 +99,6 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   // metrics.increment("endpoint.user.login");
 
-  let useExteded = await userNeedsExtendedData(req);
-
   const body = req.body;
   const { email, password } = body;
 
@@ -124,9 +117,9 @@ router.post("/login", async (req, res) => {
     return res.status(400).json("Invalid email or password");
   }
 
-  const match = await bcrypt.compare(password, user.password);
+  const isMatch = await Bun.password.verify(password, user.password);
 
-  if (!match) {
+  if (!isMatch) {
     return res.status(400).json("Invalid email or password");
   }
 
@@ -140,20 +133,10 @@ router.post("/login", async (req, res) => {
 
   let token = await generateAccessToken(user);
 
-  let jsonresponsebody = {};
-
-  if (useExteded) {
-    jsonresponsebody = {
-      token: token,
-      uuid: user.uuid,
-    };
-  } else {
-    jsonresponsebody = {
-      token: token,
-    };
-  }
-
-  res.status(200).json(jsonresponsebody);
+  res.status(200).json({
+    token: token,
+    uuid: user.uuid,
+  });
 });
 
 /**
@@ -319,11 +302,11 @@ router.patch("/me", authenticateToken, async (req, res) => {
   }
 
   if (password) {
-    const valid = await bcrypt.compare(password, userInfo.password);
+    const valid = await Bun.password.verify(password, userInfo.password);
     if (!valid) {
       return res.status(400).json("Invalid password");
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await Bun.password.hash(password);
     await prisma.user.update({
       where: {
         id: userInfo.id,

@@ -77,12 +77,6 @@ export async function generateAccessToken(user: any) {
 export async function getUserInfo(req: any) {
   const tsStart = Date.now();
 
-  // FIXME:
-  // for some reson, even when we have headers, we still get a error, so this is the temp solution
-  if (!req.headers) {
-    return logger.debug("No headers found, but not actually an error");
-  }
-
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) return console.error("No token provided");
