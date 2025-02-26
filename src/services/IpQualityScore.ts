@@ -1,8 +1,8 @@
 import axios from "axios";
 
-import { getDbDomain } from "../functions/db/getDbDomain";
+import { headers } from "../defs/headers";
 import { prisma } from "../prisma";
-import { headers } from "../utils/headers";
+import { getDbDomain } from "../utils/db/getDbDomain";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**

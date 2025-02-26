@@ -1,7 +1,7 @@
 import * as express from "express";
-import { validateEmail } from "../functions/validateEmail";
 import { logRequest } from "../middleware/logRequest";
 import { ipQualityScoreService } from "../services/_index";
+import { validateEmail } from "../utils/validateEmail";
 
 const router = express.Router();
 router.use(express.json());

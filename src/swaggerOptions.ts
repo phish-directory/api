@@ -1,4 +1,4 @@
-import { getVersion } from "./functions/getVersion";
+import { getVersion } from "./utils/getVersion";
 
 let filePattern;
 if (process.env.NODE_ENV === "production") {

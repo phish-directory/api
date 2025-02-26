@@ -1,9 +1,9 @@
 import express from "express";
 import moment from "moment";
-import { getPackageVersion, getVersion } from "../../functions/getVersion";
-import { authenticateToken, getUserInfo } from "../../functions/jwt";
 import { logRequest } from "../../middleware/logRequest";
 import { prisma } from "../../prisma";
+import { getPackageVersion, getVersion } from "../../utils/getVersion";
+import { authenticateToken, getUserInfo } from "../../utils/jwt";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
 

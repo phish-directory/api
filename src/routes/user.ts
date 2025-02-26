@@ -1,14 +1,14 @@
 import bcrypt from "bcrypt";
 import express from "express";
 
+import { logRequest } from "../middleware/logRequest";
+import { prisma } from "../prisma";
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
-} from "../functions/jwt";
-import { userNeedsExtendedData } from "../functions/userNeedsExtendedData";
-import { logRequest } from "../middleware/logRequest";
-import { prisma } from "../prisma";
+} from "../utils/jwt";
+import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 
 const router = express.Router();
 router.use(express.json());

@@ -3,8 +3,8 @@ const router = express.Router();
 
 import { Classifications } from "@prisma/client";
 import * as jwt from "jsonwebtoken";
-import { authenticateToken } from "../../functions/jwt";
 import { prisma } from "../../prisma";
+import { authenticateToken } from "../../utils/jwt";
 
 /**
  * PUT /domain/classify

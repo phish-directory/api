@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import requestIp from "request-ip";
 
-import { getUserInfo } from "../functions/jwt";
 import { prisma } from "../prisma";
+import { getUserInfo } from "../utils/jwt";
 import { log } from "../utils/logger";
 
 let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
