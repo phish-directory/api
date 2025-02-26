@@ -1,6 +1,6 @@
 {
   "name": "phish.directory",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
   "maintainers": [
     {
@@ -47,8 +47,7 @@
     "@types/request-ip": "^0.0.41",
     "@types/response-time": "^2.3.8",
     "nodemon": "^3.1.9",
-    "prisma": "^6.2.1",
+    "prisma": "^6.4.1",
     "typescript": "^5.7.2"
-  },
-  "type": "module"
+  }
 }
