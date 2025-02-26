@@ -14,7 +14,14 @@ router.use(authenticateToken);
 
 // middleware to check if the user is an admin
 router.use(async (req, res, next) => {
-  let user = await getUserInfo(prisma, res, req);
+  let user = await getUserInfo(req);
+
+  if (!user) {
+    res.status(401).json({
+      error: "Unauthorized",
+    });
+    return;
+  }
 
   if (user.permission !== "admin") {
     res.status(403).json({

@@ -179,7 +179,7 @@ router.patch("/user/:id", async (req, res) => {
  * @summary Creates a new user.
  * @tags User - User Ops
  * @security BearerAuth
- * @param {User} request.body - User information
+ * @param {object} request.body - User information
  * @return {object} 200 - Success response
  * @example request - Example request
  * {
@@ -403,6 +403,7 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
           id: parseInt(id),
         },
         data: {
+          // @ts-expect-error
           useExtendedData: useExtended,
         },
       })

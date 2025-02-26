@@ -1,5 +1,5 @@
-import express, { Request, Response } from "express";
 import axios from "axios";
+import express, { Request, Response } from "express";
 
 import { domainReport } from "../../../functions/domain";
 import { getUserInfo } from "../../../functions/jwt";
@@ -113,7 +113,7 @@ router.post(
   "/reports/:id/review",
   async (
     req: Request<{ id: string }, {}, ReportReviewRequest>,
-    res: Response,
+    res: Response
   ) => {
     try {
       const { id } = req.params;
@@ -129,7 +129,7 @@ router.post(
         return res.status(400).json({ error: "Invalid report ID" });
       }
 
-      const user = await getUserInfo(prisma, res, req);
+      const user = await getUserInfo(req);
       if (!user) {
         return res.status(401).json({ error: "Unauthorized" });
       }
@@ -182,7 +182,7 @@ router.post(
                   "X-Identity": "internal-server@phish.directory",
                   "X-OTX-API-KEY": `${process.env.OTX_KEY!}`,
                 },
-              },
+              }
             );
 
             // Run domainReport function
@@ -206,7 +206,7 @@ router.post(
         .status(500)
         .json({ error: "An error occurred while reviewing the report." });
     }
-  },
+  }
 );
 
 export default router;

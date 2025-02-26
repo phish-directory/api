@@ -17,7 +17,7 @@ let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
 export const logRequest = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): Promise<void> => {
   // metrics.increment("api.requests");
 
@@ -52,7 +52,7 @@ export const logRequest = async (
     const token = authHeader && authHeader.split(" ")[1];
 
     if (token !== null && token !== undefined) {
-      userinfo = await getUserInfo(prisma, res, req);
+      userinfo = await getUserInfo(req);
       if (userinfo) {
         usr = userinfo.uuid;
       }
