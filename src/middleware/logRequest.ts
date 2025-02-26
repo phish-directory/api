@@ -65,20 +65,14 @@ export const logRequest = async (
   let bdytmp = { ...body };
 
   if (url === "/user/signup") {
-    // Redact password in the cloned body object
     if (bdytmp.password) {
       bdytmp.password = "REDACTED BY API FOR PRIVACY";
     }
   }
 
   if (url === "/user/login") {
-    // Redact password in the cloned body object
     if (bdytmp.password) {
       bdytmp.password = "REDACTED BY API FOR PRIVACY";
-      // bdytmp.password =
-      //   bdytmp.password.slice(0, 4) +
-      //   "*".repeat(bdytmp.password.length - 8) +
-      //   bdytmp.password.slice(-4);
     }
   }
 

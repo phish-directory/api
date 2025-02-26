@@ -1,9 +1,3 @@
-// function that takes in a string and returns a sanitized version of it
-//  * @param str - The string to be sanitized
-//  * @returns sanitized string
-//  */
-
-// Domain validation constants
 const MAX_DOMAIN_LENGTH = 253; // Maximum length of a domain name
 const DOMAIN_REGEX = /^(?!:\/\/)(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/;
 

@@ -361,8 +361,6 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
   try {
     let { id, useExtended } = req.params;
 
-    // change the useExtended data to the ExtendedData enum
-
     switch (useExtended) {
       case "off":
         useExtended = ExtendedData.off;

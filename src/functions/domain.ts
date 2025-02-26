@@ -49,54 +49,6 @@ export async function domainCheck(domain: string) {
     });
   }
 
-  // let browser;
-
-  // if (process.env.NODE_ENV === "development") {
-  //   browser = await chromium.launch();
-  // } else {
-  //   browser = await chromium.launch({
-  //     executablePath: "/usr/bin/chromium-browser",
-  //     args: [
-  //       "--disable-dev-shm-usage",
-  //       "--disable-setuid-sandbox",
-  //       "--no-sandbox",
-  //     ],
-  //     chromiumSandbox: false,
-  //   });
-  // }
-
-  // const context = await browser.newContext();
-  // const page = await context.newPage();
-
-  // // Navigate to the domain
-  // await page.goto(`https://${domain}`, {
-  //   // waitUntil: "networkidle",
-  // });
-
-  // const pageimgBuffer = await page.screenshot({
-  //   type: "png",
-  // });
-
-  // console.log("\n");
-  // console.log(pageimgBuffer);
-  // console.log("\n");
-
-  // // Save to database
-  // await prisma.capture.create({
-  //   data: {
-  //     domain: {
-  //       connect: {
-  //         id: dbDomain.id,
-  //       },
-  //     },
-  //     binary: pageimgBuffer,
-  //   },
-  // });
-
-  // // Clean up
-  // await context.close();
-  // await browser.close();
-
   // metrics.timing("functions.timing.domainCheck", Date.now() - tsStart);
 
   return {

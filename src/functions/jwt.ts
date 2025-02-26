@@ -117,8 +117,9 @@ export async function getPermissionLevel(req: any) {
   // metrics.increment("functions.jwt.getPermissionLevel");
 
   const info = await getUserInfo(req);
-  // console.log(info);
 
   const tsEnd = Date.now();
   // metrics.timing("functions.jwt.getPermissionLevel", tsEnd - tsStart);
+
+  return info!.permission;
 }

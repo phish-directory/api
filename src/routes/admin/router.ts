@@ -94,14 +94,11 @@ router.use(async (req, res, next) => {
  * }
  */
 router.get("/metrics", logRequest, async (req, res) => {
-  // // metrics.increment("endpoint.misc.metrics");
+  // metrics.increment("endpoint.misc.metrics");
 
   let uptime = process.uptime();
-  // format the uptime
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
-
   let dateStarted = new Date(Date.now() - uptime * 1000);
-  // format the date started with moment
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
 
   let domainCount = await prisma.domain.count();
@@ -180,7 +177,7 @@ router.get("/metrics", logRequest, async (req, res) => {
       responses: {
         googleSafebrowsing: await prisma.rawAPIData.count({
           where: {
-            sourceAPI: "SafeBrowsing", // Changed from APIs.SafeBrowsing
+            sourceAPI: "SafeBrowsing",
           },
         }),
         ipQualityScore: await prisma.rawAPIData.count({

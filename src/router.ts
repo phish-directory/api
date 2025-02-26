@@ -39,8 +39,6 @@ router.use(
   })
 );
 
-// router.use(defaultRateLimiter);
-
 /**
  * GET /
  * @summary Redirect to docs
@@ -102,7 +100,7 @@ router.get("/up", logRequest, async (req, res) => {
       uptime: process.uptime(),
       memory: process.memoryUsage(),
     });
-  } catch (error) {
+  } catch (error: any) {
     // Return response with database error details
     res.status(200).json({
       status: "up",
@@ -110,7 +108,6 @@ router.get("/up", logRequest, async (req, res) => {
         connected: false,
         ping: null,
         lastError: {
-          // @ts-expect-error
           message: error.message,
           timestamp: new Date().toISOString(),
         },

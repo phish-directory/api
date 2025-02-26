@@ -2,6 +2,7 @@ import axios from "axios";
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 
+import { Classifications } from "@prisma/client";
 import { getDbDomain } from "../functions/db/getDbDomain";
 import { domainCheck, domainReport } from "../functions/domain";
 import { authenticateToken, getUserInfo } from "../functions/jwt";
@@ -9,7 +10,6 @@ import { parseData } from "../functions/parseData";
 import { userNeedsExtendedData } from "../functions/userNeedsExtendedData";
 import { logRequest } from "../middleware/logRequest";
 import { prisma } from "../prisma";
-import { Classifications } from "../types/enums";
 
 const router = express.Router();
 router.use(express.json());
@@ -284,23 +284,6 @@ router.get("/check", authenticateToken, async (req, res) => {
     }
   }
 });
-
-/**
- * Classification Type
- * @typedef {string} ClassificationType
- * @enum {string}
- * @property {string} postal - postal
- * @property {string} banking - banking
- * @property {string} item_scams - item_scams
- * @property {string} other - other
- */
-
-/**
- * Domain Classification Body
- * @typedef {object} DomainClassification
- * @property {string} domain.required - Domain to classify
- * @property {object} classification.required - Classification to assign to the domain - eg: postal, banking, item_scams, other
- */
 
 /**
  * PUT /domain/classify

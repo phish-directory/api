@@ -59,10 +59,10 @@ export class PhishReportService {
 
     // const sanitizedDomain = await sanitizeDomain(domain);
 
-    //   // metrics.increment("services.phishreport.domain.report");
+    // metrics.increment("services.phishreport.domain.report");
 
-    //   // todo: implement this
-    //   // https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post
+    // todo: implement this
+    // https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post
     // },
   };
 }

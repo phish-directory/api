@@ -45,7 +45,7 @@ app.use(
       preload: true,
     },
     xPoweredBy: false,
-  }),
+  })
 );
 
 // Add metric interceptors for axios
@@ -94,20 +94,6 @@ app.use("/", router);
 - https://whoisjsonapi.com/
 - https://whoisfreaks.com/
 */
-
-// console.log(new Date().getTime());
-
-// run cron every 1 sec
-// new CronJob(
-//   "* * * * * *",
-//   async function () {
-//     console.log("Thump Thump");
-//     // metrics.increment("heartbeat");
-//   },
-//   null,
-//   true,
-//   "America/New_York",
-// );
 
 // Heartbeat
 // new CronJob(
