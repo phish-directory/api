@@ -1,96 +1,90 @@
-import axios from "axios";
-import * as dotenv from "dotenv";
-import expressJSDocSwagger from "express-jsdoc-swagger";
-import helmet from "helmet";
+import { swagger } from "@elysiajs/swagger";
+import { Elysia } from "elysia";
 
-import { app } from "./app";
-import router from "./router";
-import { server } from "./server";
-// import metrics from "./metrics";
-import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
-import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
-import * as logger from "./utils/logger";
+import { prisma } from "../OLD-SRC/prisma";
+import { getVersion } from "../OLD-SRC/utils/getVersion";
 
-dotenv.config();
+let version = getVersion();
 
-const port: number = Number(process.env.PORT) || 3000;
-
-expressJSDocSwagger(app)(mainSwagOptions);
-expressJSDocSwagger(app)(adminSwagOptions);
-
-app.disable("x-powered-by");
-
-app.use(
-  helmet({
-    xFrameOptions: { action: "deny" },
-    xContentTypeOptions: true,
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        baseUri: ["'self'"],
-        fontSrc: ["'self'", "https:", "data:"],
-        formAction: ["'self'"],
-        frameAncestors: ["'self'"],
-        imgSrc: ["'self'", "data:"],
-        objectSrc: ["'none'"],
-        scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'none'"],
-        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-        upgradeInsecureRequests: [],
+new Elysia()
+  .use(
+    swagger({
+      // Basic Swagger configuration
+      documentation: {
+        info: {
+          title: "phish.directory API",
+          version: version,
+          description:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+        },
+        tags: [
+          { name: "Domain", description: "Domain-related operations" },
+          { name: "Email", description: "Email-related operations" },
+          { name: "User", description: "User management operations" },
+          { name: "Admin", description: "[RESTRICTED] Admin operations" },
+        ],
+        components: {
+          securitySchemes: {
+            BearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+          },
+        },
+        security: [
+          {
+            BearerAuth: [],
+          },
+        ],
       },
-    },
-    referrerPolicy: { policy: "strict-origin" },
-    strictTransportSecurity: {
-      maxAge: 63072000,
-      preload: true,
-    },
-    xPoweredBy: false,
+      // Scalar-specific configuration
+      provider: "scalar",
+      scalarConfig: {
+        hideDownloadButton: true,
+        hideTestRequestButton: true,
+        servers: [
+          {
+            url: "https://api.phish.directory",
+            description: "Production server",
+          },
+          {
+            url: "http://localhost:3000",
+            description: "Local server",
+          },
+        ],
+        forceDarkModeState: "dark",
+        hideDarkModeToggle: true,
+        // defaultOpenAllTags: true,
+        metaData: {
+          title: "phish.directory API",
+          description:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          ogDescription:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          ogTitle: "phish.directory API",
+        },
+      },
+      path: "/docs",
+    })
+  )
+  .get("/", async ({ set }) => {
+    // redirect to docs
+    set.status = 302;
+    set.headers = {
+      Location: "/docs",
+    };
+    return "Redirecting to /docs";
   })
-);
+  .get("/up", async ({}) => {
+    // Record start time for ping calculation
+    const startTime = Date.now();
 
-// Add metric interceptors for axios
-axios.interceptors.request.use((config: any) => {
-  config.metadata = { startTs: performance.now() };
-  return config;
-});
+    // Check database connectivity with a simple query
 
-axios.interceptors.response.use((res: any) => {
-  const stat = (res.config.method + "/" + res.config.url?.split("/")[1])
-    .toLowerCase()
-    .replace(/[:.]/g, "")
-    .replace(/\//g, "_");
-
-  const httpCode = res.status;
-  const timingStatKey = `http.request.${stat}`;
-  const codeStatKey = `http.request.${stat}.${httpCode}`;
-  // metrics.timing(
-  //   timingStatKey,
-  //   performance.now() - res.config.metadata.startTs
-  // );
-  // metrics.increment(codeStatKey, 1);
-
-  return res;
-});
-
-app.use("/", router);
-
-// Heartbeat
-// new CronJob(
-//   "0 * * * * *",
-//   async function () {
-//     logger.log("Thump Thump");
-//     // metrics.increment("heartbeat");
-//   },
-//   null,
-//   true,
-//   "America/New_York",
-// );
-//
-
-server
-  .listen(Number(port), "0.0.0.0", () => {
-    logger.info(`Server is running on port ${port}`);
+    await prisma.$queryRaw`SELECT 1`;
+    // Calculate ping time
+    const pingTime = Date.now() - startTime;
+    // Return success response with database status
   })
-  .on("error", (err) => {
-    logger.error(`Failed to start server: ${err.message}`);
-  });
+  .listen(3000);

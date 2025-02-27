@@ -2,7 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
 import { prisma } from "../prisma";
-import * as logger from "../utils/logger";
+import * as logger from "./logger";
 
 /**
  * Function to authenticate the token
