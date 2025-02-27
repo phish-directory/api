@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import express from "express";
 
 import { ExtendedData } from "@prisma/client";
@@ -218,8 +217,7 @@ router.post("/user/new", async (req, res) => {
     return;
   }
 
-  const salt = bcrypt.genSaltSync(saltRounds);
-  let passHash = await bcrypt.hash(password, salt);
+  let passHash = await Bun.password.hash(password);
 
   // Create the user
   const newUser = await prisma.user.create({
