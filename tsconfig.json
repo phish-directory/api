@@ -5,11 +5,12 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "rootDir": "OLD-SRC",
+    "rootDir": "src",
     "outDir": "dist",
     "typeRoots": [
       "node_modules/@types"
     ],
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "noImplicitAny": false
   },

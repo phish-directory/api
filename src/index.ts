@@ -1,21 +1,53 @@
+import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
+// import { cron } from "@elysiajs/cron";
+// bun add @elysiajs/jwt
+// import { randomUUIDv7 } from "bun";
+import { ip } from "elysia-ip";
 
-import { prisma } from "../OLD-SRC/prisma";
-import { getVersion } from "../OLD-SRC/utils/getVersion";
+import { getVersion } from "./utils/getVersion";
+// import { prisma } from "./utils/prisma";
+import * as logger from "./utils/logger";
 
 let version = getVersion();
 
+const port: number = Number(process.env.PORT) || 3000;
+
 new Elysia()
   .use(
+    cors({
+      maxAge: 86400,
+    })
+  )
+  .use(ip())
+  // .use(
+  //   cron({
+  //     name: "updateState",
+  //     pattern: "*/10 * * * * *",
+  //     run() {
+
+  //     },
+  //   })
+  // )
+  .use(
     swagger({
-      // Basic Swagger configuration
+      exclude: ["/"],
       documentation: {
         info: {
           title: "phish.directory API",
           version: version,
           description:
             "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          contact: {
+            name: "phish.directory",
+            url: "mailto:team@phish.directory",
+            email: "team@phish.directory",
+          },
+          // license: {
+          //   name: "AGPL 3.0",
+          //   url: "",
+          // },
         },
         tags: [
           { name: "Domain", description: "Domain-related operations" },
@@ -41,8 +73,8 @@ new Elysia()
       // Scalar-specific configuration
       provider: "scalar",
       scalarConfig: {
-        hideDownloadButton: true,
-        hideTestRequestButton: true,
+        hideDownloadButton: false,
+        hideTestRequestButton: false,
         servers: [
           {
             url: "https://api.phish.directory",
@@ -77,14 +109,25 @@ new Elysia()
     return "Redirecting to /docs";
   })
   .get("/up", async ({}) => {
-    // Record start time for ping calculation
-    const startTime = Date.now();
-
-    // Check database connectivity with a simple query
-
-    await prisma.$queryRaw`SELECT 1`;
-    // Calculate ping time
-    const pingTime = Date.now() - startTime;
-    // Return success response with database status
+    return {
+      status: "up",
+    };
   })
-  .listen(3000);
+  .listen(port);
+
+// Heartbeat
+// new CronJob(
+//   "0 * * * * *",
+//   async function () {
+//     console.log("Thump Thump");
+//     // metrics.increment("heartbeat");
+//   },
+//   null,
+//   true,
+//   "America/New_York",
+// );
+//
+
+logger.log(`Server started on port ${port}`, "ready");
+logger.log("Press Ctrl+C to stop the server", "ready");
+logger.log("----\n", "plain");
