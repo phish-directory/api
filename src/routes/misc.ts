@@ -1,8 +1,8 @@
 import * as express from "express";
 import moment from "moment";
+import { getVersion } from "../func/getVersion";
 import { logRequest } from "../middleware/logRequest";
-import { prisma } from "../prisma";
-import { getVersion } from "../utils/getVersion";
+import { prisma } from "../utils/prisma";
 
 const router = express.Router();
 router.use(express.json());

@@ -1,10 +1,10 @@
 import express from "express";
 const router = express.Router();
 
-import { prisma } from "../../prisma";
 import { getDbDomain } from "../../utils/db/getDbDomain";
 import { domainReport } from "../../utils/domain/domainReport";
 import { authenticateToken, getUserInfo } from "../../utils/jwt";
+import { prisma } from "../../utils/prisma";
 
 /**
  * POST /domain/report

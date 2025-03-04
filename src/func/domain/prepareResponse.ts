@@ -1,5 +1,5 @@
 import { DomainCheckResponse } from "../../defs/interfaces";
-import { prisma } from "../../prisma";
+import { prisma } from "../../utils/prisma";
 import { reportToAlienVault } from "./reportToAlienVault";
 
 /**

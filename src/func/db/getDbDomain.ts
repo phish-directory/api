@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma";
+import { prisma } from "../../utils/prisma";
 import { sanitizeDomain } from "../../utils/sanitizeDomain";
 
 export async function getDbDomain(domain: string) {

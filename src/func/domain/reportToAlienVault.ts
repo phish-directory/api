@@ -1,5 +1,5 @@
-import axios from "axios";
 import { headersWithOTX } from "../../defs/headers";
+import { axios } from "../../utils/axios";
 
 /**
  * Reports a malicious domain to AlienVault OTX

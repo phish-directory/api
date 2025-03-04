@@ -1,8 +1,7 @@
-import axios from "axios";
-
 import { headersWithVirusTotal } from "../defs/headers";
-import { prisma } from "../prisma";
-import { getDbDomain } from "../utils/db/getDbDomain";
+import { getDbDomain } from "../func/db/getDbDomain";
+import { axios } from "../utils/axios";
+import { prisma } from "../utils/prisma";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**

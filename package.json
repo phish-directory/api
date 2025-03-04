@@ -1,12 +1,11 @@
 {
   "name": "phish.directory",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
   "maintainers": [
     {
       "name": "Jasper Mayone",
-      "email": "me@jaspermayone.com",
-      "url": "https://jaspermayone.com"
+      "email": "jasper.mayone@phish.directory"
     }
   ],
   "scripts": {
@@ -16,7 +15,7 @@
     "compile": "bunx prisma generate && tsc"
   },
   "keywords": [],
-  "author": "Jasper Mayone <me@jaspermayone.com>",
+  "author": "Jasper Mayone <jasper.mayone@phish.directory>",
   "dependencies": {
     "@playwright/test": "^1.49.1",
     "@prisma/client": "6.4.1",

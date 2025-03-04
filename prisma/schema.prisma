@@ -103,6 +103,7 @@ model ExpressRequest {
   ip        String
   userAgent String   @default("")
   xIdentity String   @default("")
+  referer   String?
   User      User?    @relation(fields: [userId], references: [id])
   userId    Int?
   createdAt DateTime @default(now())

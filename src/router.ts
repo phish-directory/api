@@ -1,17 +1,20 @@
 import * as express from "express";
 import responseTime from "response-time";
+
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
 // import defaultRateLimiter from "./middleware/rateLimit";
-import { prisma } from "./prisma";
+import { getVersion } from "./func/getVersion";
 import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
 import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
 import * as logger from "./utils/logger";
+import { prisma } from "./utils/prisma";
 
 const router = express.Router();
+const version = getVersion();
 
 router.use(
   responseTime((req: express.Request, res: express.Response, time: number) => {
@@ -53,68 +56,141 @@ router.get("/", logRequest, (req, res) => {
   res.status(301).redirect("/docs");
 });
 
+/*
+  .get(
+    "/health",
+    async ({}) => {
+      try {
+        // Record start time for ping calculation
+        const startTime = Date.now();
+        // Check database connectivity with a simple query
+        await prisma.$queryRaw`SELECT 1`;
+        // Calculate ping time
+        const pingTime = Date.now() - startTime;
+
+        return {
+          status: "up",
+          timestamp: new Date().toISOString(),
+          database: {
+            connected: true,
+            ping: `${pingTime}ms`,
+            lastError: null,
+          },
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+        };
+      } catch (error) {
+        logger.error(`"Error in /up", \n ${error}`);
+        return {
+          status: "Having errors returning data",
+        };
+      }
+    },
+    {
+      tags: ["System"],
+      response: {
+        200: t.Object({
+          status: t.String(),
+          timestamp: t.String(),
+          database: t.Object({
+            connected: t.Boolean(),
+            ping: t.String(),
+            lastError: t.Null(),
+          }),
+          uptime: t.Number(),
+          memory: t.Object({
+            rss: t.Number(),
+            heapTotal: t.Number(),
+            heapUsed: t.Number(),
+            external: t.Number(),
+          }),
+        }),
+      },
+    }
+  )
+  */
+
 /**
  * GET /up
- * @summary Check if the API and database are up
+ * @summary Check if the API is up
  * @tags System
  * @return {object} 200 - Status response
  * @produces application/json
  * @example response - 200 - Success with database connection
  * {
  *   "status": "up",
- *   "database": {
- *     "connected": true,
- *     "ping": "42ms",
- *     "lastError": null
- *   }
- * }
- * @example response - 200 - Success with database error
- * {
- *   "status": "up",
- *   "database": {
- *     "connected": false,
- *     "ping": null,
- *     "lastError": {
- *       "message": "Connection refused",
- *       "timestamp": "2025-01-09T12:00:00Z"
- *     }
- *   }
+ *   "timestamp": "2023-01-15T00:00:00.000Z",
  * }
  */
 router.get("/up", logRequest, async (req, res) => {
-  try {
-    // Record start time for ping calculation
-    const startTime = Date.now();
-    // Check database connectivity with a simple query
-    await prisma.$queryRaw`SELECT 1`;
-    // Calculate ping time
-    const pingTime = Date.now() - startTime;
-    // Return success response with database status
-    res.status(200).json({
-      status: "up",
-      timestamp: new Date().toISOString(),
-      database: {
-        connected: true,
-        ping: `${pingTime}ms`,
-        lastError: null,
-      },
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-    });
-  } catch (error: any) {
-    // Return response with database error details
-    res.status(200).json({
-      status: "up",
-      database: {
-        connected: false,
-        ping: null,
-        lastError: {
-          message: error.message,
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-  }
+  return res.status(200).json({
+    status: "up",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * GET /version
+ * @summary Get the API version
+ * @tags System
+ * @return {object} 200 - Version response
+ * @produces application/json
+ * @example response - 200 - Version response
+ * {
+ *   "version": "1.0.0",
+ *   "timestamp": "2023-01-15T00:00:00.000Z",
+ * }
+ */
+router.get("/version", logRequest, async (req, res) => {
+  return res.status(200).json({
+    version,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * GET /health
+ * @summary Check the health of the API
+ * @tags System
+ * @return {object} 200 - Health response
+ * @produces application/json
+ * @example response - 200 - Health response
+ * {
+ *  "status": "up",
+ * "timestamp": "2023-01-15T00:00:00.000Z",
+ * "database": {
+ *  "connected": true,
+ * "ping": "100ms",
+ * "lastError": null
+ * },
+ * "uptime": 1000,
+ * "memory": {
+ * "rss": 1000000,
+ * "heapTotal": 500000,
+ * "heapUsed": 250000,
+ * "external": 10000
+ * }
+ * }
+ */
+router.get("/health", logRequest, async (req, res) => {
+  // Record start time for ping calculation
+  const startTime = Date.now();
+  // Check database connectivity with a simple query
+  await prisma.$queryRaw`SELECT 1`;
+  // Calculate ping time
+  const pingTime = Date.now() - startTime;
+
+  return res.status(200).json({
+    status: "up",
+    timestamp: new Date().toISOString(),
+    database: {
+      connected: true,
+      ping: `${pingTime}ms`,
+      lastError: null,
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+  });
 });
 
 /**

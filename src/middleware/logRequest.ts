@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import requestIp from "request-ip";
 
-import { prisma } from "../prisma";
 import { getUserInfo } from "../utils/jwt";
 import { log } from "../utils/logger";
+import { prisma } from "../utils/prisma";
 
 let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
 
@@ -85,6 +85,7 @@ export const logRequest = async (
         body: bdytmp,
         query: query,
         ip: ip,
+        referer: req.headers.referer,
         userAgent: userAgent,
         xIdentity: xIdentity,
         User: usr

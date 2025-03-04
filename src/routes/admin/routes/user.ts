@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import express from "express";
 
 import { ExtendedData } from "@prisma/client";
-import { prisma } from "../../../prisma";
 import * as logger from "../../../utils/logger";
+import { prisma } from "../../../utils/prisma";
 
 let saltRounds = 10;
 

@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma";
+import { prisma } from "../../utils/prisma";
 import { domainCheck } from "./domain";
 import { parseData } from "./parseData";
 import { reportToAlienVault } from "./reportToAlienVault";

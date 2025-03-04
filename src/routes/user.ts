@@ -2,12 +2,12 @@ import bcrypt from "bcrypt";
 import express from "express";
 
 import { logRequest } from "../middleware/logRequest";
-import { prisma } from "../prisma";
 import {
   authenticateToken,
   generateAccessToken,
   getUserInfo,
 } from "../utils/jwt";
+import { prisma } from "../utils/prisma";
 import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 
 const router = express.Router();
