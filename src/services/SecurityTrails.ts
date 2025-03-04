@@ -26,6 +26,12 @@ export class SecurityTrailsService {
         headers: headersWithSecurityTrails,
       };
 
+      const optionsTwo = {
+        method: "GET",
+        url: `https://api.securitytrails.com/v1/domain/${sanitizedDomain}/subdomains`,
+        headers: headersWithSecurityTrails,
+      };
+
       try {
         const response = await axios.request(options);
         const data = response.data;
@@ -40,6 +46,20 @@ export class SecurityTrailsService {
               },
             },
             data: data,
+          },
+        });
+
+        const response2 = await axios.request(optionsTwo);
+        const data2 = response2.data;
+        await prisma.rawAPIData.create({
+          data: {
+            sourceAPI: "SecurityTrails",
+            domain: {
+              connect: {
+                id: dbDomain.id,
+              },
+            },
+            data: data2,
           },
         });
 
