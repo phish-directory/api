@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma";
+import { prisma } from "../../utils/prisma";
 import { checkAndUpdateDomainStatus } from "../domain/checkAndUpdateDomainStatus";
 import { domainCheck } from "../domain/domain";
 

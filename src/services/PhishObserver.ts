@@ -1,8 +1,10 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+
 import { headersWithPhishObserver } from "../defs/headers";
-import { prisma } from "../prisma";
-import { getDbDomain } from "../utils/db/getDbDomain";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { getDbDomain } from "../func/db/getDbDomain";
+import { sanitizeDomain } from "../func/domain/sanitizeDomain";
+import { axios } from "../utils/axios";
+import { prisma } from "../utils/prisma";
 
 interface PhishObserverError {
   error: string;

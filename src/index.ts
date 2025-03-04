@@ -1,84 +1,125 @@
-import axios from "axios";
-import * as dotenv from "dotenv";
-import expressJSDocSwagger from "express-jsdoc-swagger";
-import helmet from "helmet";
+import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
+import { Elysia } from "elysia";
+// import { cron } from "@elysiajs/cron";
+// bun add @elysiajs/jwt
+// import { randomUUIDv7 } from "bun";
+import { ip } from "elysia-ip";
 
-import { app } from "./app";
-import router from "./router";
-import { server } from "./server";
-// import metrics from "./metrics";
-import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
-import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
+import { getVersion } from "./utils/getVersion";
+// import { prisma } from "./utils/prisma";
 import * as logger from "./utils/logger";
 
-dotenv.config();
+let version = getVersion();
 
 const port: number = Number(process.env.PORT) || 3000;
 
-expressJSDocSwagger(app)(mainSwagOptions);
-expressJSDocSwagger(app)(adminSwagOptions);
+new Elysia()
+  .use(
+    cors({
+      maxAge: 86400,
+    })
+  )
+  .use(ip())
+  // .use(
+  //   cron({
+  //     name: "updateState",
+  //     pattern: "*/10 * * * * *",
+  //     run() {
 
-app.disable("x-powered-by");
-
-app.use(
-  helmet({
-    xFrameOptions: { action: "deny" },
-    xContentTypeOptions: true,
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        baseUri: ["'self'"],
-        fontSrc: ["'self'", "https:", "data:"],
-        formAction: ["'self'"],
-        frameAncestors: ["'self'"],
-        imgSrc: ["'self'", "data:"],
-        objectSrc: ["'none'"],
-        scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'none'"],
-        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-        upgradeInsecureRequests: [],
+  //     },
+  //   })
+  // )
+  .use(
+    swagger({
+      exclude: ["/"],
+      documentation: {
+        info: {
+          title: "phish.directory API",
+          version: version,
+          description:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          contact: {
+            name: "phish.directory",
+            url: "mailto:team@phish.directory",
+            email: "team@phish.directory",
+          },
+          // license: {
+          //   name: "AGPL 3.0",
+          //   url: "",
+          // },
+        },
+        tags: [
+          { name: "Domain", description: "Domain-related operations" },
+          { name: "Email", description: "Email-related operations" },
+          { name: "User", description: "User management operations" },
+          { name: "Admin", description: "[RESTRICTED] Admin operations" },
+        ],
+        components: {
+          securitySchemes: {
+            BearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+          },
+        },
+        security: [
+          {
+            BearerAuth: [],
+          },
+        ],
       },
-    },
-    referrerPolicy: { policy: "strict-origin" },
-    strictTransportSecurity: {
-      maxAge: 63072000,
-      preload: true,
-    },
-    xPoweredBy: false,
+      // Scalar-specific configuration
+      provider: "scalar",
+      scalarConfig: {
+        hideDownloadButton: false,
+        hideTestRequestButton: false,
+        servers: [
+          {
+            url: "https://api.phish.directory",
+            description: "Production server",
+          },
+          {
+            url: "http://localhost:3000",
+            description: "Local server",
+          },
+        ],
+        forceDarkModeState: "dark",
+        hideDarkModeToggle: true,
+        // defaultOpenAllTags: true,
+        metaData: {
+          title: "phish.directory API",
+          description:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          ogDescription:
+            "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts",
+          ogTitle: "phish.directory API",
+        },
+      },
+      path: "/docs",
+    })
+  )
+  .get("/", async ({ set }) => {
+    // redirect to docs
+    set.status = 302;
+    set.headers = {
+      Location: "/docs",
+    };
+    return "Redirecting to /docs";
   })
-);
-
-// Add metric interceptors for axios
-axios.interceptors.request.use((config: any) => {
-  config.metadata = { startTs: performance.now() };
-  return config;
-});
-
-axios.interceptors.response.use((res: any) => {
-  const stat = (res.config.method + "/" + res.config.url?.split("/")[1])
-    .toLowerCase()
-    .replace(/[:.]/g, "")
-    .replace(/\//g, "_");
-
-  const httpCode = res.status;
-  const timingStatKey = `http.request.${stat}`;
-  const codeStatKey = `http.request.${stat}.${httpCode}`;
-  // metrics.timing(
-  //   timingStatKey,
-  //   performance.now() - res.config.metadata.startTs
-  // );
-  // metrics.increment(codeStatKey, 1);
-
-  return res;
-});
-
-app.use("/", router);
+  .get("/up", async ({}) => {
+    return {
+      status: "up",
+    };
+  })
+  .listen(port);
 
 // Heartbeat
 // new CronJob(
 //   "0 * * * * *",
 //   async function () {
-//     logger.log("Thump Thump");
+//     console.log("Thump Thump");
 //     // metrics.increment("heartbeat");
 //   },
 //   null,
@@ -87,10 +128,6 @@ app.use("/", router);
 // );
 //
 
-server
-  .listen(Number(port), "0.0.0.0", () => {
-    logger.info(`Server is running on port ${port}`);
-  })
-  .on("error", (err) => {
-    logger.error(`Failed to start server: ${err.message}`);
-  });
+logger.log(`Server started on port ${port}`, "ready");
+logger.log("Press Ctrl+C to stop the server", "ready");
+logger.log("----\n", "plain");

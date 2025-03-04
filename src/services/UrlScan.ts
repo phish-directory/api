@@ -1,9 +1,8 @@
-import axios from "axios";
-
 import { headersWithUrlScan } from "../defs/headers";
-import { prisma } from "../prisma";
-import { getDbDomain } from "../utils/db/getDbDomain";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { getDbDomain } from "../func/db/getDbDomain";
+import { sanitizeDomain } from "../func/domain/sanitizeDomain";
+import { axios } from "../utils/axios";
+import { prisma } from "../utils/prisma";
 
 /**
  * A service that provides access to the UrlScan service for checking and reporting domains.

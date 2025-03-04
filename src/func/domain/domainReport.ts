@@ -1,6 +1,6 @@
-import axios from "axios";
+import { axios } from "../../utils/axios";
 
-import { headersWithOTX } from "../../defs/headers";
+import { headersWithOTX } from "../../../src/defs/headers";
 import { virusTotalService, walshyService } from "../../services/_index";
 
 /**

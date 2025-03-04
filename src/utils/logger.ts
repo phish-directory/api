@@ -16,7 +16,8 @@ export const log = (
     | "error"
     | "debug"
     | "db"
-    | "ready" = "log",
+    | "ready"
+    | "multicolor" = "log"
 ) => {
   const timestamp = `${colors.white(`[${moment().format("DD-MM-YY H:m:s")}]`)}`;
 
@@ -27,30 +28,34 @@ export const log = (
       return console.log(`${content}`);
     case "info":
       return console.log(
-        `${colors.cyan("[INFO]")} ${timestamp} ${colors.cyan(content)}`,
+        `${colors.cyan("[INFO]")} ${timestamp} ${colors.cyan(content)}`
       );
     case "warn":
       return console.log(
-        `${colors.yellow("[WARN]")} ${timestamp} ${colors.yellow(content)} `,
+        `${colors.yellow("[WARN]")} ${timestamp} ${colors.yellow(content)} `
       );
     case "error":
       return console.log(
-        `${colors.red("[ERROR]")} ${timestamp} ${colors.red(content)} `,
+        `${colors.red("[ERROR]")} ${timestamp} ${colors.red(content)} `
       );
     case "debug":
       return console.log(
-        `${colors.green("[DEBUG]")}  ${timestamp} ${colors.green(content)} `,
+        `${colors.green("[DEBUG]")}  ${timestamp} ${colors.green(content)} `
       );
     case "db": {
       return console.log(
         `${colors.magenta("[DATABASE]")} ${timestamp} ${colors.magenta(
-          content,
-        )} `,
+          content
+        )} `
       );
     }
+    case "multicolor":
+      return console.log(
+        `${colors.rainbow("[LOG]")}  ${timestamp} ${colors.rainbow(content)}`
+      );
     case "ready":
       return console.log(
-        `${colors.rainbow("[READY]")}  ${timestamp} ${colors.rainbow(content)}`,
+        `${colors.green("[READY]")}  ${timestamp} ${colors.green(content)}`
       );
     default:
       throw new TypeError("Logger type not correct.");
