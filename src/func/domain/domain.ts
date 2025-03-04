@@ -1,5 +1,4 @@
 // import metrics from "../metrics";
-import { prisma } from "../../prisma";
 import {
   googleSafebrowsingService,
   ipQualityScoreService,
@@ -11,6 +10,7 @@ import {
   virusTotalService,
   walshyService,
 } from "../../services/_index";
+import { prisma } from "../../utils/prisma";
 
 /**
  * Check the domain against all the services

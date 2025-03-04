@@ -1,11 +1,11 @@
 import express from "express";
 const router = express.Router();
 
-import { findOrCreateDomain } from "../../utils/db/findOrCreateDomain";
-import { prepareResponse } from "../../utils/domain/prepareResponse";
-import { validateAndExtractParams } from "../../utils/domain/validateAndExtractDomainParams";
+import { ValidationError } from "../../defs/validationError";
+import { findOrCreateDomain } from "../../func/db/findOrCreateDomain";
+import { prepareResponse } from "../../func/domain/prepareResponse";
+import { validateAndExtractParams } from "../../func/domain/validateAndExtractDomainParams";
 import { authenticateToken } from "../../utils/jwt";
-import { ValidationError } from "../../utils/validationError";
 
 /**
  * GET /domain/check

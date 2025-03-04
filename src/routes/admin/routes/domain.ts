@@ -1,11 +1,11 @@
-import axios from "axios";
 import express, { Request, Response } from "express";
 
 import { headersWithOTX } from "../../../defs/headers";
-import { prisma } from "../../../prisma";
-import { getDbDomain } from "../../../utils/db/getDbDomain";
-import { domainReport } from "../../../utils/domain/domainReport";
+import { getDbDomain } from "../../../func/db/getDbDomain";
+import { domainReport } from "../../../func/domain/domainReport";
+import { axios } from "../../../utils/axios";
 import { getUserInfo } from "../../../utils/jwt";
+import { prisma } from "../../../utils/prisma";
 
 /*
 GET domain - Get all domains
