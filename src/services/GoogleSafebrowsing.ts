@@ -1,4 +1,3 @@
-import { headers } from "../defs/headers";
 import { googleThreatTypes, urlParamString } from "../defs/misc";
 import { getDbDomain } from "../func/db/getDbDomain";
 import { axios } from "../utils/axios";
@@ -25,7 +24,6 @@ export class GoogleSafebrowsingService {
         `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process
           .env.GOOGLE_API_KEY!}`,
         {
-          headers,
           client: {
             clientId: `phish.directory API`,
             clientVersion: `${process.env.npm_package_version!}`,
@@ -45,10 +43,7 @@ export class GoogleSafebrowsingService {
 
       const response2 = await axios.get(
         `https://webrisk.googleapis.com/v1/uris:search?${urlParamString}&uri=${domain}&key=${process
-          .env.GOOGLE_API_KEY!}`,
-        {
-          headers,
-        }
+          .env.GOOGLE_API_KEY!}`
       );
 
       const data = response.data;

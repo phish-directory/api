@@ -1,6 +1,8 @@
 import { headers } from "../defs/headers";
+import { getDbDomain } from "../func/db/getDbDomain";
 import { axios } from "../utils/axios";
 import { prisma } from "../utils/prisma";
+import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
  * A service that provides access to the AbuseCh service for checking and reporting domains, emails, etc.
@@ -23,21 +25,43 @@ export class AbuseChService {
         }
       );
 
-      let data = response.data;
+      let sanitizedDomain = await sanitizeDomain(domain);
+      const dbDomain = await getDbDomain(sanitizedDomain);
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "AbuseCh",
-          domain: {
-            connect: {
-              id: data.id,
+      // Check if the response is JSON before saving to database
+      if (response.headers["content-type"]?.includes("application/json")) {
+        let data = response.data;
+
+        await prisma.rawAPIData.create({
+          data: {
+            sourceAPI: "AbuseCh",
+            domain: {
+              connect: {
+                id: dbDomain.id,
+              },
             },
+            data: data,
           },
-          data: data,
-        },
-      });
+        });
 
-      return data;
+        return data;
+      } else {
+        await prisma.rawAPIData.create({
+          data: {
+            sourceAPI: "AbuseCh",
+            domain: {
+              connect: {
+                id: dbDomain.id,
+              },
+            },
+            data: JSON.stringify(
+              "Received non-JSON response from AbuseCh API for domain."
+            ),
+          },
+        });
+
+        return response.data;
+      }
     },
 
     // /**
