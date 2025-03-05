@@ -29,6 +29,7 @@ enum Classifications {
 
 enum APIs {
   SafeBrowsing
+  GoogleWebRisk
   IpQualityScore
   PhishObserver
   PhishReport

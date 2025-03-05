@@ -1,3 +1,5 @@
+import { headers } from "../defs/headers";
+import { googleThreatTypes, urlParamString } from "../defs/misc";
 import { getDbDomain } from "../func/db/getDbDomain";
 import { axios } from "../utils/axios";
 import { prisma } from "../utils/prisma";
@@ -23,12 +25,13 @@ export class GoogleSafebrowsingService {
         `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process
           .env.GOOGLE_API_KEY!}`,
         {
+          headers,
           client: {
-            clientId: `phish.directory`,
+            clientId: `phish.directory API`,
             clientVersion: `${process.env.npm_package_version!}`,
           },
           threatInfo: {
-            threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"],
+            threatTypes: googleThreatTypes,
             platformTypes: ["ANY_PLATFORM"],
             threatEntryTypes: ["URL"],
             threatEntries: [
@@ -40,7 +43,17 @@ export class GoogleSafebrowsingService {
         }
       );
 
+      const response2 = await axios.get(
+        `https://webrisk.googleapis.com/v1/uris:search?${urlParamString}&uri=${domain}&key=${process
+          .env.GOOGLE_API_KEY!}`,
+        {
+          headers,
+        }
+      );
+
       const data = response.data;
+      const data2 = response2.data;
+
       const dbDomain = await getDbDomain(sanitizedDomain);
 
       await prisma.rawAPIData.create({
@@ -52,6 +65,18 @@ export class GoogleSafebrowsingService {
             },
           },
           data: data,
+        },
+      });
+
+      await prisma.rawAPIData.create({
+        data: {
+          sourceAPI: "GoogleWebRisk",
+          domain: {
+            connect: {
+              id: dbDomain.id,
+            },
+          },
+          data: data2,
         },
       });
 
