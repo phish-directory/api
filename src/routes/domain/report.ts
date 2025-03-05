@@ -1,8 +1,8 @@
 import express from "express";
 const router = express.Router();
 
-import { getDbDomain } from "../../utils/db/getDbDomain";
-import { domainReport } from "../../utils/domain/domainReport";
+import { getDbDomain } from "../../func/db/getDbDomain";
+import { domainReport } from "../../func/domain/domainReport";
 import { authenticateToken, getUserInfo } from "../../utils/jwt";
 import { prisma } from "../../utils/prisma";
 

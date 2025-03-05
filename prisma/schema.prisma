@@ -39,6 +39,7 @@ enum APIs {
   VirusTotal
   Walshy
   IpQuery
+  AbuseCh
 }
 
 enum ExtendedData {

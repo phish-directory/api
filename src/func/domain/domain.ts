@@ -1,5 +1,6 @@
 // import metrics from "../metrics";
 import {
+  abuseChService,
   googleSafebrowsingService,
   ipQualityScoreService,
   phishObserverService,
@@ -32,6 +33,7 @@ export async function domainCheck(domain: string) {
   let urlScanData = await urlScanService.domain.check(domain);
   let securitytrailsData = await securityTrailsService.domain.check(domain);
   let phishreportData = await phishReportService.domain.check(domain);
+  let abuseChData = await abuseChService.domain.check(domain);
 
   let dbDomain = await prisma.domain.findFirst({
     where: {
@@ -59,5 +61,6 @@ export async function domainCheck(domain: string) {
     urlScanData,
     securitytrailsData,
     phishreportData,
+    abuseChData,
   };
 }
