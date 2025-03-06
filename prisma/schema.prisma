@@ -29,6 +29,7 @@ enum Classifications {
 
 enum APIs {
   SafeBrowsing
+  GoogleWebRisk
   IpQualityScore
   PhishObserver
   PhishReport
@@ -37,6 +38,8 @@ enum APIs {
   UrlScan
   VirusTotal
   Walshy
+  IpQuery
+  AbuseCh
 }
 
 enum ExtendedData {
