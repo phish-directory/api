@@ -7,6 +7,7 @@ import {
   generateAccessToken,
   getUserInfo,
 } from "../utils/jwt";
+import postmark from "../utils/postmark";
 import { prisma } from "../utils/prisma";
 import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 
@@ -39,9 +40,7 @@ let saltRounds = 10;
  */
 router.post("/signup", async (req, res) => {
   // metrics.increment("endpoint.user.signup");
-
   const body = req.body;
-
   const { name, email, password } = body;
 
   if (!name || !email || !password) {
@@ -66,19 +65,42 @@ router.post("/signup", async (req, res) => {
   const salt = bcrypt.genSaltSync(saltRounds);
   let passHash = await bcrypt.hash(password, salt);
 
-  // Create the user
-  const newUser = await prisma.user.create({
-    data: {
-      name: name,
-      email: email,
-      password: passHash,
-    },
-  });
+  try {
+    // Create the user
+    const newUser = await prisma.user.create({
+      data: {
+        name: name,
+        email: email,
+        password: passHash,
+      },
+    });
 
-  res.status(200).json({
-    message: "User created successfully, please login.",
-    uuid: newUser.uuid,
-  });
+    // Send welcome email after user is created
+    await postmark.sendEmailWithTemplate({
+      From: "bot@phish.directory",
+      To: newUser.email,
+      TemplateAlias: "welcome",
+      TemplateModel: {
+        product_url: "https://api.phish.directory",
+        product_name: "Phish Directory API",
+        name: newUser.name,
+        email: newUser.email,
+        company_name: "Phish Directory",
+        company_address: "36 Old Quarry Rd, Fayston, VT 05673",
+      },
+    });
+
+    // Send success response with the user's uuid
+    res.status(200).json({
+      message: "User created successfully, please login.",
+      uuid: newUser.uuid,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Error creating user",
+      error: error.message,
+    });
+  }
 });
 
 /**
