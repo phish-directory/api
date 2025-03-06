@@ -1,3 +1,4 @@
+import { AbuseChService } from "./AbuseCh";
 import { GoogleSafebrowsingService } from "./GoogleSafebrowsing";
 import { IpQualityScoreService } from "./IpQualityScore";
 import { PhishObserverService } from "./PhishObserver";
@@ -17,3 +18,4 @@ export const phishObserverService = new PhishObserverService();
 export const urlScanService = new UrlScanService();
 export const securityTrailsService = new SecurityTrailsService();
 export const phishReportService = new PhishReportService();
+export const abuseChService = new AbuseChService();

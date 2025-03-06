@@ -9,6 +9,7 @@
  * @param urlScanData - Data from URLScan API
  * @param securitytrailsData - Data from SecurityTrails API
  * @param phishreportData - Data from Phishreport API
+ * @param abuseChData - Data from AbuseCh API
  * @returns boolean
  **/
 export async function parseData(
@@ -20,7 +21,8 @@ export async function parseData(
   phishObserverData: any,
   urlScanData: any,
   securitytrailsData: any,
-  phishreportData: any
+  phishreportData: any,
+  abuseChData: any
 ): Promise<Boolean> {
   // return true;
 
@@ -49,6 +51,8 @@ export async function parseData(
     virusTotalData.data.attributes.last_analysis_stats.suspicious > 0
   ) {
     verdict = true;
+    // todo: add correct condition for abuseChData
+    // } else if (abuseChData.query_status === "ok" && abuseChData.) {
   } else {
     verdict = false;
   }

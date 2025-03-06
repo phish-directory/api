@@ -1,6 +1,6 @@
 import { ExtendedData } from "@prisma/client";
 import { Request } from "express";
-import { getDbUser } from "./db/getDbUser";
+import { getDbUser } from "../func/db/getDbUser";
 import { getUserInfo } from "./jwt";
 
 /**
