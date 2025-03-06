@@ -136,6 +136,61 @@ router.post("/login", async (req, res) => {
     return;
   }
 
+  // Get IP address from the request
+  const ipAddress =
+    req.headers["x-forwarded-for"] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.ip ||
+    "0.0.0.0";
+
+  // Get detailed IP information from ipgeolocation.io
+  let ipInfo = {
+    ip: ipAddress,
+    timestamp: new Date().toISOString(),
+    userAgent: req.headers["user-agent"] || "Unknown",
+    country: null,
+    city: null,
+    region: null,
+    location: null,
+    isp: null,
+    organization: null,
+  };
+
+  try {
+    const API_KEY = process.env.IPGEOLOCATION_API_KEY; // Store your API key in environment variables
+    const geoResponse = await fetch(
+      `https://api.ipgeolocation.io/ipgeo?apiKey=${API_KEY}&ip=${ipAddress}`
+    );
+
+    if (geoResponse.ok) {
+      const geoData = await geoResponse.json();
+
+      // Update ipInfo with data from the API
+      ipInfo = {
+        ...ipInfo,
+        country: geoData.country_name,
+        countryCode: geoData.country_code2,
+        city: geoData.city,
+        region: geoData.state_prov,
+        regionCode: geoData.state_code,
+        zipcode: geoData.zipcode,
+        // @ts-expect-error
+        location: {
+          lat: geoData.latitude,
+          lng: geoData.longitude,
+        },
+        isp: geoData.isp,
+        organization: geoData.organization,
+        timezone: geoData.time_zone?.name,
+        currency: geoData.currency?.code,
+      };
+    }
+  } catch (error) {
+    console.error("Failed to fetch IP geolocation data:", error);
+    // Continue with basic IP info if geolocation lookup fails
+  }
+
   const user = await prisma.user.findUnique({
     where: {
       email: email,
@@ -160,9 +215,55 @@ router.post("/login", async (req, res) => {
       );
   }
 
+  // Store login attempt with IP information
+  try {
+    await prisma.loginAttempt.create({
+      data: {
+        userId: user.id,
+        ipAddress: ipAddress as string,
+        userAgent: ipInfo.userAgent,
+        successful: true,
+        ipInfo: JSON.stringify(ipInfo),
+      },
+    });
+  } catch (error) {
+    console.error("Failed to log login attempt:", error);
+    // Continue with login process even if logging fails
+  }
+
   let token = await generateAccessToken(user);
 
   let jsonresponsebody = {};
+
+  // Update the email to include comprehensive IP address information
+  await postmark.sendEmail({
+    From: "bot@phish.directory",
+    To: user.email,
+    Subject: "Phish Directory API Login",
+    HtmlBody: `<html><body>
+      <h1>Hello ${user.name}</h1>
+      <p>You have successfully logged in to the Phish Directory API.</p>
+      <p>Login details:</p>
+      <ul>
+        <li>Time: ${ipInfo.timestamp}</li>
+        <li>IP Address: ${ipInfo.ip}</li>
+        <li>Device: ${ipInfo.userAgent}</li>
+        ${
+          ipInfo.city
+            ? // @ts-expect-error
+              `<li>Location: ${ipInfo.city}, ${ipInfo.region} ${ipInfo.countryCode}</li>`
+            : ""
+        }
+        ${
+          ipInfo.organization
+            ? `<li>Organization: ${ipInfo.organization}</li>`
+            : ""
+        }
+        ${ipInfo.isp ? `<li>Internet Provider: ${ipInfo.isp}</li>` : ""}
+      </ul>
+      <p>If this wasn't you, please contact <a href="mailto:security@phish.directory">security@phish.directory</a> immediately AND change your password.</p>
+    </body></html>`,
+  });
 
   if (useExteded) {
     jsonresponsebody = {
