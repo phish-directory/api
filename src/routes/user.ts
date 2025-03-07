@@ -1,3 +1,4 @@
+import { sInvite } from "@prisma/client";
 import bcrypt from "bcrypt";
 import express from "express";
 
@@ -99,7 +100,38 @@ router.post("/signup", async (req, res) => {
       HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
     });
 
-    await inviteToSlack(newUser.email);
+    await inviteToSlack(newUser.email).then((response) => {
+      if (response.success !== true) {
+        console.error(
+          `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
+        );
+
+        prisma.user.update({
+          where: {
+            id: newUser.id,
+          },
+          data: {
+            invitedToSlack: sInvite.no,
+          },
+        });
+
+        postmark.sendEmail({
+          From: "bot@phish.directory",
+          To: "jasper.mayone@phish.directory",
+          Subject: "Failed Slack Invite",
+          TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+        });
+      } else {
+        prisma.user.update({
+          where: {
+            id: newUser.id,
+          },
+          data: {
+            invitedToSlack: sInvite.yes,
+          },
+        });
+      }
+    });
 
     // Send success response with the user's uuid
     res.status(200).json({
