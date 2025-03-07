@@ -20,7 +20,8 @@ export async function checkAndUpdateDomainStatus(domain, domainId) {
     data.phishObserverData,
     data.urlScanData,
     data.securitytrailsData,
-    data.phishreportData
+    data.phishreportData,
+    data.abuseChData
   );
 
   await prisma.domain.update({
