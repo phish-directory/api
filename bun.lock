@@ -10,6 +10,7 @@
         "bcrypt": "^5.1.1",
         "body-parser": "^1.20.3",
         "colors": "^1.4.0",
+        "disposable-email-detector": "^3.0.0",
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "express-jsdoc-swagger": "^1.8.0",
@@ -341,6 +342,8 @@
     "devalue": ["devalue@5.1.1", "", {}, "sha512-maua5KUiapvEwiEAe+XnlZ3Rh0GD+qI1J/nb9vrJc3muPXvcF/8gXYTWF76+5DAqHyDUtOIImEuo0YKE9mshVw=="],
 
     "diff": ["diff@5.2.0", "", {}, "sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A=="],
+
+    "disposable-email-detector": ["disposable-email-detector@3.0.0", "", { "dependencies": { "disposable-email-detector": "^1.0.1" } }, "sha512-q/7bq+vXAupa8Z9eGlrpJ8qJ0Q3j8cgs15qvvdJNVnmFso8ludFFBVXoj4ALRfy66K92T9xdyWxl98RX9jlAiw=="],
 
     "doctrine": ["doctrine@3.0.0", "", { "dependencies": { "esutils": "^2.0.2" } }, "sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w=="],
 
@@ -731,6 +734,8 @@
     "anymatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 
     "body-parser/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
+
+    "disposable-email-detector/disposable-email-detector": ["disposable-email-detector@1.0.3", "", { "dependencies": { "disposable-email-detector": "^1.0.1" } }, "sha512-hqVTnwz4B8iuFefKcp6I3m8J/ZXiNzBZROD2t3lS2cZlo+/hkKrsMvn9i9wyuXTGZ0WUblC8h/gSzybF9nVWiQ=="],
 
     "express/debug": ["debug@2.6.9", "", { "dependencies": { "ms": "2.0.0" } }, "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA=="],
 
