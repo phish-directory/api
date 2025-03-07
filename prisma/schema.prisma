@@ -67,6 +67,40 @@ model User {
   emailsReported    Email[]
   reportedDomains   DomainReport[]   @relation("reporter")
   reviewedDomains   DomainReport[]   @relation("reviewer")
+  loginAttempts LoginAttempt[]
+}
+
+model LoginAttempt {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+
+  // User relationship
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  // Login details
+  ipAddress   String
+  userAgent   String?
+  successful  Boolean  @default(true)
+
+  // Detailed IP information (stored as JSON)
+  ipInfo      String?  // JSON string containing all IP geolocation data
+
+  // Extracted key fields for easier querying
+  country     String?
+  city        String?
+  region      String?
+  isp         String?
+  organization String?
+
+  // Additional metadata
+  deviceType  String?  // Mobile, Desktop, Tablet, etc.
+  browser     String?  // Chrome, Firefox, Safari, etc.
+  loginMethod String?  @default("password") // password, oauth, token, etc.
+
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([createdAt])
 }
 
 model Domain {
