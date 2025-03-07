@@ -1,6 +1,7 @@
 import * as express from "express";
 import { logRequest } from "../middleware/logRequest";
 import { ipQualityScoreService } from "../services/_index";
+import { authenticateToken } from "../utils/jwt";
 import { validateEmail } from "../utils/validateEmail";
 
 const router = express.Router();
@@ -44,7 +45,7 @@ router.use(logRequest);
  *   "message": "No email provided."
  * }
  */
-router.get("/check", async (req, res) => {
+router.get("/check", authenticateToken, async (req, res) => {
   const email = req.query.email as string;
   if (!email) {
     return res.status(400).json({ message: "No email provided." });
