@@ -42,6 +42,12 @@ enum APIs {
   AbuseCh
 }
 
+enum sInvite {
+  no
+  error
+  yes
+}
+
 enum ExtendedData {
   off
   on
@@ -68,6 +74,7 @@ model User {
   reportedDomains   DomainReport[]   @relation("reporter")
   reviewedDomains   DomainReport[]   @relation("reviewer")
   loginAttempts LoginAttempt[]
+  invitedToSlack sInvite @default(no)
 }
 
 model LoginAttempt {
