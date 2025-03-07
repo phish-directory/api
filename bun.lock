@@ -4,6 +4,7 @@
     "": {
       "name": "phish.directory",
       "dependencies": {
+        "@jaspermayone/disposable-email-detector": "^1.0.0",
         "@playwright/test": "^1.49.1",
         "@prisma/client": "6.4.1",
         "axios": "^1.7.9",
@@ -96,6 +97,8 @@
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.24.2", "", { "os": "win32", "cpu": "x64" }, "sha512-7VTgWzgMGvup6aSqDPLiW5zHaxYJGTO4OokMjIlrCtf+VpEL+cXKtCvg723iguPYI5oaUNdS+/V7OU2gvXVWEg=="],
 
     "@flydotio/dockerfile": ["@flydotio/dockerfile@0.6.1", "", { "dependencies": { "@sveltejs/adapter-node": "^5.2.11", "chalk": "^5.3.0", "diff": "^5.2.0", "ejs": "^3.1.10", "shell-quote": "^1.8.1", "yargs": "^17.7.2" }, "bin": { "dockerfile": "index.js" } }, "sha512-zGZK6OdqpBmFaWzKaORkSvUzvUnAsSkr0dwYqr+vimV0EU5j9C3trOHnmXdqCXswr45eGlietk8hYBdKWV/fIg=="],
+
+    "@jaspermayone/disposable-email-detector": ["@jaspermayone/disposable-email-detector@1.0.0", "", {}, "sha512-SPowxkBW5lKy9oa33beP18UjXzd71OuqKs/BWatWww15gFUENM3xmttJKEVI8x4pArD5JI4q8rF0cAdJM3mLUQ=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.8", "", { "dependencies": { "@jridgewell/set-array": "^1.2.1", "@jridgewell/sourcemap-codec": "^1.4.10", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA=="],
 

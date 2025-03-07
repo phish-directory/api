@@ -1,6 +1,6 @@
+import disposableEmailDetector from "@jaspermayone/disposable-email-detector";
 import { sInvite } from "@prisma/client";
 import bcrypt from "bcrypt";
-import disposableEmailDetector from "disposable-email-detector";
 import express from "express";
 
 import { inviteToSlack } from "../func/slackInvite";
@@ -53,7 +53,7 @@ router.post("/signup", async (req, res) => {
     return;
   }
 
-  let isDisposable = await disposableEmailDetector(email);
+  let isDisposable = await disposableEmailDetector(email as string);
 
   if (isDisposable) {
     res.status(400).json("Disposable email addresses are not allowed");
