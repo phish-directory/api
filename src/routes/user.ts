@@ -90,6 +90,7 @@ router.post("/signup", async (req, res) => {
         company_name: "Phish Directory",
         company_address: "36 Old Quarry Rd, Fayston, VT 05673",
       },
+      MessageStream: "api-transactional",
     });
 
     postmark.sendEmail({
@@ -98,6 +99,7 @@ router.post("/signup", async (req, res) => {
       Subject: "New User Signup",
       // email the team and provide name, and email of the new user,
       HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
+      MessageStream: "api-transactional",
     });
 
     await inviteToSlack(newUser.email).then((response) => {
@@ -120,6 +122,7 @@ router.post("/signup", async (req, res) => {
           To: "jasper.mayone@phish.directory",
           Subject: "Failed Slack Invite",
           TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+          MessageStream: "api-transactional",
         });
       } else {
         prisma.user.update({
@@ -306,6 +309,7 @@ router.post("/login", async (req, res) => {
       </ul>
       <p>If this wasn't you, please contact <a href="mailto:security@phish.directory">security@phish.directory</a> immediately AND change your password.</p>
     </body></html>`,
+    MessageStream: "api-transactional",
   });
 
   if (useExteded) {
