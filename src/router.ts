@@ -11,7 +11,6 @@ import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
 import * as logger from "./utils/logger";
-import postmark from "./utils/postmark";
 import { prisma } from "./utils/prisma";
 
 const router = express.Router();
@@ -192,39 +191,6 @@ router.get("/health", logRequest, async (req, res) => {
     uptime: process.uptime(),
     memory: process.memoryUsage(),
   });
-});
-
-router.get("/tmp", async (req, res) => {
-  postmark
-    // .sendEmail({
-    //   From: "bot@phish.directory",
-    //   To: "me@jaspermayone.com",
-    //   Subject: "Test",
-    //   HtmlBody: "<html><body><h1>Hello</h1><p>This is a test</p></body></html>",
-    //   TextBody: "Hello, this is a test",
-    //   TrackOpens: true,
-    //   TrackLinks: LinkTrackingOptions.HtmlAndText,
-    // })
-    .sendEmailWithTemplate({
-      From: "bot@phish.directory",
-      To: "me@jaspermayone.com",
-      TemplateAlias: "welcome",
-      TemplateModel: {
-        product_url: "https://api.phish.directory",
-        product_name: "Phish Directory API",
-        name: "Jasper",
-        email: "me@jaspermayone.com",
-        company_name: "Phish Directory",
-        company_address: "36 Old Quarry Rd, Fayston, VT 05673",
-      },
-    })
-    .then((response) => {
-      res.json(response);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.json(error);
-    });
 });
 
 /**

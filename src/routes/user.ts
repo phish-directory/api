@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import express from "express";
 
+import { inviteToSlack } from "../func/slackInvite";
 import { logRequest } from "../middleware/logRequest";
 import {
   authenticateToken,
@@ -89,6 +90,16 @@ router.post("/signup", async (req, res) => {
         company_address: "36 Old Quarry Rd, Fayston, VT 05673",
       },
     });
+
+    postmark.sendEmail({
+      From: "bot@phish.directory",
+      To: "team@phish.directory",
+      Subject: "New User Signup",
+      // email the team and provide name, and email of the new user,
+      HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
+    });
+
+    await inviteToSlack(newUser.email);
 
     // Send success response with the user's uuid
     res.status(200).json({
