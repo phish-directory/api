@@ -2,9 +2,13 @@ import { getVersion } from "./func/getVersion";
 
 let filePattern;
 if (process.env.NODE_ENV === "production") {
-  filePattern = ["./router.js", "./routes/*.js"];
+  filePattern = ["./router.js", "./routes/*.js", "./routes/**/**/*.js"];
 } else {
-  filePattern = ["./router.{ts,js}", "./routes/*.{ts,js}"];
+  filePattern = [
+    "./router.{ts,js}",
+    "./routes/*.{ts,js}",
+    "./routes/**/**/*.{ts,js}",
+  ];
 }
 
 let version = getVersion();
