@@ -42,6 +42,7 @@ router.use(async (req, res, next) => {
  * - Version information for API and all dependencies
  * - Usage statistics across different time periods
  * - API integration response counts
+ * @tags Misc - Miscellaneous endpoints
  * @security BearerAuth
  * @return {object} 200 - Detailed metrics response
  * @return {object} 403 - Permission denied
@@ -225,17 +226,6 @@ router.get("/metrics", logRequest, async (req, res) => {
   });
 });
 
-/**
- * Admin Router Configuration
- * @summary Administrative route handler with authentication and permission checks
- * @description All routes under /admin require:
- * 1. Valid JWT authentication token
- * 2. Admin-level permissions
- * Sub-routes include:
- * - /admin/metrics: System metrics and statistics
- * - /admin/domain: Domain management
- * - /admin/user: User management
- */
 router.use("/domain", logRequest, domainRouter);
 router.use("/user", userRouter);
 
