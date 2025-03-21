@@ -4,6 +4,5 @@ Expires: 2026-03-17T17:00:00.000Z
 Preferred-Languages: en
 Canonical: https://phish.directory/.well-known/security.txt
 Canonical: https://phish.directory/security.txt
-Canonical: https://api/phish.directory/.well-known/security.txt
-Canonical: https://api/phish.directory/security.txt
-
+Canonical: https://api.phish.directory/.well-known/security.txt
+Canonical: https://api.phish.directory/security.txt
