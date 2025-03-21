@@ -19,7 +19,7 @@
   "dependencies": {
     "@jaspermayone/disposable-email-detector": "^1.0.0",
     "@playwright/test": "^1.49.1",
-    "@prisma/client": "6.4.1",
+    "@prisma/client": "^6.5.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
@@ -48,7 +48,7 @@
     "@types/request-ip": "^0.0.41",
     "@types/response-time": "^2.3.8",
     "nodemon": "^3.1.9",
-    "prisma": "^6.4.1",
+    "prisma": "^6.5.0",
     "typescript": "^5.7.2"
   }
 }

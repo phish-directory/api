@@ -193,6 +193,31 @@ router.get("/health", logRequest, async (req, res) => {
   });
 });
 
+// Error handling middleware
+router.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    console.error("Unhandled error:", err);
+
+    const errorResponse = {
+      status: "error",
+      message:
+        process.env.NODE_ENV === "production"
+          ? "An unexpected error occurred"
+          : err.message,
+      timestamp: new Date().toISOString(),
+    };
+
+    res.status(500).json(errorResponse);
+  }
+);
+
+router.use(express.static("public"));
+
 /**
  * @swagger
  * tags:
@@ -225,28 +250,5 @@ const routes = [
 routes.forEach(({ path, router: routeHandler }) => {
   router.use(path, logRequest, routeHandler);
 });
-
-// Error handling middleware
-router.use(
-  (
-    err: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error("Unhandled error:", err);
-
-    const errorResponse = {
-      status: "error",
-      message:
-        process.env.NODE_ENV === "production"
-          ? "An unexpected error occurred"
-          : err.message,
-      timestamp: new Date().toISOString(),
-    };
-
-    res.status(500).json(errorResponse);
-  }
-);
 
 export default router;
