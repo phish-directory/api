@@ -85,64 +85,69 @@ router.post("/signup", async (req, res) => {
       },
     });
 
-    // Send welcome email after user is created
-    await postmark.sendEmailWithTemplate({
-      From: "bot@phish.directory",
-      To: newUser.email,
-      TemplateAlias: "welcome",
-      TemplateModel: {
-        product_url: "https://api.phish.directory",
-        product_name: "Phish Directory API",
-        name: newUser.name,
-        email: newUser.email,
-        company_name: "Phish Directory",
-        company_address: "36 Old Quarry Rd, Fayston, VT 05673",
-      },
-      MessageStream: "api-transactional",
-    });
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.SEND_DEV_EMAILS === "true"
+    ) {
+      // Send welcome email after user is created
+      await postmark.sendEmailWithTemplate({
+        From: "bot@phish.directory",
+        To: newUser.email,
+        TemplateAlias: "welcome",
+        TemplateModel: {
+          product_url: "https://api.phish.directory",
+          product_name: "Phish Directory API",
+          name: newUser.name,
+          email: newUser.email,
+          company_name: "Phish Directory",
+          company_address: "36 Old Quarry Rd, Fayston, VT 05673",
+        },
+        MessageStream: "api-transactional",
+      });
 
-    postmark.sendEmail({
-      From: "bot@phish.directory",
-      To: "team@phish.directory",
-      Subject: "New User Signup",
-      // email the team and provide name, and email of the new user,
-      HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
-      MessageStream: "api-transactional",
-    });
+      postmark.sendEmail({
+        From: "bot@phish.directory",
+        To: "team@phish.directory",
+        Subject: "New User Signup",
+        // email the team and provide name, and email of the new user,
+        HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
+        MessageStream: "api-transactional",
+      });
 
-    await inviteToSlack(newUser.email).then((response) => {
-      if (response.success !== true) {
-        console.error(
-          `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
-        );
+      await inviteToSlack(newUser.email).then((response) => {
+        if (response.success !== true) {
+          console.error(
+            `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
+          );
 
-        prisma.user.update({
-          where: {
-            id: newUser.id,
-          },
-          data: {
-            invitedToSlack: sInvite.no,
-          },
-        });
+          prisma.user.update({
+            where: {
+              id: newUser.id,
+            },
+            data: {
+              invitedToSlack: sInvite.no,
+            },
+          });
 
-        postmark.sendEmail({
-          From: "bot@phish.directory",
-          To: "jasper.mayone@phish.directory",
-          Subject: "Failed Slack Invite",
-          TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
-          MessageStream: "api-transactional",
-        });
-      } else {
-        prisma.user.update({
-          where: {
-            id: newUser.id,
-          },
-          data: {
-            invitedToSlack: sInvite.yes,
-          },
-        });
-      }
-    });
+          postmark.sendEmail({
+            From: "bot@phish.directory",
+            To: "jasper.mayone@phish.directory",
+            Subject: "Failed Slack Invite",
+            TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+            MessageStream: "api-transactional",
+          });
+        } else {
+          prisma.user.update({
+            where: {
+              id: newUser.id,
+            },
+            data: {
+              invitedToSlack: sInvite.yes,
+            },
+          });
+        }
+      });
+    }
 
     // Send success response with the user's uuid
     res.status(200).json({
@@ -289,12 +294,16 @@ router.post("/login", async (req, res) => {
 
   let jsonresponsebody = {};
 
-  // Update the email to include comprehensive IP address information
-  await postmark.sendEmail({
-    From: "bot@phish.directory",
-    To: user.email,
-    Subject: "Phish Directory API Login",
-    HtmlBody: `<html><body>
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.SEND_DEV_EMAILS === "true"
+  ) {
+    // Update the email to include comprehensive IP address information
+    await postmark.sendEmail({
+      From: "bot@phish.directory",
+      To: user.email,
+      Subject: "Phish Directory API Login",
+      HtmlBody: `<html><body>
       <h1>Hello ${user.name}</h1>
       <p>You have successfully logged in to the Phish Directory API.</p>
       <p>Login details:</p>
@@ -317,8 +326,9 @@ router.post("/login", async (req, res) => {
       </ul>
       <p>If this wasn't you, please contact <a href="mailto:security@phish.directory">security@phish.directory</a> immediately AND change your password.</p>
     </body></html>`,
-    MessageStream: "api-transactional",
-  });
+      MessageStream: "api-transactional",
+    });
+  }
 
   if (useExteded) {
     jsonresponsebody = {
