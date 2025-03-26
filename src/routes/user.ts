@@ -114,39 +114,32 @@ router.post("/signup", async (req, res) => {
         MessageStream: "api-transactional",
       });
 
-      await inviteToSlack(newUser.email).then((response) => {
-        if (response.success !== true) {
-          console.error(
-            `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
-          );
+      // Handle Slack invite asynchronously with 5-minute delay
+      setTimeout(async () => {
+        try {
+          const response = await inviteToSlack(newUser.email);
+          if (response.success !== true) {
+            console.error(
+              `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
+            );
 
-          prisma.user.update({
-            where: {
-              id: newUser.id,
-            },
-            data: {
-              invitedToSlack: sInvite.no,
-            },
-          });
-
-          postmark.sendEmail({
-            From: "bot@phish.directory",
-            To: "jasper.mayone@phish.directory",
-            Subject: "Failed Slack Invite",
-            TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
-            MessageStream: "api-transactional",
-          });
-        } else {
-          prisma.user.update({
-            where: {
-              id: newUser.id,
-            },
-            data: {
-              invitedToSlack: sInvite.yes,
-            },
-          });
+            await postmark.sendEmail({
+              From: "bot@phish.directory",
+              To: "jasper.mayone@phish.directory",
+              Subject: "Failed Slack Invite",
+              TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+              MessageStream: "api-transactional",
+            });
+          } else {
+            await db.update(users).set({
+              invitedToSlack: true,
+              // @ts-expect-errorß
+            }).where(eq(users.id, newUser.id));
+          }
+        } catch (error) {
+          console.error(`Error sending Slack invite to ${newUser.email}:`, error);
         }
-      });
+      }, 5 * 60 * 1000); // 5 minutes in milliseconds
     }
 
     // Send success response with the user's uuid
