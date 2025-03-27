@@ -25,7 +25,6 @@
         "moment": "^2.30.1",
         "node-statsd": "^0.1.1",
         "pg": "^8.14.1",
-        "postmark": "^4.0.5",
         "react": "^19.0.0",
         "request-ip": "^3.3.0",
         "resend": "^4.2.0",
@@ -850,8 +849,6 @@
     "postgres-date": ["postgres-date@1.0.7", "", {}, "sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q=="],
 
     "postgres-interval": ["postgres-interval@1.2.0", "", { "dependencies": { "xtend": "^4.0.0" } }, "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="],
-
-    "postmark": ["postmark@4.0.5", "", { "dependencies": { "axios": "^1.7.4" } }, "sha512-nerZdd3TwOH4CgGboZnlUM/q7oZk0EqpZgJL+Y3Nup8kHeaukxouQ6JcFF3EJEijc4QbuNv1TefGhboAKtf/SQ=="],
 
     "prelude-ls": ["prelude-ls@1.2.1", "", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
 
