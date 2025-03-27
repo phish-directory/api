@@ -5,8 +5,6 @@ import { axios } from "../utils/axios";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 import { db } from "src/utils/db";
 
-//FIXME: Add back db logic
-
 /**
  * A service that provides access to the AbuseCh service for checking and reporting domains, emails, etc.
  */

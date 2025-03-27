@@ -3,7 +3,6 @@ import { db } from "src/utils/db";
 import { headers } from "../defs/headers";
 import { getDbDomain } from "../func/db/domain";
 import { axios } from "../utils/axios";
-//FIXME: Add back db logic
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**

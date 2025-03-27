@@ -13,6 +13,7 @@ import userRouter from "./routes/user";
 import * as logger from "./utils/logger";
 import { db } from "./utils/db";
 import { sql } from "drizzle-orm";
+import moment from "moment";
 
 const router = express.Router();
 const version = getVersion();
@@ -131,26 +132,11 @@ router.get("/health", logRequest, async (req, res) => {
   const memoryUsage = process.memoryUsage();
   const formatMemory = (bytes: number) => Math.round(bytes / 1024 / 1024 * 100) / 100;
 
-  // Format uptime to show days, hours, minutes, and seconds
-  const formatUptime = (totalSeconds: number): string => {
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.round(totalSeconds % 60);
-    
-    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-  };
-
-  // Get machine-friendly uptime breakdown
-  const getMachineUptime = (totalSeconds: number) => {
-    return {
-      total: Math.round(totalSeconds),
-      days: Math.floor(totalSeconds / 86400),
-      hours: Math.floor((totalSeconds % 86400) / 3600),
-      minutes: Math.floor((totalSeconds % 3600) / 60),
-      seconds: Math.round(totalSeconds % 60)
-    };
-  };
+  let uptime = process.uptime();
+  let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
+  let dateStarted = new Date(Date.now() - uptime * 1000);
+  let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
+  
 
   return res.status(200).json({
     status: "up",
@@ -158,9 +144,9 @@ router.get("/health", logRequest, async (req, res) => {
     database: {
       connected: true,
       ping: `${pingTime}ms`,
-      lastError: null,
     },
-      uptime: getMachineUptime(process.uptime()),
+    uptime: uptimeString,
+    dateStarted: dateStartedFormatted,
     memory: {
       rss: `${formatMemory(memoryUsage.rss)}MB`, // Resident Set Size - total memory allocated
       heapTotal: `${formatMemory(memoryUsage.heapTotal)}MB`, // V8 heap total size
