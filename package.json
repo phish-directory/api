@@ -8,15 +8,15 @@
       "email": "jasper.mayone@phish.directory"
     }
   ],
-"scripts": {
-  "start": "bun run dist/src/index.js",
-  "dev": "bun run --watch src/index.ts",
-  "build": "bun run db:generate && tsc",
-  "compile": "bun run db:generate && tsc",
-  "db:generate": "bunx drizzle-kit generate",
-  "db:migrate": "bunx drizzle-kit migrate",
-  "db:studio": "bunx drizzle-kit studio"
-},
+  "scripts": {
+    "start": "bun run dist/src/index.js",
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun run db:generate && tsc",
+    "compile": "bun run db:generate && tsc",
+    "db:generate": "bunx drizzle-kit generate",
+    "db:migrate": "bunx drizzle-kit migrate",
+    "db:studio": "bunx drizzle-kit studio"
+  },
   "keywords": [],
   "author": "Jasper Mayone <jasper.mayone@phish.directory>",
   "dependencies": {
@@ -57,5 +57,8 @@
     "@types/response-time": "^2.3.8",
     "nodemon": "^3.1.9",
     "typescript": "^5.7.2"
+  },
+  "dockerfile": {
+    "bun": true
   }
 }
