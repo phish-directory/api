@@ -1,16 +1,15 @@
 import express from "express";
-import { prisma } from "../../utils/prisma";
+import { db } from "src/utils/db";
 const router = express.Router();
+import { domains } from "src/db/schema";
+import { eq } from "drizzle-orm";
 
 async function getAllDomains() {
-  const domains = await prisma.domain.findMany({
-    where: {
-      malicious: true,
-    },
+  const dbDomains = await db.query.domains.findMany({
+    where: (domains) => eq(domains.malicious, true),
   });
-
   // specifically get the domain names
-  const domainNames = domains.map((domain) => domain.domain);
+  const domainNames = dbDomains.map((domain) => domain.domain);
   return domainNames;
 }
 
@@ -23,7 +22,6 @@ async function getAllDomains() {
  */
 router.get("/adgaurd", async (req, res) => {
   const domains = await getAllDomains();
-
   const header = [
     "! Title: phish.directory AdGuard Filters",
     "! Description: Auto-generated filter list from https://phish.directory",
@@ -32,10 +30,8 @@ router.get("/adgaurd", async (req, res) => {
     "! Contact: support@phish.directory",
     "!",
   ].join("\n");
-
   // add the domains to the filter list
   const filters = domains.map((domain) => `||${domain}^`).join("\n");
-
   // Set content type for filter list
   res.setHeader("Content-Type", "text/plain");
   res.send(`${header}\n${filters}`);
@@ -50,7 +46,6 @@ router.get("/adgaurd", async (req, res) => {
  */
 router.get("/ublock", async (req, res) => {
   const domains = await getAllDomains();
-
   const header = [
     "! Title: phish.directory uBlock Origin Filters",
     "! Description: Auto-generated filter list from https://phish.directory",
@@ -59,10 +54,8 @@ router.get("/ublock", async (req, res) => {
     "! Contact: support@phish.directory",
     "!",
   ].join("\n");
-
   // add the domains to the filter list
   const filters = domains.map((domain) => `||${domain}^`).join("\n");
-
   // Set content type for filter list
   res.setHeader("Content-Type", "text/plain");
   res.send(`${header}\n${filters}`);
@@ -77,7 +70,6 @@ router.get("/ublock", async (req, res) => {
  */
 router.get("/pihole", async (req, res) => {
   const domains = await getAllDomains();
-
   const header = [
     "# Title: phish.directory Pi-hole Filters",
     "# Description: Auto-generated filter list from https://phish.directory",
@@ -86,7 +78,6 @@ router.get("/pihole", async (req, res) => {
     "# Contact: support@phish.directory",
     "#",
   ].join("\n");
-
   res.setHeader("Content-Type", "text/plain");
   res.send(`${header}\n${domains.join("\n")}`);
 });

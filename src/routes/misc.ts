@@ -2,7 +2,7 @@ import * as express from "express";
 import moment from "moment";
 import { getVersion } from "../func/getVersion";
 import { logRequest } from "../middleware/logRequest";
-import { prisma } from "../utils/prisma";
+import { db } from "../utils/db";
 
 const router = express.Router();
 router.use(express.json());
@@ -38,7 +38,7 @@ router.get("/metrics", async (req, res) => {
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
-  let domainCount = await prisma.domain.count();
+  let domainCount = await db.query.domains.findMany();
   let npmVersion = getVersion();
   let environment = process.env.NODE_ENV;
 

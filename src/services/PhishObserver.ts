@@ -1,8 +1,9 @@
 import axios, { AxiosError } from "axios";
 import { headersWithPhishObserver } from "../defs/headers";
-import { getDbDomain } from "../func/db/getDbDomain";
-import { prisma } from "../utils/prisma";
+import { getDbDomain } from "../func/db/domain";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
 
 interface PhishObserverError {
   error: string;
@@ -51,16 +52,11 @@ export class PhishObserverService {
 
         // Store the response in the database
         const dbDomain = await getDbDomain(sanitizedDomain);
-        await prisma.rawAPIData.create({
-          data: {
-            sourceAPI: "PhishObserver",
-            domain: {
-              connect: {
-                id: dbDomain.id,
-              },
-            },
-            data: searchResponse.data,
-          },
+
+        await db.insert(rawAPIData).values({
+          sourceAPI: "PhishObserver",
+          domain: dbDomain!.id!,
+          data: searchResponse.data,
         });
 
         return searchResponse.data;

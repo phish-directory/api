@@ -3,9 +3,14 @@ import moment from "moment";
 import { getPackageVersion, getVersion } from "../../func/getVersion";
 import { logRequest } from "../../middleware/logRequest";
 import { authenticateToken, getUserInfo } from "../../utils/jwt";
-import { prisma } from "../../utils/prisma";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
+import { count, eq, gte } from "drizzle-orm";
+import { domains, users, requestsLog, permissionLevel, rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
+import { APIs } from "src/db/schema";
+
+//FIXME: Add back db logic
 
 const router = express.Router();
 router.use(express.json());
@@ -23,7 +28,7 @@ router.use(async (req, res, next) => {
     return;
   }
 
-  if (user.permission !== "admin") {
+  if (user.permissionLevel !== permissionLevel.enumValues[2]) {
     res.status(403).json({
       error: "You do not have permission to access this endpoint",
     });
@@ -58,7 +63,7 @@ router.use(async (req, res, next) => {
  *     "node": "v18.17.0",
  *     "packages": {
  *       "express": "4.18.2",
- *       "prisma": "5.4.2",
+ *       "drizzle": "0.19.0",
  *       "axios": "1.5.0",
  *       "cron": "2.4.3",
  *       "helmet": "7.0.0",
@@ -102,13 +107,13 @@ router.get("/metrics", logRequest, async (req, res) => {
   let dateStarted = new Date(Date.now() - uptime * 1000);
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
 
-  let domainCount = await prisma.domain.count();
-  let userCount = await prisma.user.count();
-  let requestCount = await prisma.expressRequest.count();
+  let domainCount = await db.select({ count: count() }).from(domains);
+  let userCount = await db.select({ count: count() }).from(users);
+  let requestCount = await db.select({ count: count() }).from(requestsLog);
 
   let npmVersion = getVersion();
   let expressVersion = getPackageVersion("express");
-  let prismaVersion = getPackageVersion("@prisma/client");
+  let drizzleVersion = getPackageVersion("drizzle");
   let axiosVersion = getPackageVersion("axios");
   let cronVersion = getPackageVersion("cron");
   let helmetVersion = getPackageVersion("helmet");
@@ -127,7 +132,7 @@ router.get("/metrics", logRequest, async (req, res) => {
       node: nodeVersion,
       packages: {
         express: expressVersion,
-        prisma: prismaVersion,
+        drizzle: drizzleVersion,
         axios: axiosVersion,
         cron: cronVersion,
         helmet: helmetVersion,
@@ -135,92 +140,28 @@ router.get("/metrics", logRequest, async (req, res) => {
       },
     },
     counts: {
-      domains: domainCount,
-      users: userCount,
+      domains: domainCount[0].count,
+      users: userCount[0].count,
       requests: {
-        lifetime: requestCount,
-        today: await prisma.expressRequest.count({
-          where: {
-            createdAt: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)),
-            },
-          },
-        }),
-        "24 hours": await prisma.expressRequest.count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-            },
-          },
-        }),
-        week: await prisma.expressRequest.count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            },
-          },
-        }),
-        month: await prisma.expressRequest.count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-            },
-          },
-        }),
-        year: await prisma.expressRequest.count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-            },
-          },
-        }),
+        lifetime: requestCount[0].count,
+        "24 hours": (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 24 * 60 * 60 * 1000))))[0].count,
+        week: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))))[0].count,
+        month: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))))[0].count,
+        year: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 365 * 24 * 60 * 60 * 1000))))[0].count,
       },
       responses: {
-        googleSafebrowsing: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "SafeBrowsing",
-          },
-        }),
-        ipQualityScore: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "IpQualityScore",
-          },
-        }),
-        phishObserver: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "PhishObserver",
-          },
-        }),
-        phishReport: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "PhishReport",
-          },
-        }),
-        securityTrails: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "SecurityTrails",
-          },
-        }),
-        sinkingYahts: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "SinkingYachts",
-          },
-        }),
-        urlScan: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "UrlScan",
-          },
-        }),
-        virusTotal: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "VirusTotal",
-          },
-        }),
-        walshy: await prisma.rawAPIData.count({
-          where: {
-            sourceAPI: "Walshy",
-          },
-        }),
+        googleSafebrowsing: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[0])))[0].count,
+        googleWebRisk: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[1])))[0].count,
+        ipQualityScore: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[2])))[0].count,
+        phishObserver: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[3])))[0].count,
+        phishReport: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[4])))[0].count,
+        securityTrails: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[5])))[0].count,
+        sinkingYahts: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[6])))[0].count,
+        urlScan: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[7])))[0].count,
+        virusTotal: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[8])))[0].count,
+        walshy: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[9])))[0].count,
+        ipQuery: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[10])))[0].count,
+        abuseCh: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[11])))[0].count,
       },
     },
   });

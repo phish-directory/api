@@ -1,8 +1,9 @@
+import { rawAPIData } from "src/db/schema";
 import { googleThreatTypes, urlParamString } from "../defs/misc";
-import { getDbDomain } from "../func/db/getDbDomain";
+import { getDbDomain } from "../func/db/domain";
 import { axios } from "../utils/axios";
-import { prisma } from "../utils/prisma";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { db } from "src/utils/db";
 
 /**
  * A service that provides access to the Google Safebrowsing for checking and reporting domains.
@@ -51,28 +52,16 @@ export class GoogleSafebrowsingService {
 
       const dbDomain = await getDbDomain(sanitizedDomain);
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "SafeBrowsing",
-          domain: {
-            connect: {
-              id: dbDomain.id,
-            },
-          },
-          data: data,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "SafeBrowsing",
+        domain: dbDomain!.id!,
+        data: data,
       });
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "GoogleWebRisk",
-          domain: {
-            connect: {
-              id: dbDomain.id,
-            },
-          },
-          data: data2,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "GoogleWebRisk",
+        domain: dbDomain!.id!,
+        data: data2,
       });
 
       return data;

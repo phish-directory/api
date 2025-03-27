@@ -4,7 +4,6 @@ prod.env
 yarn.lock
 dist/
 ignore/
-prisma/data
 .env
 ! .env.example
 .vscode

@@ -3,7 +3,8 @@ import requestIp from "request-ip";
 
 import { getUserInfo } from "../utils/jwt";
 import { log } from "../utils/logger";
-import { prisma } from "../utils/prisma";
+import { db } from "src/utils/db";
+import { requestsLog } from "src/db/schema";
 
 let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
 
@@ -35,7 +36,8 @@ export const logRequest = async (
     xIdentity = "";
   }
 
-  if (monitoringAgents.some((agent) => userAgent.startsWith(agent))) {
+  const normalizedUserAgent = userAgent.toLowerCase();
+  if (monitoringAgents.some((agent) => normalizedUserAgent.includes(agent.toLowerCase()))) {
     return next();
   }
 
@@ -54,7 +56,7 @@ export const logRequest = async (
     if (token !== null && token !== undefined) {
       userinfo = await getUserInfo(req);
       if (userinfo) {
-        usr = userinfo.uuid;
+        usr = userinfo.id;
       }
     }
   }
@@ -76,30 +78,31 @@ export const logRequest = async (
     }
   }
 
-  await prisma.expressRequest
-    .create({
-      data: {
-        method: method,
-        url: url,
-        headers: headers,
-        body: bdytmp,
-        query: query,
-        ip: ip,
-        referer: req.headers.referer,
-        userAgent: userAgent,
-        xIdentity: xIdentity,
-        User: usr
-          ? {
-              connect: {
-                uuid: usr,
-              },
-            }
-          : undefined,
-      },
-    })
-    .catch((err: any) => {
-      console.error("Failed to log request to the database", err);
-    });
+  // await db.insert(requests).values({
+  //   method: method,
+  //   url: url,
+  //   headers: headers,
+  //   body: bdytmp,
+  //   query: query,
+  //   ip: ip,
+  //   referer: req.headers.referer,
+  //   userAgent: userAgent,
+  //   xIdentity: xIdentity,
+  //   userId: usr,
+  // });
+
+  await db.insert(requestsLog).values({
+    method: method,
+    url: url,
+    headers: headers,
+    body: bdytmp,
+    query: query,
+    ip: ip,
+    referer: req.headers.referer,
+    userAgent: userAgent,
+    xIdentity: xIdentity,
+    userId: usr,
+  });
 
   if (process.env.NODE_ENV === "development") {
     log(`${req.method} ${req.url} ${userAgent}`, "log");

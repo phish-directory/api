@@ -2,10 +2,13 @@ import express from "express";
 const router = express.Router();
 
 import { ValidationError } from "../../defs/validationError";
-import { findOrCreateDomain } from "../../func/db/findOrCreateDomain";
+// import { findOrCreateDomain } from "../../func/db/findOrCreateDomain";
 import { prepareResponse } from "../../func/domain/prepareResponse";
 import { validateAndExtractParams } from "../../func/domain/validateAndExtractDomainParams";
 import { authenticateToken } from "../../utils/jwt";
+import { eq } from "drizzle-orm";
+import { db } from "src/utils/db";
+import { domains } from "src/db/schema";
 
 /**
  * GET /domain/check
@@ -24,8 +27,21 @@ router.get("/", authenticateToken, async (req, res) => {
     // Validate and extract query parameters
     const { domain, extendData } = await validateAndExtractParams(req);
 
+    let dbDomain;
+
     // Check if domain exists in database
-    const dbDomain = await findOrCreateDomain(domain);
+    dbDomain = await db.query.domains.findFirst({
+      where: (domains) => eq(domains.domain, domain),
+    });
+
+    // if domain does not exist, create it
+    if (!dbDomain) {
+      dbDomain = await db.insert(domains).values({
+        domain: domain,
+        malicious: false,
+        last_checked: new Date(),
+      }).returning();
+    }
 
     // Prepare and send response
     const response = await prepareResponse(domain, dbDomain, extendData);

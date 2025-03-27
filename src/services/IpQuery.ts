@@ -1,6 +1,7 @@
+import { rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
 import { headers } from "../defs/headers";
 import { axios } from "../utils/axios";
-import { prisma } from "../utils/prisma";
 
 /**
  * A service that provides access to the IpQuery service for checking and reporting domains, emails, etc.
@@ -23,12 +24,11 @@ export class IpQueryService {
       // set json as response data
       const jsonData = data.data;
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "IpQuery",
-          data: jsonData,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "IpQuery",
+        data: jsonData,
       });
+
     },
   };
 }

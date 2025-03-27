@@ -11,7 +11,10 @@ import {
   virusTotalService,
   walshyService,
 } from "../../services/_index";
-import { prisma } from "../../utils/prisma";
+
+import { getDbDomain } from "../db/domain";
+import { db } from "src/utils/db";
+import { domains } from "src/db/schema";
 
 /**
  * Check the domain against all the services
@@ -35,17 +38,11 @@ export async function domainCheck(domain: string) {
   let phishreportData = await phishReportService.domain.check(domain);
   let abuseChData = await abuseChService.domain.check(domain);
 
-  let dbDomain = await prisma.domain.findFirst({
-    where: {
-      domain: domain,
-    },
-  });
+  let dbDomain = await getDbDomain(domain);
 
   if (!dbDomain) {
-    dbDomain = await prisma.domain.create({
-      data: {
-        domain: domain,
-      },
+    dbDomain = await db.insert(domains).values({
+      domain: domain,
     });
   }
 

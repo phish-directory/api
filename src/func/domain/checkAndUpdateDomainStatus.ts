@@ -1,7 +1,10 @@
-import { prisma } from "../../utils/prisma";
+import { db } from "src/utils/db";
 import { domainCheck } from "./domain";
 import { parseData } from "./parseData";
 import { reportToAlienVault } from "./reportToAlienVault";
+import { domains } from "src/db/schema";
+import { eq } from "drizzle-orm";
+
 
 /**
  * Checks domain against various services and updates its status in the database
@@ -24,13 +27,12 @@ export async function checkAndUpdateDomainStatus(domain, domainId) {
     data.abuseChData
   );
 
-  await prisma.domain.update({
-    where: { id: domainId },
-    data: {
-      malicious: Boolean(isPhish), // Ensure it's a boolean primitive
-      lastChecked: new Date(),
-    },
-  });
+  await db.update(domains)
+  .set({
+    malicious: Boolean(isPhish),
+    last_checked: new Date(),
+  })
+  .where(eq(domains.id, domainId));
 
   if (isPhish) {
     await reportToAlienVault(domain);

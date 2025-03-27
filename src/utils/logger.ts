@@ -15,7 +15,7 @@ export const log = (
     | "warn"
     | "error"
     | "debug"
-    | "db"
+    | "database"
     | "ready" = "log",
 ) => {
   const timestamp = `${colors.white(`[${moment().format("DD-MM-YY H:m:s")}]`)}`;
@@ -41,7 +41,7 @@ export const log = (
       return console.log(
         `${colors.green("[DEBUG]")}  ${timestamp} ${colors.green(content)} `,
       );
-    case "db": {
+    case "database": {
       return console.log(
         `${colors.magenta("[DATABASE]")} ${timestamp} ${colors.magenta(
           content,
@@ -62,5 +62,5 @@ export const info = (content: string) => log(content, "info");
 export const warn = (content: string) => log(content, "warn");
 export const error = (content: string) => log(content, "error");
 export const debug = (content: string) => log(content, "debug");
-export const db = (content: string) => log(content, "db");
+export const database = (content: string) => log(content, "database");
 export const ready = (content: string) => log(content, "ready");

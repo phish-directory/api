@@ -3,7 +3,7 @@
 # Use the official Bun image
 FROM oven/bun:1 AS base
 
-LABEL fly_launch_runtime="Bun/Prisma"
+LABEL fly_launch_runtime="Bun / Drizzle"
 
 # App lives here
 WORKDIR /app
@@ -22,10 +22,6 @@ RUN apt-get update -qq && \
 # Install dependencies
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
-
-# Generate Prisma Client
-COPY prisma .
-RUN bunx prisma generate
 
 # Copy application code
 COPY . .

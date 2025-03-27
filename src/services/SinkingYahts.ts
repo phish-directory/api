@@ -1,7 +1,9 @@
+import { APIs, rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
 import { headersWithSinkingYahts } from "../defs/headers";
-import { getDbDomain } from "../func/db/getDbDomain";
+import { getDbDomain } from "../func/db/domain";
 import { axios } from "../utils/axios";
-import { prisma } from "../utils/prisma";
+//FIXME: Add back db logic
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -29,16 +31,10 @@ export class SinkingYahtsService {
       const data = response.data;
       const dbDomain = await getDbDomain(sanitizedDomain);
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "SinkingYachts",
-          domain: {
-            connect: {
-              id: dbDomain.id,
-            },
-          },
-          data: data,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "SinkingYachts",
+        domain: dbDomain!.id!,
+        data: data,
       });
 
       return data;
