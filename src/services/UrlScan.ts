@@ -1,7 +1,8 @@
+import { rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
 import { headersWithUrlScan } from "../defs/headers";
-import { getDbDomain } from "../func/db/getDbDomain";
+import { getDbDomain } from "../func/db/domain";
 import { axios } from "../utils/axios";
-import { prisma } from "../utils/prisma";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
 
 /**
@@ -61,16 +62,11 @@ export class UrlScanService {
         );
 
         const dbDomain = await getDbDomain(sanitizedDomain);
-        await prisma.rawAPIData.create({
-          data: {
-            sourceAPI: "UrlScan",
-            domain: {
-              connect: {
-                id: dbDomain.id,
-              },
-            },
-            data: scanResult.data,
-          },
+
+        await db.insert(rawAPIData).values({
+          sourceAPI: "UrlScan",
+          domain: dbDomain!.id!,
+          data: scanResult.data,
         });
 
         return scanResult.data;

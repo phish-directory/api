@@ -1,37 +1,16 @@
 import bcrypt from "bcrypt";
 import express from "express";
 
-import { ExtendedData } from "@prisma/client";
+import { useExtendedData } from "src/db/schema";
 import * as logger from "../../../utils/logger";
-import { prisma } from "../../../utils/prisma";
+import { db } from "src/utils/db";
+import { users } from "src/db/schema";
+import { eq } from "drizzle-orm";
+import { getUserInfo } from "src/utils/jwt";
 
 let saltRounds = 10;
 
 const router = express.Router();
-
-/**
- * User w/ Name
- * @typedef {object} User
- * @property {string} name.required - The name of the user
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-export type User = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-/**
- * User login information
- * @typedef {object} UserLogin
- * @property {string} email.required - The email of the user
- * @property {string} password.required - The password of the user
- */
-export type UserLogin = {
-  email: string;
-  password: string;
-};
 
 /**
  * GET /admin/user
@@ -56,16 +35,8 @@ export type UserLogin = {
  */
 router.get("/", async (req, res) => {
   // metrics.increment("endpoint.admin.users.get");
-  try {
-    const users = await prisma.user.findMany({
-      orderBy: {
-        id: "asc",
-      },
-    });
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ error: "An error occurred while fetching users." });
-  }
+  const dbUsers = await db.query.users.findMany();
+  res.status(200).json(dbUsers);
 });
 
 /**
@@ -103,15 +74,18 @@ router.get("/user/:id", async (req, res) => {
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const dbUser = await db.query.users.findFirst({
+      where: (users) => eq(users.id, userId),
     });
 
-    if (!user) {
+    if (!dbUser) {
       return res.status(404).json({
         message: "User not found.",
       });
     }
+
+    res.status(200).json(dbUser);
+
   } catch (error) {
     logger.error(error as string);
 
@@ -149,21 +123,13 @@ router.patch("/user/:id", async (req, res) => {
     const { email, password, permission } = req.body;
 
     // Build the data object dynamically
-    const updateData = {};
-    // @ts-expect-error
+    const updateData: Partial<typeof users.$inferInsert> = {};
     if (email !== undefined) updateData.email = email;
-    // @ts-expect-error
     if (password !== undefined) updateData.password = password;
-    // @ts-expect-error
-    if (permission !== undefined) updateData.permission = permission;
+    if (permission !== undefined) updateData.permissionLevel = permission;
 
     // Update user
-    await prisma.user.update({
-      where: {
-        id: parseInt(id),
-      },
-      data: updateData,
-    });
+    await db.update(users).set(updateData).where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: "User updated successfully.",
@@ -207,10 +173,8 @@ router.post("/user/new", async (req, res) => {
   }
 
   // Check if the user already exists
-  const user = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
+  const user = await db.query.users.findFirst({
+    where: (users) => eq(users.email, email),
   });
 
   if (user) {
@@ -222,13 +186,12 @@ router.post("/user/new", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   // Create the user
-  const newUser = await prisma.user.create({
-    data: {
-      name: name,
-      email: email,
-      password: passHash,
-    },
-  });
+  const [newUser] = await db.insert(users).values({
+    firstName: name,
+    lastName: name,
+    email: email,
+    password: passHash,
+  }).returning();
 
   res.status(200).json({
     message: "User created successfully, please login.",
@@ -253,15 +216,10 @@ router.delete("/user/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    await prisma.user.update({
-      where: {
-        id: parseInt(id),
-      },
-      data: {
-        deletedAt: new Date(),
-        deleted: true,
-      },
-    });
+    // update deleted_at timestamp on user (soft delete)
+    await db.update(users).set({
+      deleted_at: new Date(),
+    }).where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: "User deleted successfully.",
@@ -290,6 +248,9 @@ router.patch("/role/:id/:role", async (req, res) => {
   // metrics.increment("endpoint.admin.user.role.patch");
 
   try {
+
+    const requester = await getUserInfo(req);
+
     const { id, role } = req.params;
     const permission = role;
 
@@ -306,7 +267,7 @@ router.patch("/role/:id/:role", async (req, res) => {
     }
 
     if (
-      permission !== "basic" &&
+      permission !== "user" &&
       permission !== "trusted" &&
       permission !== "admin"
     ) {
@@ -315,10 +276,28 @@ router.patch("/role/:id/:role", async (req, res) => {
       });
     }
 
-    let user = await prisma.user.findUnique({
-      where: {
-        id: parseInt(id),
-      },
+    if (!requester) {
+      return res.status(401).json({
+        message: "Unauthorized.",
+      });
+    }
+
+    // don't allow a user to change their own role
+    if (parseInt(id) === requester.id) {
+      return res.status(400).json({
+        message: "Cannot change your own role.",
+      });
+    }
+
+    // if trying to make a user an admin, check if the requester is an owner (permissionLevel[4])
+    if (permission === "admin" && requester.permissionLevel !== "owner") {
+      return res.status(403).json({
+        message: "Unauthorized.",
+      });
+    }
+
+    const user = await db.query.users.findFirst({
+      where: (users) => eq(users.id, parseInt(id)),
     });
 
     if (!user) {
@@ -327,26 +306,20 @@ router.patch("/role/:id/:role", async (req, res) => {
       });
     }
 
-    await prisma.user
-      .update({
-        where: {
-          id: parseInt(id),
-        },
-        data: {
-          permission: permission,
-        },
-      })
-      .then(() => {
-        res.status(200).json({
-          message: `User role updated to ${permission} successfully.`,
-        });
-      });
+    await db.update(users).set({
+      permissionLevel: permission,
+    }).where(eq(users.id, parseInt(id)));
+
+    res.status(200).json({
+      message: `User role updated to ${permission} successfully.`,
+    });
   } catch (error) {
     res.status(500).json({
       message: "An error occurred.",
     });
   }
 });
+
 
 /**
  * PATCH /admin/user/:id/:useExtended/
@@ -362,32 +335,30 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
   try {
     let { id, useExtended } = req.params;
 
-    switch (useExtended) {
-      case "off":
-        useExtended = ExtendedData.off;
-        break;
-      case "on":
-        useExtended = ExtendedData.on;
-        break;
-      case "forced":
-        useExtended = ExtendedData.forced;
-        break;
-      default:
-        return res.status(400).json({
-          message: "Invalid useExtended data.",
-        });
-    }
-
     if (!id) {
       return res.status(400).json({
         message: "User ID is required.",
       });
     }
 
-    let user = await prisma.user.findUnique({
-      where: {
-        id: parseInt(id),
-      },
+    if (!useExtended) {
+      return res.status(400).json({
+        message: "useExtended data is required.",
+      });
+    }
+
+    if (
+      useExtended !== "off" &&
+      useExtended !== "on" &&
+      useExtended !== "forced"
+    ) {
+      return res.status(400).json({
+        message: "Invalid useExtended data.",
+      });
+    }
+
+    const user = await db.query.users.findFirst({
+      where: (users) => eq(users.id, parseInt(id)),
     });
 
     if (!user) {
@@ -396,21 +367,13 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
       });
     }
 
-    await prisma.user
-      .update({
-        where: {
-          id: parseInt(id),
-        },
-        data: {
-          // @ts-expect-error
-          useExtendedData: useExtended,
-        },
-      })
-      .then(() => {
-        res.status(200).json({
-          message: `User useExtended data updated to ${useExtended} successfully.`,
-        });
-      });
+    await db.update(users).set({
+      useExtendedData: useExtended,
+    }).where(eq(users.id, parseInt(id)));
+
+    res.status(200).json({
+      message: `User useExtended data updated to ${useExtended} successfully.`,
+    });
   } catch (error) {
     res.status(500).json({
       message: "An error occurred.",

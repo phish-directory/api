@@ -1,7 +1,8 @@
-import { ExtendedData } from "@prisma/client";
 import { Request } from "express";
-import { getDbUser } from "../func/db/getDbUser";
+// import { getDbUser } from "../func/db/getDbUser";
 import { getUserInfo } from "./jwt";
+import { getDbUser } from "src/func/db/user";
+import { useExtendedData } from "src/db/schema";
 
 /**
  * Function to determine if a user needs extended data
@@ -13,6 +14,7 @@ import { getUserInfo } from "./jwt";
  */
 export async function userNeedsExtendedData(request: Request) {
   let user = await getUserInfo(request);
+
   if (!user) {
     return false;
   }
@@ -40,15 +42,15 @@ export async function userNeedsExtendedData(request: Request) {
       break;
   }
 
-  // Check database permission setting
+ // Check database permission setting
   switch (dbUser.useExtendedData) {
-    case ExtendedData.off:
+    case "off":
       // If ExtendedData is off, never use extended data regardless of query
       return false;
-    case ExtendedData.on:
+    case "on":
       // If ExtendedData is on, use extended data only if the query requests it
       return queryWantsExtendedData === true;
-    case ExtendedData.forced:
+    case "forced":
       // If ExtendedData is forced, always use extended data regardless of query
       return true;
     default:

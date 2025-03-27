@@ -1,6 +1,8 @@
+import { eq } from "drizzle-orm";
+import { db } from "src/utils/db";
 import { DomainCheckResponse } from "../../defs/interfaces";
-import { prisma } from "../../utils/prisma";
 import { reportToAlienVault } from "./reportToAlienVault";
+import { rawAPIData } from "src/db/schema";
 
 /**
  * Prepares the response object based on domain status and extended data flag
@@ -26,20 +28,18 @@ export async function prepareResponse(
     domain: domain,
     phishing: Boolean(dbDomain.malicious),
     times: {
-      createdAt: dbDomain.createdAt,
-      updatedAt: dbDomain.updatedAt,
-      lastChecked: dbDomain.lastChecked,
+      created_at: dbDomain.created_at,
+      updated_at: dbDomain.updated_at,
+      last_checked: dbDomain.last_checked,
     },
   };
 
   // Add raw API data if extended data is requested
   if (extendData) {
-    const rawAPIData = await prisma.rawAPIData.findMany({
-      where: { domainId: dbDomain.id },
-    });
+    const apiDataResults = await db.select().from(rawAPIData).where(eq(rawAPIData.domain, dbDomain.id));
 
-    response.rawData = rawAPIData;
-  }
+    response.rawData = apiDataResults;
+  }   
 
   return response;
 }

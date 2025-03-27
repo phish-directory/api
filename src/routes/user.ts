@@ -1,19 +1,16 @@
 import disposableEmailDetector from "@jaspermayone/disposable-email-detector";
-import { sInvite } from "@prisma/client";
 import bcrypt from "bcrypt";
-import express from "express";
+import express, { query } from "express";
 
 import { inviteToSlack } from "../func/slackInvite";
 import { logRequest } from "../middleware/logRequest";
-import {
-  authenticateToken,
-  generateAccessToken,
-  getUserInfo,
-} from "../utils/jwt";
 import postmark from "../utils/postmark";
-import { prisma } from "../utils/prisma";
 import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
-
+import { db } from "../utils/db";
+import { count, eq } from "drizzle-orm";
+import { loginAttempts, requestsLog, users } from "../db/schema";
+import { authenticateToken, generateAccessToken, getUserInfo } from "src/utils/jwt";
+ 
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -44,12 +41,12 @@ let saltRounds = 10;
 router.post("/signup", async (req, res) => {
   // metrics.increment("endpoint.user.signup");
   const body = req.body;
-  const { name, email, password } = body;
+  const { firstName, lastName, email, password } = body;
 
-  if (!name || !email || !password) {
+  if (!firstName || !lastName || !email || !password) {
     res
       .status(400)
-      .json("Invalid arguments. Please provide name, email, and password");
+      .json("Invalid arguments. Please provide firstName, lastName, email, and password");
     return;
   }
 
@@ -60,11 +57,16 @@ router.post("/signup", async (req, res) => {
     return;
   }
 
+  // use regex to validate email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    res.status(400).json("Invalid email address");
+    return;
+  }
+
   // Check if the user already exists
-  const user = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
+  const user = await db.query.users.findFirst({
+    where: (users) => eq(users.email, email),
   });
 
   if (user) {
@@ -76,14 +78,13 @@ router.post("/signup", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   try {
-    // Create the user
-    const newUser = await prisma.user.create({
-      data: {
-        name: name,
-        email: email,
-        password: passHash,
-      },
-    });
+
+    const [newUser] = await db.insert(users).values({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: passHash,
+    }).returning();
 
     if (
       process.env.NODE_ENV === "production" ||
@@ -97,7 +98,7 @@ router.post("/signup", async (req, res) => {
         TemplateModel: {
           product_url: "https://api.phish.directory",
           product_name: "Phish Directory API",
-          name: newUser.name,
+          name: newUser.firstName + " " + newUser.lastName,
           email: newUser.email,
           company_name: "Phish Directory",
           company_address: "36 Old Quarry Rd, Fayston, VT 05673",
@@ -110,7 +111,7 @@ router.post("/signup", async (req, res) => {
         To: "team@phish.directory",
         Subject: "New User Signup",
         // email the team and provide name, and email of the new user,
-        HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.name}</p><p>Email: ${newUser.email}</p></body></html>`,
+        HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.firstName} ${newUser.lastName}</p><p>Email: ${newUser.email}</p></body></html>`,
         MessageStream: "api-transactional",
       });
 
@@ -133,7 +134,6 @@ router.post("/signup", async (req, res) => {
           } else {
             await db.update(users).set({
               invitedToSlack: true,
-              // @ts-expect-errorß
             }).where(eq(users.id, newUser.id));
           }
         } catch (error) {
@@ -191,10 +191,8 @@ router.post("/login", async (req, res) => {
   // Get IP address from the request
   const ipAddress =
     req.headers["x-forwarded-for"] ||
-    req.connection.remoteAddress ||
     req.socket.remoteAddress ||
-    req.ip ||
-    "0.0.0.0";
+    req.ip;
 
   // Get detailed IP information from ipgeolocation.io
   let ipInfo = {
@@ -243,10 +241,8 @@ router.post("/login", async (req, res) => {
     // Continue with basic IP info if geolocation lookup fails
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
+  const user = await db.query.users.findFirst({
+    where: (users) => eq(users.email, email),
   });
 
   if (!user) {
@@ -259,7 +255,7 @@ router.post("/login", async (req, res) => {
     return res.status(400).json("Invalid email or password");
   }
 
-  if (user.deleted === true) {
+  if (user.deleted_at !== null) {
     return res
       .status(403)
       .json(
@@ -268,22 +264,15 @@ router.post("/login", async (req, res) => {
   }
 
   // Store login attempt with IP information
-  try {
-    await prisma.loginAttempt.create({
-      data: {
-        userId: user.id,
-        ipAddress: ipAddress as string,
-        userAgent: ipInfo.userAgent,
-        successful: true,
-        ipInfo: JSON.stringify(ipInfo),
-      },
-    });
-  } catch (error) {
-    console.error("Failed to log login attempt:", error);
-    // Continue with login process even if logging fails
-  }
+  await db.insert(loginAttempts).values({
+    userId: user.id,
+    ipAddress: ipAddress as string,
+    userAgent: ipInfo.userAgent,
+    success: true,
+    ipInfo: ipInfo,
+  });
 
-  let token = await generateAccessToken(user);
+  const token = await generateAccessToken(user);
 
   let jsonresponsebody = {};
 
@@ -297,7 +286,7 @@ router.post("/login", async (req, res) => {
       To: user.email,
       Subject: "Phish Directory API Login",
       HtmlBody: `<html><body>
-      <h1>Hello ${user.name}</h1>
+      <h1>Hello ${user.firstName} ${user.lastName}</h1>
       <p>You have successfully logged in to the Phish Directory API.</p>
       <p>Login details:</p>
       <ul>
@@ -381,71 +370,63 @@ router.get("/me", authenticateToken, async (req, res) => {
     return res.status(400).json("User not found");
   }
 
-  // Get the count of requests made by the user
-  const count = await prisma.expressRequest.count({
-    where: {
-      userId: userInfo!.id,
-    },
-  });
+// Get the count of requests made by the user
+const requestcount = await db.select({ count: count() }).from(requestsLog).where(eq(requestsLog.userId, userInfo!.id));
 
-  // Fetch all requests made by the user
-  const userRequests = await prisma.expressRequest.findMany({
-    where: {
-      userId: userInfo!.id,
-    },
-  });
 
-  // Normalize the URLs by removing query parameters
-  const normalizedRequests = userRequests.map((req) => {
-    const urlWithoutQuery = req.url.split("?")[0]; // Remove query params
-    return {
-      ...req,
-      url: urlWithoutQuery,
-    };
-  });
+// Fetch all requests made by the user
+const userRequests = await db.select().from(requestsLog).where(eq(requestsLog.userId, userInfo!.id));
 
-  // Group the requests by the normalized URL and count occurrences
-  const requestCountsByUrl = normalizedRequests.reduce((acc, req) => {
-    acc[req.url] = (acc[req.url] || 0) + 1;
-    return acc;
-  }, {});
+// Normalize the URLs by removing query parameters
+const normalizedRequests = userRequests.map((req) => {
+  const urlWithoutQuery = req.url.split("?")[0]; // Remove query params
+  return {
+    ...req,
+    url: urlWithoutQuery,
+  };
+});
 
-  const requestUrls = Object.keys(requestCountsByUrl).map((url) => ({
-    url,
-    count: requestCountsByUrl[url],
-  }));
+// Group the requests by the normalized URL and count occurrences
+const requestCountsByUrl = normalizedRequests.reduce((acc, req) => {
+  acc[req.url] = (acc[req.url] || 0) + 1;
+  return acc;
+}, {});
 
-  // Group by request methods using Prisma
-  const groupByMethod = await prisma.expressRequest.groupBy({
-    by: ["method"],
-    where: {
-      userId: userInfo!.id,
-    },
-    _count: {
-      method: true,
-    },
-  });
+const requestUrls = Object.keys(requestCountsByUrl).map((url) => ({
+  url,
+  count: requestCountsByUrl[url],
+}));
 
-  // Transform the data to a more readable format
-  const requestMethods = groupByMethod.map((methodGroup) => ({
-    method: methodGroup.method,
-    count: methodGroup._count.method,
-  }));
+// Group by request method
+// Group by request method
+const groupByMethod = await db.select({ 
+  method: requestsLog.method, 
+  count: count() 
+})
+.from(requestsLog)
+.where(eq(requestsLog.userId, userInfo!.id))
+.groupBy(requestsLog.method); // Missing GROUP BY clause
+
+// Transform the data to a more readable format
+const requestMethods = groupByMethod.map((methodGroup) => ({
+  method: methodGroup.method,
+  count: methodGroup.count,
+}));
 
   res.status(200).json({
-    name: userInfo.name,
+    name: userInfo.firstName + " " + userInfo.lastName,
     email: userInfo.email,
     uuid: userInfo.uuid,
-    permission: userInfo.permission,
+    permission: userInfo.permissionLevel,
     extendedData: userInfo.useExtendedData,
     metrics: {
       requests: {
-        count: count,
+        count: requestcount[0].count,
         methods: requestMethods,
         urls: requestUrls,
       },
     },
-    accountCreated: userInfo.createdAt,
+    accountCreated: userInfo.created_at,
   });
 });
 
@@ -489,14 +470,10 @@ router.patch("/me", authenticateToken, async (req, res) => {
   }
 
   if (name) {
-    await prisma.user.update({
-      where: {
-        id: userInfo.id,
-      },
-      data: {
-        name: name,
-      },
-    });
+    await db.update(users).set({
+      firstName: name.split(" ")[0],
+      lastName: name.split(" ").slice(1).join(" "),
+    }).where(eq(users.id, userInfo.id));
   }
 
   if (password) {
@@ -505,14 +482,9 @@ router.patch("/me", authenticateToken, async (req, res) => {
       return res.status(400).json("Invalid password");
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    await prisma.user.update({
-      where: {
-        id: userInfo.id,
-      },
-      data: {
-        password: hashedPassword,
-      },
-    });
+    await db.update(users).set({
+      password: hashedPassword,
+    }).where(eq(users.id, userInfo.id));
   }
 
   res.status(200).json("User updated successfully");

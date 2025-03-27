@@ -1,8 +1,10 @@
+import { emails, rawAPIData } from "src/db/schema";
+import { db } from "src/utils/db";
 import { headers } from "../defs/headers";
-import { getDbDomain } from "../func/db/getDbDomain";
+import { getDbDomain } from "../func/db/domain";
 import { axios } from "../utils/axios";
-import { prisma } from "../utils/prisma";
 import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { getDbEmail } from "src/func/db/email";
 
 /**
  * A service that provides access to the IpQualityScore service for checking and reporting domains.
@@ -31,16 +33,16 @@ export class IpQualityScoreService {
       const data = response.data;
       const dbDomain = await getDbDomain(sanitizedDomain);
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "IpQualityScore",
-          domain: {
-            connect: {
-              id: dbDomain.id,
-            },
-          },
-          data: data,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "IpQualityScore",
+        domain: dbDomain!.id!,
+        data: data,
+      });
+
+      await db.insert(rawAPIData).values({
+        sourceAPI: "IpQualityScore",
+        domain: dbDomain!.id!,
+        data: data,
       });
 
       return data;
@@ -67,30 +69,19 @@ export class IpQualityScoreService {
 
       let data = response.data;
 
-      let dbEmail = await prisma.email.findFirst({
-        where: {
-          email: email,
-        },
-      });
+      let dbEmail = await getDbEmail(email);
 
       if (!dbEmail) {
-        dbEmail = await prisma.email.create({
-          data: {
-            email: email,
-          },
+        dbEmail = await db.insert(emails).values({
+          email: email,
+          last_checked: new Date(),
         });
       }
 
-      await prisma.rawAPIData.create({
-        data: {
-          sourceAPI: "IpQualityScore",
-          email: {
-            connect: {
-              id: dbEmail.id,
-            },
-          },
-          data: data,
-        },
+      await db.insert(rawAPIData).values({
+        sourceAPI: "IpQualityScore",
+        email: dbEmail.id,
+        data: data,
       });
 
       let keyData = {

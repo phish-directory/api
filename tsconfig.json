@@ -5,7 +5,6 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "rootDir": "src",
     "outDir": "dist",
     "typeRoots": [
       "node_modules/@types"
@@ -13,7 +12,13 @@
     "esModuleInterop": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
+    "baseUrl": ".",
+    "rootDirs": ["src", "drizzle"]
   },
+  "include": [
+    "src/**/*",
+    "drizzle/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",

@@ -2,7 +2,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
 import * as logger from "../utils/logger";
-import { prisma } from "./prisma";
+import { db } from "../utils/db";
+import { eq } from "drizzle-orm";
+import { users } from "../db/schema";
 
 /**
  * Function to authenticate the token
@@ -20,18 +22,16 @@ export async function authenticateToken(req: any, res: any, next: any) {
   try {
     // Verify token synchronously without callback
     const jwUser = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-
-    let user = await prisma.user.findUnique({
-      where: {
-        id: jwUser.id,
-      },
+    
+    let user = await db.query.users.findFirst({
+      where: (users) => eq(users.id, jwUser.id),
     });
 
     if (!user) {
       return res.status(400).json("User not found");
     }
 
-    if (user.deleted === true) {
+    if (user.deleted_at !== null) {
       return res
         .status(403)
         .json(
@@ -40,7 +40,9 @@ export async function authenticateToken(req: any, res: any, next: any) {
     }
 
     req.user = user;
+    
     next();
+  
   } catch (err) {
     logger.error(`${err}`);
     return res.sendStatus(403);
@@ -103,11 +105,13 @@ export async function getUserInfo(req: any) {
   let id = decoded.id;
   // No need for explicit cast since id is already typed as string
 
-  let user = await prisma.user.findUnique({
-    where: {
-      id: id,
-    },
+  const user = await db.query.users.findFirst({
+    where: (users) => eq(users.id, id),
   });
+
+  if (!user) {
+    return console.error("User not found");
+  }
 
   const tsEnd = Date.now();
   return user;
@@ -122,5 +126,5 @@ export async function getPermissionLevel(req: any) {
   const tsEnd = Date.now();
   // metrics.timing("functions.jwt.getPermissionLevel", tsEnd - tsStart);
 
-  return info!.permission;
+  return info!.permissionLevel;
 }

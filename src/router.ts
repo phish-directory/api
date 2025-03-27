@@ -11,7 +11,8 @@ import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
 import * as logger from "./utils/logger";
-import { prisma } from "./utils/prisma";
+import { db } from "./utils/db";
+import { sql } from "drizzle-orm";
 
 const router = express.Router();
 const version = getVersion();
@@ -28,18 +29,18 @@ router.use(
       .replace(/\//g, "_");
 
     // Log response time metrics
-    logger.debug(`Response time for ${method} /${path}: ${time}ms`);
+    // logger.debug(`Response time for ${method} /${path}: ${time}ms`);
 
     // Metrics integration (commented out but structured)
     // metrics.timing(`http.response.${stat}`, time);
     // metrics.increment(`http.response.${stat}.${status}`);
 
     // Log slow responses (over 1000ms)
-    if (time > 1000) {
-      console.warn(
-        `Slow response detected: ${method} ${req.url} took ${time}ms`
-      );
-    }
+    // if (time > 1000) {
+    //   console.warn(
+    //     `Slow response detected: ${method} ${req.url} took ${time}ms`
+    //   );
+    // }
   })
 );
 
@@ -55,60 +56,6 @@ router.get("/", logRequest, (req, res) => {
   // // metrics.increment("http.request.root");
   res.status(301).redirect("/docs");
 });
-
-/*
-  .get(
-    "/health",
-    async ({}) => {
-      try {
-        // Record start time for ping calculation
-        const startTime = Date.now();
-        // Check database connectivity with a simple query
-        await prisma.$queryRaw`SELECT 1`;
-        // Calculate ping time
-        const pingTime = Date.now() - startTime;
-
-        return {
-          status: "up",
-          timestamp: new Date().toISOString(),
-          database: {
-            connected: true,
-            ping: `${pingTime}ms`,
-            lastError: null,
-          },
-          uptime: process.uptime(),
-          memory: process.memoryUsage(),
-        };
-      } catch (error) {
-        logger.error(`"Error in /up", \n ${error}`);
-        return {
-          status: "Having errors returning data",
-        };
-      }
-    },
-    {
-      tags: ["System"],
-      response: {
-        200: t.Object({
-          status: t.String(),
-          timestamp: t.String(),
-          database: t.Object({
-            connected: t.Boolean(),
-            ping: t.String(),
-            lastError: t.Null(),
-          }),
-          uptime: t.Number(),
-          memory: t.Object({
-            rss: t.Number(),
-            heapTotal: t.Number(),
-            heapUsed: t.Number(),
-            external: t.Number(),
-          }),
-        }),
-      },
-    }
-  )
-  */
 
 /**
  * GET /up
@@ -173,12 +120,37 @@ router.get("/version", logRequest, async (req, res) => {
  * }
  */
 router.get("/health", logRequest, async (req, res) => {
-  // Record start time for ping calculation
-  const startTime = Date.now();
+  // Record start time for ping calculation using high-precision timer
+  const startTime = performance.now();
   // Check database connectivity with a simple query
-  await prisma.$queryRaw`SELECT 1`;
-  // Calculate ping time
-  const pingTime = Date.now() - startTime;
+  await db.execute(sql`SELECT 1`);
+  // Calculate ping time with microsecond precision
+  const pingTime = Math.round((performance.now() - startTime) * 100) / 100;
+
+  // Get memory usage and convert to MB for readability
+  const memoryUsage = process.memoryUsage();
+  const formatMemory = (bytes: number) => Math.round(bytes / 1024 / 1024 * 100) / 100;
+
+  // Format uptime to show days, hours, minutes, and seconds
+  const formatUptime = (totalSeconds: number): string => {
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.round(totalSeconds % 60);
+    
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  // Get machine-friendly uptime breakdown
+  const getMachineUptime = (totalSeconds: number) => {
+    return {
+      total: Math.round(totalSeconds),
+      days: Math.floor(totalSeconds / 86400),
+      hours: Math.floor((totalSeconds % 86400) / 3600),
+      minutes: Math.floor((totalSeconds % 3600) / 60),
+      seconds: Math.round(totalSeconds % 60)
+    };
+  };
 
   return res.status(200).json({
     status: "up",
@@ -188,8 +160,14 @@ router.get("/health", logRequest, async (req, res) => {
       ping: `${pingTime}ms`,
       lastError: null,
     },
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
+      uptime: getMachineUptime(process.uptime()),
+    memory: {
+      rss: `${formatMemory(memoryUsage.rss)}MB`, // Resident Set Size - total memory allocated
+      heapTotal: `${formatMemory(memoryUsage.heapTotal)}MB`, // V8 heap total size
+      heapUsed: `${formatMemory(memoryUsage.heapUsed)}MB`, // V8 heap used size
+      external: `${formatMemory(memoryUsage.external)}MB`, // C++ objects bound to JavaScript
+      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB` // Memory used by array buffers
+    }
   });
 });
 
