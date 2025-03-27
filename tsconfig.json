@@ -13,7 +13,8 @@
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "rootDirs": ["src", "drizzle"]
+    "rootDirs": ["src", "drizzle"],
+    "jsx": "react-jsx"
   },
   "include": [
     "src/**/*",

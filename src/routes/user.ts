@@ -1,15 +1,17 @@
 import disposableEmailDetector from "@jaspermayone/disposable-email-detector";
 import bcrypt from "bcrypt";
-import express, { query } from "express";
+import express from "express";
 
 import { inviteToSlack } from "../func/slackInvite";
 import { logRequest } from "../middleware/logRequest";
-import postmark from "../utils/postmark";
 import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
 import { db } from "../utils/db";
 import { count, eq } from "drizzle-orm";
 import { loginAttempts, requestsLog, users } from "../db/schema";
 import { authenticateToken, generateAccessToken, getUserInfo } from "src/utils/jwt";
+import resend from "src/utils/resend";
+import { WelcomeEmail } from "src/email/welcome";
+import { LoginEmail } from "src/email/login";
  
 const router = express.Router();
 router.use(express.json());
@@ -90,29 +92,23 @@ router.post("/signup", async (req, res) => {
       process.env.NODE_ENV === "production" ||
       process.env.SEND_DEV_EMAILS === "true"
     ) {
+
       // Send welcome email after user is created
-      await postmark.sendEmailWithTemplate({
-        From: "bot@phish.directory",
-        To: newUser.email,
-        TemplateAlias: "welcome",
-        TemplateModel: {
-          product_url: "https://api.phish.directory",
-          product_name: "Phish Directory API",
-          name: newUser.firstName + " " + newUser.lastName,
-          email: newUser.email,
-          company_name: "Phish Directory",
-          company_address: "36 Old Quarry Rd, Fayston, VT 05673",
-        },
-        MessageStream: "api-transactional",
+      await resend.emails.send({
+        from: "phish.directory <onboarding@transactional.phish.directory>",
+        to: newUser.email,
+        subject: "Welcome to Phish Directory",
+        // @ts-expect-error 
+        react: WelcomeEmail({ firstName: newUser.firstName }),
       });
 
-      postmark.sendEmail({
-        From: "bot@phish.directory",
-        To: "team@phish.directory",
-        Subject: "New User Signup",
-        // email the team and provide name, and email of the new user,
-        HtmlBody: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.firstName} ${newUser.lastName}</p><p>Email: ${newUser.email}</p></body></html>`,
-        MessageStream: "api-transactional",
+      // Send team notification email
+      await resend.emails.send({
+        from: "rbt [phish.directory] <bot@transactional.phish.directory>",
+        to: "team@phish.directory",
+        subject: "New User Signup",
+        text: `New User Signup\n\nName: ${newUser.firstName} ${newUser.lastName}\nEmail: ${newUser.email}`,
+        html: `<html><body><h1>New User Signup</h1><p>Name: ${newUser.firstName} ${newUser.lastName}</p><p>Email: ${newUser.email}</p></body></html>`,
       });
 
       // Handle Slack invite asynchronously with 5-minute delay
@@ -124,13 +120,15 @@ router.post("/signup", async (req, res) => {
               `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
             );
 
-            await postmark.sendEmail({
-              From: "bot@phish.directory",
-              To: "jasper.mayone@phish.directory",
-              Subject: "Failed Slack Invite",
-              TextBody: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
-              MessageStream: "api-transactional",
+            await resend.emails.send({
+              from: "rbt [phish.directory] <bot@transactional.phish.directory>",
+              to: "jasper.mayone@phish.directory",
+              subject: "Failed Slack Invite",
+              text: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+              html: `<html><body><h1>Failed Slack Invite</h1><p>Email: ${newUser.email}</p><p>Error: ${response.data.error}</p></body></html>`,
             });
+
+            
           } else {
             await db.update(users).set({
               invitedToSlack: true,
@@ -281,34 +279,18 @@ router.post("/login", async (req, res) => {
     process.env.SEND_DEV_EMAILS === "true"
   ) {
     // Update the email to include comprehensive IP address information
-    await postmark.sendEmail({
-      From: "bot@phish.directory",
-      To: user.email,
-      Subject: "Phish Directory API Login",
-      HtmlBody: `<html><body>
-      <h1>Hello ${user.firstName} ${user.lastName}</h1>
-      <p>You have successfully logged in to the Phish Directory API.</p>
-      <p>Login details:</p>
-      <ul>
-        <li>Time: ${ipInfo.timestamp}</li>
-        <li>IP Address: ${ipInfo.ip}</li>
-        <li>Device: ${ipInfo.userAgent}</li>
-        ${
-          ipInfo.city
-            ? // @ts-expect-error
-              `<li>Location: ${ipInfo.city}, ${ipInfo.region} ${ipInfo.countryCode}</li>`
-            : ""
-        }
-        ${
-          ipInfo.organization
-            ? `<li>Organization: ${ipInfo.organization}</li>`
-            : ""
-        }
-        ${ipInfo.isp ? `<li>Internet Provider: ${ipInfo.isp}</li>` : ""}
-      </ul>
-      <p>If this wasn't you, please contact <a href="mailto:security@phish.directory">security@phish.directory</a> immediately AND change your password.</p>
-    </body></html>`,
-      MessageStream: "api-transactional",
+
+    await resend.emails.send({
+      from: "phish.directory <security@transactional.phish.directory>",
+      to: user.email,
+      subject: "Phish Directory API Login",
+    // @ts-expect-error  
+      react: LoginEmail({
+        ipAddress: ipInfo.ip as string,
+        timestamp: ipInfo.timestamp,
+        userAgent: ipInfo.userAgent,
+        userName: `${user.firstName} ${user.lastName}`,
+      }),
     });
   }
 
