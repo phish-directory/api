@@ -28,7 +28,7 @@ router.use(async (req, res, next) => {
     return;
   }
 
-  if (user.permissionLevel !== permissionLevel.enumValues[2]) {
+  if (user.permissionLevel < permissionLevel.enumValues[2]) {
     res.status(403).json({
       error: "You do not have permission to access this endpoint",
     });
