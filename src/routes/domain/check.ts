@@ -9,6 +9,7 @@ import { authenticateToken } from "../../utils/jwt";
 import { eq } from "drizzle-orm";
 import { db } from "src/utils/db";
 import { domains } from "src/db/schema";
+import { checkAndUpdateDomainStatus } from "src/func/domain/checkAndUpdateDomainStatus";
 
 /**
  * GET /domain/check
@@ -42,6 +43,8 @@ router.get("/", authenticateToken, async (req, res) => {
         last_checked: new Date(),
       }).returning();
     }
+
+    await checkAndUpdateDomainStatus(domain, dbDomain.id)
 
     // Prepare and send response
     const response = await prepareResponse(domain, dbDomain, extendData);
