@@ -87,7 +87,7 @@ export async function getUserInfo(req: any) {
 
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return console.error("No token provided");
+  if (token === null) return null;
 
   // Add interface for JWT payload
   interface JwtPayload {
