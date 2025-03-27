@@ -5,13 +5,10 @@ import { logRequest } from "../../middleware/logRequest";
 import { authenticateToken, getUserInfo } from "../../utils/jwt";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
-import { count, eq, gte } from "drizzle-orm";
+import { count, eq, gte, sql } from "drizzle-orm";
 import { domains, users, requestsLog, permissionLevel, rawAPIData } from "src/db/schema";
 import { db } from "src/utils/db";
 import { APIs } from "src/db/schema";
-
-//FIXME: Add back db logic
-
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -102,6 +99,17 @@ router.use(async (req, res, next) => {
 router.get("/metrics", logRequest, async (req, res) => {
   // metrics.increment("endpoint.misc.metrics");
 
+    // Record start time for ping calculation using high-precision timer
+    const startTime = performance.now();
+    // Check database connectivity with a simple query
+    await db.execute(sql`SELECT 1`);
+    // Calculate ping time with microsecond precision
+    const pingTime = Math.round((performance.now() - startTime) * 100) / 100;
+
+     // Get memory usage and convert to MB for readability
+  const memoryUsage = process.memoryUsage();
+  const formatMemory = (bytes: number) => Math.round(bytes / 1024 / 1024 * 100) / 100;
+
   let uptime = process.uptime();
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);
@@ -113,7 +121,8 @@ router.get("/metrics", logRequest, async (req, res) => {
 
   let npmVersion = getVersion();
   let expressVersion = getPackageVersion("express");
-  let drizzleVersion = getPackageVersion("drizzle");
+  let drizzleKitVersion = getPackageVersion("drizzle-kit");
+  let drizzleORMVersion = getPackageVersion("drizzle-orm");
   let axiosVersion = getPackageVersion("axios");
   let cronVersion = getPackageVersion("cron");
   let helmetVersion = getPackageVersion("helmet");
@@ -127,12 +136,27 @@ router.get("/metrics", logRequest, async (req, res) => {
     environment: environment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
+     memory: {
+      rss: `${formatMemory(memoryUsage.rss)}MB`, // Resident Set Size - total memory allocated
+      heapTotal: `${formatMemory(memoryUsage.heapTotal)}MB`, // V8 heap total size
+      heapUsed: `${formatMemory(memoryUsage.heapUsed)}MB`, // V8 heap used size
+      external: `${formatMemory(memoryUsage.external)}MB`, // C++ objects bound to JavaScript
+      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB` // Memory used by array buffers
+    },
+    database: {
+      connected: true,
+      ping: `${pingTime}ms`,
+      lastError: null,
+    },
     versions: {
       api: npmVersion,
       node: nodeVersion,
       packages: {
         express: expressVersion,
-        drizzle: drizzleVersion,
+        drizzle: {
+          kit: drizzleKitVersion,
+          orm: drizzleORMVersion,
+        },
         axios: axiosVersion,
         cron: cronVersion,
         helmet: helmetVersion,

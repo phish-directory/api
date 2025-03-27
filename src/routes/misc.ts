@@ -38,8 +38,6 @@ router.get("/metrics", async (req, res) => {
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
-  let domainCount = await db.query.domains.findMany();
-  let npmVersion = getVersion();
   let environment = process.env.NODE_ENV;
 
   res.status(200).json({
@@ -47,8 +45,6 @@ router.get("/metrics", async (req, res) => {
     environment: environment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
-    version: npmVersion,
-    domains: domainCount,
   });
 });
 
