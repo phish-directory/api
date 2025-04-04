@@ -2,7 +2,6 @@ import * as dotenv from "dotenv";
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import expressJSDocSwagger from "express-jsdoc-swagger";
-import helmet from "helmet";
 
 import { app } from "./app";
 import router from "./router";
@@ -26,40 +25,13 @@ try {
   const db = drizzle(process.env.DATABASE_URL);
   logger.database("Database connection initialized successfully");
 } catch (error) {
-  logger.error(`Failed to initialize database connection: ${error instanceof Error ? error.message : String(error)}`);
+  logger.error(
+    `Failed to initialize database connection: ${error instanceof Error ? error.message : String(error)}`
+  );
   process.exit(1);
 }
 
 app.disable("x-powered-by");
-
-app.use(
-  helmet({
-    xFrameOptions: { action: "deny" },
-    xContentTypeOptions: true,
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        baseUri: ["'self'"],
-        fontSrc: ["'self'", "https:", "data:"],
-        formAction: ["'self'"],
-        frameAncestors: ["'self'"],
-        imgSrc: ["'self'", "data:"],
-        objectSrc: ["'none'"],
-        scriptSrc: ["'self'"],
-        scriptSrcAttr: ["'none'"],
-        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-        upgradeInsecureRequests: [],
-      },
-    },
-    referrerPolicy: { policy: "strict-origin" },
-    strictTransportSecurity: {
-      maxAge: 63072000,
-      preload: true,
-    },
-    xPoweredBy: false,
-  })
-);
-
 app.use("/", router);
 
 // Heartbeat
