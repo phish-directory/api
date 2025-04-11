@@ -27,6 +27,6 @@ jobs:
       - name: Generate report
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
+          REPO: ${{ github.repository }}
         run: |
-          SINCE="${{ inputs.since }}" UNTIL="${{ inputs.until }}" bash ./git-activity-report.sh "$REPOSITORY" >> $GITHUB_STEP_SUMMARY
+          SINCE="${{ inputs.since }}" UNTIL="${{ inputs.until }}" bash ./git-activity-report.sh >> $GITHUB_STEP_SUMMARY
