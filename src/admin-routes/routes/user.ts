@@ -1,12 +1,11 @@
 import bcrypt from "bcrypt";
 import express from "express";
 
-import { useExtendedData } from "src/db/schema";
-import * as logger from "../../../utils/logger";
-import { db } from "src/utils/db";
-import { users } from "src/db/schema";
 import { eq } from "drizzle-orm";
+import { users } from "src/db/schema";
+import { db } from "src/utils/db";
 import { getUserInfo } from "src/utils/jwt";
+import * as logger from "src/utils/logger";
 
 let saltRounds = 10;
 
@@ -85,7 +84,6 @@ router.get("/user/:id", async (req, res) => {
     }
 
     res.status(200).json(dbUser);
-
   } catch (error) {
     logger.error(error as string);
 
@@ -129,7 +127,10 @@ router.patch("/user/:id", async (req, res) => {
     if (permission !== undefined) updateData.permissionLevel = permission;
 
     // Update user
-    await db.update(users).set(updateData).where(eq(users.id, parseInt(id)));
+    await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: "User updated successfully.",
@@ -186,12 +187,15 @@ router.post("/user/new", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   // Create the user
-  const [newUser] = await db.insert(users).values({
-    firstName: name,
-    lastName: name,
-    email: email,
-    password: passHash,
-  }).returning();
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      firstName: name,
+      lastName: name,
+      email: email,
+      password: passHash,
+    })
+    .returning();
 
   res.status(200).json({
     message: "User created successfully, please login.",
@@ -217,9 +221,12 @@ router.delete("/user/:id", async (req, res) => {
     const { id } = req.params;
 
     // update deleted_at timestamp on user (soft delete)
-    await db.update(users).set({
-      deleted_at: new Date(),
-    }).where(eq(users.id, parseInt(id)));
+    await db
+      .update(users)
+      .set({
+        deleted_at: new Date(),
+      })
+      .where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: "User deleted successfully.",
@@ -248,7 +255,6 @@ router.patch("/role/:id/:role", async (req, res) => {
   // metrics.increment("endpoint.admin.user.role.patch");
 
   try {
-
     const requester = await getUserInfo(req);
 
     const { id, role } = req.params;
@@ -306,9 +312,12 @@ router.patch("/role/:id/:role", async (req, res) => {
       });
     }
 
-    await db.update(users).set({
-      permissionLevel: permission,
-    }).where(eq(users.id, parseInt(id)));
+    await db
+      .update(users)
+      .set({
+        permissionLevel: permission,
+      })
+      .where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: `User role updated to ${permission} successfully.`,
@@ -319,7 +328,6 @@ router.patch("/role/:id/:role", async (req, res) => {
     });
   }
 });
-
 
 /**
  * PATCH /admin/user/:id/:useExtended/
@@ -367,9 +375,12 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
       });
     }
 
-    await db.update(users).set({
-      useExtendedData: useExtended,
-    }).where(eq(users.id, parseInt(id)));
+    await db
+      .update(users)
+      .set({
+        useExtendedData: useExtended,
+      })
+      .where(eq(users.id, parseInt(id)));
 
     res.status(200).json({
       message: `User useExtended data updated to ${useExtended} successfully.`,

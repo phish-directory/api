@@ -4,16 +4,15 @@ import responseTime from "response-time";
 // import metrics from "./metrics";
 import { logRequest } from "./middleware/logRequest";
 // import defaultRateLimiter from "./middleware/rateLimit";
+import { sql } from "drizzle-orm";
+import moment from "moment";
+import adminRouter from "./admin-routes/router";
 import { getVersion } from "./func/getVersion";
-import adminRouter from "./routes/admin/router";
 import domainRouter from "./routes/domain";
 import emailRouter from "./routes/email";
 import miscRouter from "./routes/misc";
 import userRouter from "./routes/user";
-import * as logger from "./utils/logger";
 import { db } from "./utils/db";
-import { sql } from "drizzle-orm";
-import moment from "moment";
 
 const router = express.Router();
 const version = getVersion();
@@ -130,13 +129,13 @@ router.get("/health", logRequest, async (req, res) => {
 
   // Get memory usage and convert to MB for readability
   const memoryUsage = process.memoryUsage();
-  const formatMemory = (bytes: number) => Math.round(bytes / 1024 / 1024 * 100) / 100;
+  const formatMemory = (bytes: number) =>
+    Math.round((bytes / 1024 / 1024) * 100) / 100;
 
   let uptime = process.uptime();
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
   let dateStarted = new Date(Date.now() - uptime * 1000);
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
-  
 
   return res.status(200).json({
     status: "up",
@@ -152,8 +151,8 @@ router.get("/health", logRequest, async (req, res) => {
       heapTotal: `${formatMemory(memoryUsage.heapTotal)}MB`, // V8 heap total size
       heapUsed: `${formatMemory(memoryUsage.heapUsed)}MB`, // V8 heap used size
       external: `${formatMemory(memoryUsage.external)}MB`, // C++ objects bound to JavaScript
-      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB` // Memory used by array buffers
-    }
+      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB`, // Memory used by array buffers
+    },
   });
 });
 
