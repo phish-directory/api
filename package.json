@@ -1,5 +1,6 @@
 {
-  "name": "phish.directory",
+  "name": "@phish-directory/api",
+  "private": true,
   "version": "3.2.0",
   "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
   "maintainers": [
@@ -29,6 +30,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "colors": "^1.4.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.5",
     "drizzle-orm": "^0.41.0",
@@ -36,6 +38,7 @@
     "express": "^4.21.2",
     "express-jsdoc-swagger": "^1.8.0",
     "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "node-statsd": "^0.1.1",
