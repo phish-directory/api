@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import requestIp from "request-ip";
 
-import { getUserInfo } from "../utils/jwt";
-import { log } from "../utils/logger";
-import { db } from "src/utils/db";
 import { requestsLog } from "src/db/schema";
+import { db } from "src/utils/db";
+import { getUserInfo } from "src/utils/jwt";
+import { log } from "src/utils/logger";
 
 let monitoringAgents = ["Checkly/", "Uptime-Kuma/"];
 
@@ -37,7 +37,11 @@ export const logRequest = async (
   }
 
   const normalizedUserAgent = userAgent.toLowerCase();
-  if (monitoringAgents.some((agent) => normalizedUserAgent.includes(agent.toLowerCase()))) {
+  if (
+    monitoringAgents.some((agent) =>
+      normalizedUserAgent.includes(agent.toLowerCase())
+    )
+  ) {
     return next();
   }
 

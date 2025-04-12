@@ -1,10 +1,9 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 // import metrics from "../metrics";
-import * as logger from "../utils/logger";
-import { db } from "../utils/db";
 import { eq } from "drizzle-orm";
-import { users } from "../db/schema";
+import { db } from "src/utils/db";
+import * as logger from "src/utils/logger";
 
 /**
  * Function to authenticate the token
@@ -22,7 +21,7 @@ export async function authenticateToken(req: any, res: any, next: any) {
   try {
     // Verify token synchronously without callback
     const jwUser = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    
+
     let user = await db.query.users.findFirst({
       where: (users) => eq(users.id, jwUser.id),
     });
@@ -40,9 +39,8 @@ export async function authenticateToken(req: any, res: any, next: any) {
     }
 
     req.user = user;
-    
+
     next();
-  
   } catch (err) {
     logger.error(`${err}`);
     return res.sendStatus(403);

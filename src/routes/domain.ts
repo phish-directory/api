@@ -1,6 +1,6 @@
 import * as express from "express";
 
-import { logRequest } from "../middleware/logRequest";
+import { logRequest } from "src/middleware/logRequest";
 import adblockRouter from "./domain/adblock";
 import checkRouter from "./domain/check";
 

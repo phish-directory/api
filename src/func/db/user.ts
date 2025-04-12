@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "../../utils/db";
+import { db } from "src/utils/db";
 
 export async function getDbUser(id: number) {
   const dbUser = await db.query.users.findFirst({
@@ -9,4 +9,3 @@ export async function getDbUser(id: number) {
 
   return dbUser;
 }
-  

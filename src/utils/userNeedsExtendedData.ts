@@ -1,8 +1,6 @@
 import { Request } from "express";
-// import { getDbUser } from "../func/db/getDbUser";
-import { getUserInfo } from "./jwt";
 import { getDbUser } from "src/func/db/user";
-import { useExtendedData } from "src/db/schema";
+import { getUserInfo } from "./jwt";
 
 /**
  * Function to determine if a user needs extended data
@@ -42,7 +40,7 @@ export async function userNeedsExtendedData(request: Request) {
       break;
   }
 
- // Check database permission setting
+  // Check database permission setting
   switch (dbUser.useExtendedData) {
     case "off":
       // If ExtendedData is off, never use extended data regardless of query

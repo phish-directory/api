@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "../../utils/db";
+import { db } from "src/utils/db";
 
 export async function getDbEmail(email: string) {
   const dbEmail = await db.query.emails.findFirst({
@@ -9,4 +9,3 @@ export async function getDbEmail(email: string) {
 
   return dbEmail;
 }
-  

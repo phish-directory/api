@@ -1,9 +1,9 @@
 import axios, { AxiosError } from "axios";
-import { headersWithPhishObserver } from "../defs/headers";
-import { getDbDomain } from "../func/db/domain";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
 import { rawAPIData } from "src/db/schema";
+import { headersWithPhishObserver } from "src/defs/headers";
+import { getDbDomain } from "src/func/db/domain";
 import { db } from "src/utils/db";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 interface PhishObserverError {
   error: string;

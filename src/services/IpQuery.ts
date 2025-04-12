@@ -1,7 +1,7 @@
 import { rawAPIData } from "src/db/schema";
+import { headers } from "src/defs/headers";
+import { axios } from "src/utils/axios";
 import { db } from "src/utils/db";
-import { headers } from "../defs/headers";
-import { axios } from "../utils/axios";
 
 /**
  * A service that provides access to the IpQuery service for checking and reporting domains, emails, etc.
@@ -28,7 +28,6 @@ export class IpQueryService {
         sourceAPI: "IpQuery",
         data: jsonData,
       });
-
     },
   };
 }

@@ -1,9 +1,9 @@
 import { rawAPIData } from "src/db/schema";
+import { headersWithSecurityTrails } from "src/defs/headers";
+import { getDbDomain } from "src/func/db/domain";
+import { axios } from "src/utils/axios";
 import { db } from "src/utils/db";
-import { headersWithSecurityTrails } from "../defs/headers";
-import { getDbDomain } from "../func/db/domain";
-import { axios } from "../utils/axios";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 /**
  * A service that provides access to the SecurityTrails service for checking and reporting domains.
@@ -46,7 +46,7 @@ export class SecurityTrailsService {
 
         const response2 = await axios.request(optionsTwo);
         const data2 = response2.data;
-       
+
         await db.insert(rawAPIData).values({
           sourceAPI: "SecurityTrails",
           domain: dbDomain!.id!,

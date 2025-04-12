@@ -1,8 +1,6 @@
 import * as express from "express";
 import moment from "moment";
-import { getVersion } from "../func/getVersion";
-import { logRequest } from "../middleware/logRequest";
-import { db } from "../utils/db";
+import { logRequest } from "src/middleware/logRequest";
 
 const router = express.Router();
 router.use(express.json());
