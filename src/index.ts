@@ -1,7 +1,9 @@
+import cors from "cors";
 import * as dotenv from "dotenv";
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import expressJSDocSwagger from "express-jsdoc-swagger";
+import helmet from "helmet";
 
 import { app } from "./app";
 import router from "./router";
@@ -31,7 +33,66 @@ try {
   process.exit(1);
 }
 
+let corsOptions: cors.CorsOptions;
+
+if (process.env.NODE_ENV === "production") {
+  corsOptions = {
+    origin: ["https://dashboard.phish.directory"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Referrer", "Accept"], // Ensure 'Authorization' is included for token-based auth
+    exposedHeaders: ["Authorization"], // Add this line
+  };
+} else {
+  corsOptions = {
+    origin: ["http://localhost:4000", "https://dashboard.phish.directory"],
+    credentials: true, // This allows cookies/auth headers to be sent
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Referrer", "Accept"], // Ensure 'Authorization' is included for token-based auth
+    exposedHeaders: ["Authorization"], // Add this line
+  };
+}
+
+app.use(cors(corsOptions)); // Enable CORS for all routes
+
 app.disable("x-powered-by");
+app.use(
+  helmet({
+    xFrameOptions: { action: "deny" },
+    xContentTypeOptions: true,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'", // Allow connections to the same origin
+          // Allow connections to external APIs (if any)
+          ...(process.env.NODE_ENV === "production"
+            ? [
+                "https://api.phish.directory",
+                "https://dashboard.phish.directory",
+              ]
+            : ["http://localhost:4000", "http://localhost:3000"]), // Allow local development
+        ],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        scriptSrc: ["'self'"],
+        scriptSrcAttr: ["'none'"],
+        styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    referrerPolicy: { policy: "strict-origin" },
+    strictTransportSecurity: {
+      maxAge: 63072000,
+      preload: true,
+    },
+    xPoweredBy: false,
+  })
+);
 app.use("/", router);
 
 // Heartbeat
