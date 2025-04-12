@@ -2,17 +2,21 @@ import disposableEmailDetector from "@jaspermayone/disposable-email-detector";
 import bcrypt from "bcrypt";
 import express from "express";
 
-import { inviteToSlack } from "../func/slackInvite";
-import { logRequest } from "../middleware/logRequest";
-import { userNeedsExtendedData } from "../utils/userNeedsExtendedData";
-import { db } from "../utils/db";
 import { count, eq } from "drizzle-orm";
-import { loginAttempts, requestsLog, users } from "../db/schema";
-import { authenticateToken, generateAccessToken, getUserInfo } from "src/utils/jwt";
-import resend from "src/utils/resend";
-import { WelcomeEmail } from "src/email/welcome";
+import { loginAttempts, requestsLog, users } from "src/db/schema";
 import { LoginEmail } from "src/email/login";
- 
+import { WelcomeEmail } from "src/email/welcome";
+import { inviteToSlack } from "src/func/slackInvite";
+import { logRequest } from "src/middleware/logRequest";
+import { db } from "src/utils/db";
+import {
+  authenticateToken,
+  generateAccessToken,
+  getUserInfo,
+} from "src/utils/jwt";
+import resend from "src/utils/resend";
+import { userNeedsExtendedData } from "src/utils/userNeedsExtendedData";
+
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -48,7 +52,9 @@ router.post("/signup", async (req, res) => {
   if (!firstName || !lastName || !email || !password) {
     res
       .status(400)
-      .json("Invalid arguments. Please provide firstName, lastName, email, and password");
+      .json(
+        "Invalid arguments. Please provide firstName, lastName, email, and password"
+      );
     return;
   }
 
@@ -80,25 +86,26 @@ router.post("/signup", async (req, res) => {
   let passHash = await bcrypt.hash(password, salt);
 
   try {
-
-    const [newUser] = await db.insert(users).values({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: passHash,
-    }).returning();
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: passHash,
+      })
+      .returning();
 
     if (
       process.env.NODE_ENV === "production" ||
       process.env.SEND_DEV_EMAILS === "true"
     ) {
-
       // Send welcome email after user is created
       await resend.emails.send({
         from: "phish.directory <onboarding@transactional.phish.directory>",
         to: newUser.email,
         subject: "Welcome to Phish Directory",
-        // @ts-expect-error 
+        // @ts-expect-error
         react: WelcomeEmail({ firstName: newUser.firstName }),
       });
 
@@ -112,32 +119,39 @@ router.post("/signup", async (req, res) => {
       });
 
       // Handle Slack invite asynchronously with 5-minute delay
-      setTimeout(async () => {
-        try {
-          const response = await inviteToSlack(newUser.email);
-          if (response.success !== true) {
+      setTimeout(
+        async () => {
+          try {
+            const response = await inviteToSlack(newUser.email);
+            if (response.success !== true) {
+              console.error(
+                `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
+              );
+
+              await resend.emails.send({
+                from: "rbt [phish.directory] <bot@transactional.phish.directory>",
+                to: "jasper.mayone@phish.directory",
+                subject: "Failed Slack Invite",
+                text: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
+                html: `<html><body><h1>Failed Slack Invite</h1><p>Email: ${newUser.email}</p><p>Error: ${response.data.error}</p></body></html>`,
+              });
+            } else {
+              await db
+                .update(users)
+                .set({
+                  invitedToSlack: true,
+                })
+                .where(eq(users.id, newUser.id));
+            }
+          } catch (error) {
             console.error(
-              `Failed to invite ${newUser.email} to Slack: ${response.data.error}`
+              `Error sending Slack invite to ${newUser.email}:`,
+              error
             );
-
-            await resend.emails.send({
-              from: "rbt [phish.directory] <bot@transactional.phish.directory>",
-              to: "jasper.mayone@phish.directory",
-              subject: "Failed Slack Invite",
-              text: `Failed to invite ${newUser.email} to Slack: ${response.data.error}`,
-              html: `<html><body><h1>Failed Slack Invite</h1><p>Email: ${newUser.email}</p><p>Error: ${response.data.error}</p></body></html>`,
-            });
-
-            
-          } else {
-            await db.update(users).set({
-              invitedToSlack: true,
-            }).where(eq(users.id, newUser.id));
           }
-        } catch (error) {
-          console.error(`Error sending Slack invite to ${newUser.email}:`, error);
-        }
-      }, 5 * 60 * 1000); // 5 minutes in milliseconds
+        },
+        5 * 60 * 1000
+      ); // 5 minutes in milliseconds
     }
 
     // Send success response with the user's uuid
@@ -188,9 +202,7 @@ router.post("/login", async (req, res) => {
 
   // Get IP address from the request
   const ipAddress =
-    req.headers["x-forwarded-for"] ||
-    req.socket.remoteAddress ||
-    req.ip;
+    req.headers["x-forwarded-for"] || req.socket.remoteAddress || req.ip;
 
   // Get detailed IP information from ipgeolocation.io
   let ipInfo = {
@@ -284,7 +296,7 @@ router.post("/login", async (req, res) => {
       from: "phish.directory <security@transactional.phish.directory>",
       to: user.email,
       subject: "Phish Directory API Login",
-    // @ts-expect-error  
+      // @ts-expect-error
       react: LoginEmail({
         ipAddress: ipInfo.ip as string,
         timestamp: ipInfo.timestamp,
@@ -352,48 +364,54 @@ router.get("/me", authenticateToken, async (req, res) => {
     return res.status(400).json("User not found");
   }
 
-// Get the count of requests made by the user
-const requestcount = await db.select({ count: count() }).from(requestsLog).where(eq(requestsLog.userId, userInfo!.id));
+  // Get the count of requests made by the user
+  const requestcount = await db
+    .select({ count: count() })
+    .from(requestsLog)
+    .where(eq(requestsLog.userId, userInfo!.id));
 
+  // Fetch all requests made by the user
+  const userRequests = await db
+    .select()
+    .from(requestsLog)
+    .where(eq(requestsLog.userId, userInfo!.id));
 
-// Fetch all requests made by the user
-const userRequests = await db.select().from(requestsLog).where(eq(requestsLog.userId, userInfo!.id));
+  // Normalize the URLs by removing query parameters
+  const normalizedRequests = userRequests.map((req) => {
+    const urlWithoutQuery = req.url.split("?")[0]; // Remove query params
+    return {
+      ...req,
+      url: urlWithoutQuery,
+    };
+  });
 
-// Normalize the URLs by removing query parameters
-const normalizedRequests = userRequests.map((req) => {
-  const urlWithoutQuery = req.url.split("?")[0]; // Remove query params
-  return {
-    ...req,
-    url: urlWithoutQuery,
-  };
-});
+  // Group the requests by the normalized URL and count occurrences
+  const requestCountsByUrl = normalizedRequests.reduce((acc, req) => {
+    acc[req.url] = (acc[req.url] || 0) + 1;
+    return acc;
+  }, {});
 
-// Group the requests by the normalized URL and count occurrences
-const requestCountsByUrl = normalizedRequests.reduce((acc, req) => {
-  acc[req.url] = (acc[req.url] || 0) + 1;
-  return acc;
-}, {});
+  const requestUrls = Object.keys(requestCountsByUrl).map((url) => ({
+    url,
+    count: requestCountsByUrl[url],
+  }));
 
-const requestUrls = Object.keys(requestCountsByUrl).map((url) => ({
-  url,
-  count: requestCountsByUrl[url],
-}));
+  // Group by request method
+  // Group by request method
+  const groupByMethod = await db
+    .select({
+      method: requestsLog.method,
+      count: count(),
+    })
+    .from(requestsLog)
+    .where(eq(requestsLog.userId, userInfo!.id))
+    .groupBy(requestsLog.method); // Missing GROUP BY clause
 
-// Group by request method
-// Group by request method
-const groupByMethod = await db.select({ 
-  method: requestsLog.method, 
-  count: count() 
-})
-.from(requestsLog)
-.where(eq(requestsLog.userId, userInfo!.id))
-.groupBy(requestsLog.method); // Missing GROUP BY clause
-
-// Transform the data to a more readable format
-const requestMethods = groupByMethod.map((methodGroup) => ({
-  method: methodGroup.method,
-  count: methodGroup.count,
-}));
+  // Transform the data to a more readable format
+  const requestMethods = groupByMethod.map((methodGroup) => ({
+    method: methodGroup.method,
+    count: methodGroup.count,
+  }));
 
   res.status(200).json({
     name: userInfo.firstName + " " + userInfo.lastName,
@@ -452,10 +470,13 @@ router.patch("/me", authenticateToken, async (req, res) => {
   }
 
   if (name) {
-    await db.update(users).set({
-      firstName: name.split(" ")[0],
-      lastName: name.split(" ").slice(1).join(" "),
-    }).where(eq(users.id, userInfo.id));
+    await db
+      .update(users)
+      .set({
+        firstName: name.split(" ")[0],
+        lastName: name.split(" ").slice(1).join(" "),
+      })
+      .where(eq(users.id, userInfo.id));
   }
 
   if (password) {
@@ -464,9 +485,12 @@ router.patch("/me", authenticateToken, async (req, res) => {
       return res.status(400).json("Invalid password");
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.update(users).set({
-      password: hashedPassword,
-    }).where(eq(users.id, userInfo.id));
+    await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+      })
+      .where(eq(users.id, userInfo.id));
   }
 
   res.status(200).json("User updated successfully");

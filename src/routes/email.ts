@@ -1,8 +1,8 @@
 import * as express from "express";
-import { logRequest } from "../middleware/logRequest";
-import { ipQualityScoreService } from "../services/_index";
-import { authenticateToken } from "../utils/jwt";
-import { validateEmail } from "../utils/validateEmail";
+import { logRequest } from "src/middleware/logRequest";
+import { ipQualityScoreService } from "src/services/_index";
+import { authenticateToken } from "src/utils/jwt";
+import { validateEmail } from "src/utils/validateEmail";
 
 const router = express.Router();
 router.use(express.json());

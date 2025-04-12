@@ -1,5 +1,5 @@
-import { ValidationError } from "../../defs/validationError";
-import { userNeedsExtendedData } from "../../utils/userNeedsExtendedData";
+import { ValidationError } from "src/defs/validationError";
+import { userNeedsExtendedData } from "src/utils/userNeedsExtendedData";
 
 /**
  * Validates the domain parameter and extracts query parameters

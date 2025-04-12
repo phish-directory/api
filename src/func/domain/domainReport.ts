@@ -1,6 +1,6 @@
-import { headersWithOTX } from "../../defs/headers";
-import { virusTotalService, walshyService } from "../../services/_index";
-import { axios } from "../../utils/axios";
+import { headersWithOTX } from "src/defs/headers";
+import { virusTotalService, walshyService } from "src/services/_index";
+import { axios } from "src/utils/axios";
 
 /**
 * Report the domain to all services that support reporting

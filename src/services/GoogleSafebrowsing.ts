@@ -1,9 +1,9 @@
 import { rawAPIData } from "src/db/schema";
-import { googleThreatTypes, urlParamString } from "../defs/misc";
-import { getDbDomain } from "../func/db/domain";
-import { axios } from "../utils/axios";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { googleThreatTypes, urlParamString } from "src/defs/misc";
+import { getDbDomain } from "src/func/db/domain";
+import { axios } from "src/utils/axios";
 import { db } from "src/utils/db";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 /**
  * A service that provides access to the Google Safebrowsing for checking and reporting domains.

@@ -1,15 +1,14 @@
 import express from "express";
 const router = express.Router();
 
-import { ValidationError } from "../../defs/validationError";
-// import { findOrCreateDomain } from "../../func/db/findOrCreateDomain";
-import { prepareResponse } from "../../func/domain/prepareResponse";
-import { validateAndExtractParams } from "../../func/domain/validateAndExtractDomainParams";
-import { authenticateToken } from "../../utils/jwt";
 import { eq } from "drizzle-orm";
-import { db } from "src/utils/db";
 import { domains } from "src/db/schema";
+import { ValidationError } from "src/defs/validationError";
 import { checkAndUpdateDomainStatus } from "src/func/domain/checkAndUpdateDomainStatus";
+import { prepareResponse } from "src/func/domain/prepareResponse";
+import { validateAndExtractParams } from "src/func/domain/validateAndExtractDomainParams";
+import { db } from "src/utils/db";
+import { authenticateToken } from "src/utils/jwt";
 
 /**
  * GET /domain/check
@@ -37,14 +36,17 @@ router.get("/", authenticateToken, async (req, res) => {
 
     // if domain does not exist, create it
     if (!dbDomain) {
-      dbDomain = await db.insert(domains).values({
-        domain: domain,
-        malicious: false,
-        last_checked: new Date(),
-      }).returning();
+      dbDomain = await db
+        .insert(domains)
+        .values({
+          domain: domain,
+          malicious: false,
+          last_checked: new Date(),
+        })
+        .returning();
     }
 
-    await checkAndUpdateDomainStatus(domain, dbDomain.id)
+    await checkAndUpdateDomainStatus(domain, dbDomain.id);
 
     // Prepare and send response
     const response = await prepareResponse(domain, dbDomain, extendData);

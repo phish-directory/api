@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 
-import { sanitizeDomain } from "../../utils/sanitizeDomain";
-import { db } from "../../utils/db";
 import { domains } from "src/db/schema";
+import { db } from "src/utils/db";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 export async function getDbDomain(domain: string) {
   let sanitizedDomain = sanitizeDomain(domain);
@@ -19,7 +19,7 @@ export async function createDbDomain(domain: string) {
 
   const dbDomain = await db.insert(domains).values({
     domain: sanitizedDomain,
-    last_checked: new Date()
+    last_checked: new Date(),
   });
 
   return dbDomain;

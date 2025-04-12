@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db } from "src/utils/db";
-import { DomainCheckResponse } from "../../defs/interfaces";
-import { reportToAlienVault } from "./reportToAlienVault";
 import { rawAPIData } from "src/db/schema";
+import { DomainCheckResponse } from "src/defs/interfaces";
+import { db } from "src/utils/db";
+import { reportToAlienVault } from "./reportToAlienVault";
 
 /**
  * Prepares the response object based on domain status and extended data flag
@@ -36,10 +36,13 @@ export async function prepareResponse(
 
   // Add raw API data if extended data is requested
   if (extendData) {
-    const apiDataResults = await db.select().from(rawAPIData).where(eq(rawAPIData.domain, dbDomain.id));
+    const apiDataResults = await db
+      .select()
+      .from(rawAPIData)
+      .where(eq(rawAPIData.domain, dbDomain.id));
 
     response.rawData = apiDataResults;
-  }   
+  }
 
   return response;
 }

@@ -1,9 +1,9 @@
 import { rawAPIData } from "src/db/schema";
-import { headers } from "../defs/headers";
-import { getDbDomain } from "../func/db/domain";
-import { axios } from "../utils/axios";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { headers } from "src/defs/headers";
+import { getDbDomain } from "src/func/db/domain";
+import { axios } from "src/utils/axios";
 import { db } from "src/utils/db";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 /**
  * A service that provides access to the AbuseCh service for checking and reporting domains, emails, etc.

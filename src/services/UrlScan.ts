@@ -1,9 +1,9 @@
 import { rawAPIData } from "src/db/schema";
+import { headersWithUrlScan } from "src/defs/headers";
+import { getDbDomain } from "src/func/db/domain";
+import { axios } from "src/utils/axios";
 import { db } from "src/utils/db";
-import { headersWithUrlScan } from "../defs/headers";
-import { getDbDomain } from "../func/db/domain";
-import { axios } from "../utils/axios";
-import { sanitizeDomain } from "../utils/sanitizeDomain";
+import { sanitizeDomain } from "src/utils/sanitizeDomain";
 
 /**
  * A service that provides access to the UrlScan service for checking and reporting domains.
