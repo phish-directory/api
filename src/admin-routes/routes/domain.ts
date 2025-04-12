@@ -1,10 +1,8 @@
 import express, { Request, Response } from "express";
 
-import { getDbDomain } from "../../../func/db/domain";
-import { getUserInfo } from "../../../utils/jwt";
-import { db } from "src/utils/db";
 import { domains } from "src/db/schema";
-
+import { getDbDomain } from "src/func/db/domain";
+import { db } from "src/utils/db";
 
 /*
 GET domain - Get all domains
@@ -54,6 +52,5 @@ router.get("/:id", async (req: Request, res: Response) => {
       .json({ error: "An error occurred while fetching the domain." });
   }
 });
-
 
 export default router;

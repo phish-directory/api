@@ -1,14 +1,20 @@
+import { count, eq, gte, sql } from "drizzle-orm";
 import express from "express";
 import moment from "moment";
-import { getPackageVersion, getVersion } from "../../func/getVersion";
-import { logRequest } from "../../middleware/logRequest";
-import { authenticateToken, getUserInfo } from "../../utils/jwt";
+import {
+  APIs,
+  domains,
+  permissionLevel,
+  rawAPIData,
+  requestsLog,
+  users,
+} from "src/db/schema";
+import { getPackageVersion, getVersion } from "src/func/getVersion";
+import { logRequest } from "src/middleware/logRequest";
+import { db } from "src/utils/db";
+import { authenticateToken, getUserInfo } from "src/utils/jwt";
 import domainRouter from "./routes/domain";
 import userRouter from "./routes/user";
-import { count, eq, gte, sql } from "drizzle-orm";
-import { domains, users, requestsLog, permissionLevel, rawAPIData } from "src/db/schema";
-import { db } from "src/utils/db";
-import { APIs } from "src/db/schema";
 const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -99,16 +105,17 @@ router.use(async (req, res, next) => {
 router.get("/metrics", logRequest, async (req, res) => {
   // metrics.increment("endpoint.misc.metrics");
 
-    // Record start time for ping calculation using high-precision timer
-    const startTime = performance.now();
-    // Check database connectivity with a simple query
-    await db.execute(sql`SELECT 1`);
-    // Calculate ping time with microsecond precision
-    const pingTime = Math.round((performance.now() - startTime) * 100) / 100;
+  // Record start time for ping calculation using high-precision timer
+  const startTime = performance.now();
+  // Check database connectivity with a simple query
+  await db.execute(sql`SELECT 1`);
+  // Calculate ping time with microsecond precision
+  const pingTime = Math.round((performance.now() - startTime) * 100) / 100;
 
-     // Get memory usage and convert to MB for readability
+  // Get memory usage and convert to MB for readability
   const memoryUsage = process.memoryUsage();
-  const formatMemory = (bytes: number) => Math.round(bytes / 1024 / 1024 * 100) / 100;
+  const formatMemory = (bytes: number) =>
+    Math.round((bytes / 1024 / 1024) * 100) / 100;
 
   let uptime = process.uptime();
   let uptimeString = new Date(uptime * 1000).toISOString().substr(11, 8);
@@ -136,12 +143,12 @@ router.get("/metrics", logRequest, async (req, res) => {
     environment: environment,
     uptime: uptimeString,
     dateStarted: dateStartedFormatted,
-     memory: {
+    memory: {
       rss: `${formatMemory(memoryUsage.rss)}MB`, // Resident Set Size - total memory allocated
       heapTotal: `${formatMemory(memoryUsage.heapTotal)}MB`, // V8 heap total size
       heapUsed: `${formatMemory(memoryUsage.heapUsed)}MB`, // V8 heap used size
       external: `${formatMemory(memoryUsage.external)}MB`, // C++ objects bound to JavaScript
-      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB` // Memory used by array buffers
+      arrayBuffers: `${formatMemory(memoryUsage.arrayBuffers)}MB`, // Memory used by array buffers
     },
     database: {
       connected: true,
@@ -168,24 +175,124 @@ router.get("/metrics", logRequest, async (req, res) => {
       users: userCount[0].count,
       requests: {
         lifetime: requestCount[0].count,
-        "24 hours": (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 24 * 60 * 60 * 1000))))[0].count,
-        week: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))))[0].count,
-        month: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))))[0].count,
-        year: (await db.select({ count: count() }).from(requestsLog).where(gte(requestsLog.created_at, new Date(Date.now() - 365 * 24 * 60 * 60 * 1000))))[0].count,
+        "24 hours": (
+          await db
+            .select({ count: count() })
+            .from(requestsLog)
+            .where(
+              gte(
+                requestsLog.created_at,
+                new Date(Date.now() - 24 * 60 * 60 * 1000)
+              )
+            )
+        )[0].count,
+        week: (
+          await db
+            .select({ count: count() })
+            .from(requestsLog)
+            .where(
+              gte(
+                requestsLog.created_at,
+                new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+              )
+            )
+        )[0].count,
+        month: (
+          await db
+            .select({ count: count() })
+            .from(requestsLog)
+            .where(
+              gte(
+                requestsLog.created_at,
+                new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+              )
+            )
+        )[0].count,
+        year: (
+          await db
+            .select({ count: count() })
+            .from(requestsLog)
+            .where(
+              gte(
+                requestsLog.created_at,
+                new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
+              )
+            )
+        )[0].count,
       },
       responses: {
-        googleSafebrowsing: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[0])))[0].count,
-        googleWebRisk: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[1])))[0].count,
-        ipQualityScore: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[2])))[0].count,
-        phishObserver: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[3])))[0].count,
-        phishReport: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[4])))[0].count,
-        securityTrails: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[5])))[0].count,
-        sinkingYahts: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[6])))[0].count,
-        urlScan: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[7])))[0].count,
-        virusTotal: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[8])))[0].count,
-        walshy: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[9])))[0].count,
-        ipQuery: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[10])))[0].count,
-        abuseCh: (await db.select({ count: count() }).from(rawAPIData).where(eq(rawAPIData.sourceAPI, APIs.enumValues[11])))[0].count,
+        googleSafebrowsing: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[0]))
+        )[0].count,
+        googleWebRisk: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[1]))
+        )[0].count,
+        ipQualityScore: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[2]))
+        )[0].count,
+        phishObserver: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[3]))
+        )[0].count,
+        phishReport: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[4]))
+        )[0].count,
+        securityTrails: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[5]))
+        )[0].count,
+        sinkingYahts: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[6]))
+        )[0].count,
+        urlScan: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[7]))
+        )[0].count,
+        virusTotal: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[8]))
+        )[0].count,
+        walshy: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[9]))
+        )[0].count,
+        ipQuery: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[10]))
+        )[0].count,
+        abuseCh: (
+          await db
+            .select({ count: count() })
+            .from(rawAPIData)
+            .where(eq(rawAPIData.sourceAPI, APIs.enumValues[11]))
+        )[0].count,
       },
     },
   });

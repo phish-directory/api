@@ -9,7 +9,7 @@ import { app } from "./app";
 import router from "./router";
 import { server } from "./server";
 // import metrics from "./metrics";
-import { swaggerOptions as adminSwagOptions } from "./routes/admin/swaggerOptions";
+import { swaggerOptions as adminSwagOptions } from "./admin-routes/swaggerOptions";
 import { swaggerOptions as mainSwagOptions } from "./swaggerOptions";
 import * as logger from "./utils/logger";
 dotenv.config();
