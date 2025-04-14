@@ -20,7 +20,7 @@ const router = express.Router();
  */
 router.get("/", async (req: Request, res: Response) => {
   let alldomains = await db.select().from(domains);
-  res.status(200).json(alldomains);
+  return res.status(200).json(alldomains);
 });
 
 /**
@@ -45,9 +45,9 @@ router.get("/:id", async (req: Request, res: Response) => {
       return res.status(400).json("Domain not found");
     }
 
-    res.status(200).json(dbDomain);
+    return res.status(200).json(dbDomain);
   } catch (error) {
-    res
+    return res
       .status(500)
       .json({ error: "An error occurred while fetching the domain." });
   }

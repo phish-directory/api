@@ -1,8 +1,7 @@
+import { eq } from "drizzle-orm";
 import express from "express";
 import { db } from "src/utils/db";
 const router = express.Router();
-import { domains } from "src/db/schema";
-import { eq } from "drizzle-orm";
 
 async function getAllDomains() {
   const dbDomains = await db.query.domains.findMany({
@@ -34,7 +33,7 @@ router.get("/adgaurd", async (req, res) => {
   const filters = domains.map((domain) => `||${domain}^`).join("\n");
   // Set content type for filter list
   res.setHeader("Content-Type", "text/plain");
-  res.send(`${header}\n${filters}`);
+  return res.status(200).send(`${header}\n${filters}`);
 });
 
 /**
@@ -58,7 +57,7 @@ router.get("/ublock", async (req, res) => {
   const filters = domains.map((domain) => `||${domain}^`).join("\n");
   // Set content type for filter list
   res.setHeader("Content-Type", "text/plain");
-  res.send(`${header}\n${filters}`);
+  return res.status(200).send(`${header}\n${filters}`);
 });
 
 /**
@@ -79,7 +78,7 @@ router.get("/pihole", async (req, res) => {
     "#",
   ].join("\n");
   res.setHeader("Content-Type", "text/plain");
-  res.send(`${header}\n${domains.join("\n")}`);
+  return res.status(200).send(`${header}\n${domains.join("\n")}`);
 });
 
 export default router;

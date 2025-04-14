@@ -25,17 +25,15 @@ router.use(async (req, res, next) => {
   let user = await getUserInfo(req);
 
   if (!user) {
-    res.status(401).json({
+    return res.status(401).json({
       error: "Unauthorized",
     });
-    return;
   }
 
   if (user.permissionLevel < permissionLevel.enumValues[2]) {
-    res.status(403).json({
+    return res.status(403).json({
       error: "You do not have permission to access this endpoint",
     });
-    return;
   } else {
     next();
   }
@@ -138,7 +136,7 @@ router.get("/metrics", logRequest, async (req, res) => {
 
   let environment = process.env.NODE_ENV;
 
-  res.status(200).json({
+  return res.status(200).json({
     status: "up",
     environment: environment,
     uptime: uptimeString,

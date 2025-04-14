@@ -50,12 +50,11 @@ router.post("/signup", async (req, res) => {
   const { firstName, lastName, email, password } = body;
 
   if (!firstName || !lastName || !email || !password) {
-    res
+    return res
       .status(400)
       .json(
         "Invalid arguments. Please provide firstName, lastName, email, and password"
       );
-    return;
   }
 
   let isDisposable = await disposableEmailDetector(email as string);
@@ -68,8 +67,7 @@ router.post("/signup", async (req, res) => {
   // use regex to validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    res.status(400).json("Invalid email address");
-    return;
+    return res.status(400).json("Invalid email address");
   }
 
   // Check if the user already exists
@@ -78,8 +76,7 @@ router.post("/signup", async (req, res) => {
   });
 
   if (user) {
-    res.status(400).json("User with that email already exists");
-    return;
+    return res.status(400).json("User with that email already exists");
   }
 
   const salt = bcrypt.genSaltSync(saltRounds);
@@ -155,12 +152,12 @@ router.post("/signup", async (req, res) => {
     }
 
     // Send success response with the user's uuid
-    res.status(200).json({
+    return res.status(200).json({
       message: "User created successfully, please login.",
       uuid: newUser.uuid,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Error creating user",
       error: error.message,
     });
@@ -196,8 +193,7 @@ router.post("/login", async (req, res) => {
   const { email, password } = body;
 
   if (!email || !password) {
-    res.status(400).json("Missing email or password");
-    return;
+    return res.status(400).json("Missing email or password");
   }
 
   // Get IP address from the request
@@ -317,7 +313,7 @@ router.post("/login", async (req, res) => {
     };
   }
 
-  res.status(200).json(jsonresponsebody);
+  return res.status(200).json(jsonresponsebody);
 });
 
 /**
@@ -413,7 +409,7 @@ router.get("/me", authenticateToken, async (req, res) => {
     count: methodGroup.count,
   }));
 
-  res.status(200).json({
+  return res.status(200).json({
     name: userInfo.firstName + " " + userInfo.lastName,
     email: userInfo.email,
     uuid: userInfo.uuid,
@@ -493,7 +489,7 @@ router.patch("/me", authenticateToken, async (req, res) => {
       .where(eq(users.id, userInfo.id));
   }
 
-  res.status(200).json("User updated successfully");
+  return res.status(200).json("User updated successfully");
 });
 
 export default router;
