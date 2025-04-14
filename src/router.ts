@@ -54,7 +54,17 @@ router.use(
  */
 router.get("/", logRequest, (req, res) => {
   // // metrics.increment("http.request.root");
-  res.status(301).redirect("/docs");
+  return res.status(301).redirect("/docs");
+});
+
+router.get("/github", logRequest, (req, res) => {
+  return res.status(301).redirect("https://github.com/phishdirectory/api");
+});
+
+router.get("/github/issues", logRequest, (req, res) => {
+  return res
+    .status(301)
+    .redirect("https://github.com/phishdirectory/api/issues");
 });
 
 /**
