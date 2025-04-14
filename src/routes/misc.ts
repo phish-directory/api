@@ -38,7 +38,7 @@ router.get("/metrics", async (req, res) => {
   let dateStartedFormatted = moment(dateStarted).format("MM-DD-YY H:m:s A Z");
   let environment = process.env.NODE_ENV;
 
-  res.status(200).json({
+  return res.status(200).json({
     status: "up",
     environment: environment,
     uptime: uptimeString,

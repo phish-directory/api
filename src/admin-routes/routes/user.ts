@@ -35,7 +35,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   // metrics.increment("endpoint.admin.users.get");
   const dbUsers = await db.query.users.findMany();
-  res.status(200).json(dbUsers);
+  return res.status(200).json(dbUsers);
 });
 
 /**
@@ -83,7 +83,7 @@ router.get("/user/:id", async (req, res) => {
       });
     }
 
-    res.status(200).json(dbUser);
+    return res.status(200).json(dbUser);
   } catch (error) {
     logger.error(error as string);
 
@@ -132,11 +132,11 @@ router.patch("/user/:id", async (req, res) => {
       .set(updateData)
       .where(eq(users.id, parseInt(id)));
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "User updated successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred.",
     });
   }
@@ -167,10 +167,9 @@ router.post("/user/new", async (req, res) => {
   const { name, email, password } = body;
 
   if (!name || !email || !password) {
-    res
+    return res
       .status(400)
       .json("Invalid arguments. Please provide name, email, and password");
-    return;
   }
 
   // Check if the user already exists
@@ -179,8 +178,7 @@ router.post("/user/new", async (req, res) => {
   });
 
   if (user) {
-    res.status(400).json("User with that email already exists");
-    return;
+    return res.status(400).json("User with that email already exists");
   }
 
   const salt = bcrypt.genSaltSync(saltRounds);
@@ -197,7 +195,7 @@ router.post("/user/new", async (req, res) => {
     })
     .returning();
 
-  res.status(200).json({
+  return res.status(200).json({
     message: "User created successfully, please login.",
     uuid: newUser.uuid,
   });
@@ -228,11 +226,11 @@ router.delete("/user/:id", async (req, res) => {
       })
       .where(eq(users.id, parseInt(id)));
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "User deleted successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred.",
     });
   }
@@ -319,11 +317,11 @@ router.patch("/role/:id/:role", async (req, res) => {
       })
       .where(eq(users.id, parseInt(id)));
 
-    res.status(200).json({
+    return res.status(200).json({
       message: `User role updated to ${permission} successfully.`,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred.",
     });
   }
@@ -382,11 +380,11 @@ router.patch("/useExtended/:id/:useExtended", async (req, res) => {
       })
       .where(eq(users.id, parseInt(id)));
 
-    res.status(200).json({
+    return res.status(200).json({
       message: `User useExtended data updated to ${useExtended} successfully.`,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred.",
     });
   }

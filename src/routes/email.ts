@@ -59,7 +59,7 @@ router.get("/check", authenticateToken, async (req, res) => {
   }
 
   const result = await ipQualityScoreService.email.check(email);
-  res.status(200).json(result);
+  return res.status(200).json(result);
 });
 
 export default router;
