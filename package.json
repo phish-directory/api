@@ -1,5 +1,5 @@
 {
-  "name": "@phish-directory/api",
+  "name": "@phishdirectory/api",
   "private": true,
   "version": "3.2.0",
   "description": "API for phish.directory, a community-driven anti-phishing tool. Helping catch, prevent, and catalog phishing links & attempts.",
