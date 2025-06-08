@@ -6,3 +6,5 @@ Canonical: https://phish.directory/.well-known/security.txt
 Canonical: https://phish.directory/security.txt
 Canonical: https://api.phish.directory/.well-known/security.txt
 Canonical: https://api.phish.directory/security.txt
+Canonical: https://veritas.phish.directory/.well-known/security.txt
+Canonical: https://veritas.phish.directory/security.txt
