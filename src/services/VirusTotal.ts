@@ -23,7 +23,7 @@ export class VirusTotalService {
         
         // Validate domain before making API call
         try {
-          validateDomain(sanitizedDomain);
+          await validateDomain(sanitizedDomain);
         } catch (error) {
           if (error instanceof DomainValidationError) {
             console.warn(`VirusTotal: Skipping invalid domain "${domain}": ${error.message}`);
@@ -51,7 +51,7 @@ export class VirusTotalService {
         return data;
       } catch (error) {
         // Log the error for transparency, but don't throw to prevent crashes
-        console.warn("VirusTotal API error for domain '%s':", domain, error instanceof Error ? error.message : error);
+        console.warn(`VirusTotal API error for domain "${domain}":`, error instanceof Error ? error.message : error);
         return null;
       }
     },
@@ -68,7 +68,7 @@ export class VirusTotalService {
       
       // Validate domain before making API call
       try {
-        validateDomain(sanitizedDomain);
+        await validateDomain(sanitizedDomain);
       } catch (error) {
         if (error instanceof DomainValidationError) {
           console.warn(`VirusTotal: Skipping report for invalid domain "${domain}": ${error.message}`);

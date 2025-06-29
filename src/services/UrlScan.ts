@@ -18,7 +18,7 @@ export class UrlScanService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.urlscan.domain.check");
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const checkSearch = await axios.get(
         `https://urlscan.io/api/v1/search/?q=domain:${sanitizedDomain}`,

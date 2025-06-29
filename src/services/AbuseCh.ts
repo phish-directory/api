@@ -26,7 +26,7 @@ export class AbuseChService {
         }
       );
 
-      let sanitizedDomain = await sanitizeDomain(domain);
+      let sanitizedDomain = sanitizeDomain(domain);
       const dbDomain = await getDbDomain(sanitizedDomain);
 
       // Check if the response is JSON before saving to database

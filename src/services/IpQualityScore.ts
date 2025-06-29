@@ -20,7 +20,7 @@ export class IpQualityScoreService {
     check: async (domain: string) => {
       // metrics.increment("services.ipqualityscore.domain.check");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const response = await axios.get(
         `https://ipqualityscore.com/api/json/url/${process.env
