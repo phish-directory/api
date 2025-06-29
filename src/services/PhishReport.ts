@@ -19,7 +19,7 @@ export class PhishReportService {
     check: async (domain: string) => {
       // metrics.increment("services.phishreport.domain.check");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       let response = await axios.get(
         `https://phish.report/api/v0/hosting?url=${sanitizedDomain}`,

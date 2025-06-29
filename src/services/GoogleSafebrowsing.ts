@@ -19,7 +19,7 @@ export class GoogleSafebrowsingService {
     check: async (domain: string) => {
       // metrics.increment("services.googleSafebrowsing.domain.check");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const response = await axios.post(
         `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${process

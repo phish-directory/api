@@ -18,7 +18,7 @@ export class WalshyService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.walshy.domain.check");
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const response = await axios.post<{
         badDomain: boolean;
@@ -49,7 +49,7 @@ export class WalshyService {
     report: async (domain: string) => {
       // metrics.increment("services.walshy.domain.report");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const response = await axios.post(
         `https://bad-domains.walshy.dev/report`,

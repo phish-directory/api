@@ -19,7 +19,7 @@ export class SecurityTrailsService {
     check: async (domain: string) => {
       // metrics.increment("services.securitytrails.domain.check");
 
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const options = {
         method: "GET",

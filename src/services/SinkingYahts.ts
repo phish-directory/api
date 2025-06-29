@@ -18,7 +18,7 @@ export class SinkingYahtsService {
      */
     check: async (domain: string) => {
       // metrics.increment("services.sinkingyahts.domain.check");
-      const sanitizedDomain = await sanitizeDomain(domain);
+      const sanitizedDomain = sanitizeDomain(domain);
 
       const response = await axios.get<boolean>(
         `https://phish.sinking.yachts/v2/check/${sanitizedDomain}`,

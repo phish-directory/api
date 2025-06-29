@@ -47,8 +47,12 @@ export async function parseData(
   } else if (urlScanData.verdicts.overall.malicious === true) {
     verdict = true;
   } else if (
-    virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||
-    virusTotalData.data.attributes.last_analysis_stats.suspicious > 0
+    virusTotalData &&
+    virusTotalData.data &&
+    virusTotalData.data.attributes &&
+    virusTotalData.data.attributes.last_analysis_stats &&
+    (virusTotalData.data.attributes.last_analysis_stats.malicious > 0 ||
+      virusTotalData.data.attributes.last_analysis_stats.suspicious > 0)
   ) {
     verdict = true;
     // todo: add correct condition for abuseChData

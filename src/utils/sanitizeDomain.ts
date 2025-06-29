@@ -1,3 +1,5 @@
+import { promises as dns } from 'dns';
+
 const MAX_DOMAIN_LENGTH = 253; // Maximum length of a domain name
 const DOMAIN_REGEX = /^(?!:\/\/)(?:[a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/;
 
@@ -7,7 +9,7 @@ class DomainValidationError extends Error {
     this.name = "DomainValidationError";
   }
 }
-const validateDomain = (domain: string): boolean => {
+const validateDomain = async (domain: string): Promise<boolean> => {
   // Check domain length
   if (!domain || domain.length > MAX_DOMAIN_LENGTH) {
     throw new DomainValidationError(
@@ -27,6 +29,13 @@ const validateDomain = (domain: string): boolean => {
     domain.includes("/")
   ) {
     throw new DomainValidationError("Domain cannot contain URL components");
+  }
+
+  // Perform DNS lookup to verify domain exists
+  try {
+    await dns.resolve(domain);
+  } catch (error) {
+    throw new DomainValidationError(`Domain does not resolve: ${domain}`);
   }
 
   return true;
