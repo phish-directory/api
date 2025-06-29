@@ -1,17 +1,10 @@
 /**
- * parses the data from the different sources and returns a boolean value
- * @param walshyData - Data from Walshy API
- * @param ipQualityScoreData - Data from IPQualityScore API
- * @param googleSafebrowsingData - Data from Google Safebrowsing API
- * @param sinkingYahtsData - Data from Sinking Yahts API
- * @param virusTotalData - Data from VirusTotal API
- * @param phishObserverData - Data from PhishObserver API
- * @param urlScanData - Data from URLScan API
- * @param securitytrailsData - Data from SecurityTrails API
- * @param phishreportData - Data from Phishreport API
- * @param abuseChData - Data from AbuseCh API
- * @returns boolean
- **/
+ * Aggregates results from multiple security data sources to determine if a domain is malicious or unsafe.
+ *
+ * Evaluates input from various APIs and returns `true` if any source indicates the domain is potentially harmful; otherwise, returns `false`.
+ *
+ * @returns `true` if any data source flags the domain as malicious or unsafe; otherwise, `false`.
+ */
 export async function parseData(
   walshyData: any,
   ipQualityScoreData: any,
