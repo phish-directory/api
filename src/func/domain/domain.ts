@@ -18,11 +18,14 @@ import { db } from "src/utils/db";
 import { warn } from "src/utils/logger";
 
 /**
- * Helper function to safely call an external API service with quota error handling
- * @param serviceName - Name of the service for logging
- * @param serviceCall - Promise function to call the service
- * @param domain - Domain being checked (for logging)
- * @returns Service response or null if failed
+ * Executes an external service call for a domain, returning the result or `null` if an error occurs.
+ *
+ * Handles quota and rate limit errors gracefully by logging a warning and skipping the service check, allowing the overall process to continue without interruption.
+ *
+ * @param serviceName - The name of the external service being called, used for logging context.
+ * @param serviceCall - A function that returns a Promise for the external service request.
+ * @param domain - The domain being checked, included in log messages for context.
+ * @returns The service response if successful, or `null` if an error or quota limit is encountered.
  */
 async function safeServiceCall(
   serviceName: string,
@@ -57,9 +60,12 @@ async function safeServiceCall(
 }
 
 /**
- * Check the domain against all the services
- * @param domain - Domain to check
- * @returns void
+ * Performs security and reputation checks on a domain using multiple external services.
+ *
+ * Calls a set of external services to assess the given domain, handling errors gracefully for each service. Ensures the domain is recorded in the database if not already present.
+ *
+ * @param domain - The domain name to check
+ * @returns An object containing the results from each service, with `null` for any service that failed or was rate-limited
  */
 export async function domainCheck(domain: string) {
   const tsStart = Date.now();
