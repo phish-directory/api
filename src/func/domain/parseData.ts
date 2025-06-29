@@ -1,17 +1,10 @@
 /**
- * parses the data from the different sources and returns a boolean value
- * @param walshyData - Data from Walshy API
- * @param ipQualityScoreData - Data from IPQualityScore API
- * @param googleSafebrowsingData - Data from Google Safebrowsing API
- * @param sinkingYahtsData - Data from Sinking Yahts API
- * @param virusTotalData - Data from VirusTotal API
- * @param phishObserverData - Data from PhishObserver API
- * @param urlScanData - Data from URLScan API
- * @param securitytrailsData - Data from SecurityTrails API
- * @param phishreportData - Data from Phishreport API
- * @param abuseChData - Data from AbuseCh API
- * @returns boolean
- **/
+ * Aggregates results from multiple security data sources to determine if a domain is malicious or unsafe.
+ *
+ * Evaluates input from various APIs and returns `true` if any source indicates the domain is potentially harmful; otherwise, returns `false`.
+ *
+ * @returns `true` if any data source flags the domain as malicious or unsafe; otherwise, `false`.
+ */
 export async function parseData(
   walshyData: any,
   ipQualityScoreData: any,
@@ -29,24 +22,41 @@ export async function parseData(
   const tsStart = Date.now();
   // metrics.increment("functions.domain.parseData");
 
-  let verdict: boolean;
+  let verdict: boolean = false;
 
-  if (walshyData.badDomain) {
+  // Check Walshy data - handle null/undefined gracefully
+  if (walshyData && walshyData.badDomain) {
     verdict = true;
-  } else if (Object.keys(googleSafebrowsingData).length !== 0) {
+  }
+  // Check Google Safe Browsing data - handle null/undefined gracefully
+  else if (googleSafebrowsingData && Object.keys(googleSafebrowsingData).length !== 0) {
     verdict = true;
-  } else if (
-    ipQualityScoreData.unsafe ||
-    ipQualityScoreData.spam ||
-    ipQualityScoreData.phishing ||
-    ipQualityScoreData.malware
+  }
+  // Check IpQualityScore data - handle null/undefined gracefully
+  else if (
+    ipQualityScoreData &&
+    (ipQualityScoreData.unsafe ||
+      ipQualityScoreData.spam ||
+      ipQualityScoreData.phishing ||
+      ipQualityScoreData.malware)
   ) {
     verdict = true;
-  } else if (sinkingYahtsData) {
+  }
+  // Check SinkingYahts data - handle null/undefined gracefully
+  else if (sinkingYahtsData) {
     verdict = true;
-  } else if (urlScanData.verdicts.overall.malicious === true) {
+  }
+  // Check UrlScan data - handle null/undefined gracefully
+  else if (
+    urlScanData &&
+    urlScanData.verdicts &&
+    urlScanData.verdicts.overall &&
+    urlScanData.verdicts.overall.malicious === true
+  ) {
     verdict = true;
-  } else if (
+  }
+  // Check VirusTotal data - already has good null checking
+  else if (
     virusTotalData &&
     virusTotalData.data &&
     virusTotalData.data.attributes &&
@@ -55,11 +65,11 @@ export async function parseData(
       virusTotalData.data.attributes.last_analysis_stats.suspicious > 0)
   ) {
     verdict = true;
-    // todo: add correct condition for abuseChData
-    // } else if (abuseChData.query_status === "ok" && abuseChData.) {
-  } else {
-    verdict = false;
   }
+  // TODO: add correct condition for abuseChData when needed
+  // else if (abuseChData && abuseChData.query_status === "ok" && ...) {
+  //   verdict = true;
+  // }
 
   return verdict;
 }
